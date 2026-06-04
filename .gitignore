@@ -1,0 +1,19 @@
+# Virtual environments
+.venv/
+omniparser_env/
+
+# External dependency
+OmniParser/
+
+# Logs
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Screenshots
+screenshot_*.png
+
+# VSCode
+.vscode/
