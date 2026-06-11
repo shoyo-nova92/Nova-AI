@@ -3,6 +3,13 @@ from core.reasoning_engine import ReasoningEngine
 from core.context_fusion_engine import (
     ContextFusionEngine
 )
+from core.execution_verifier import (
+    ExecutionVerifier
+)
+
+from core.adaptive_retry_engine import (
+    AdaptiveRetryEngine
+)
 
 from core.memory_retriever import (
     MemoryRetriever
@@ -18,7 +25,8 @@ from core.llm_planner import LLMPlanner
 class NovaRuntime:
 
     def __init__(self):
-
+        self.verifier = ExecutionVerifier()
+        self.retry_engine = AdaptiveRetryEngine()
         self.vision = VisionEngine()
 
         self.reasoner = (
@@ -93,6 +101,34 @@ class NovaRuntime:
             )
         )
 
+        # STEP 7
+        verification = {
+            "success": False,
+            "reason": "Verification not executed."
+        }
+
+        recovery = {
+            "status": "not_executed"
+        }
+        
+        verification = (
+            self.verifier.verify(
+                "open notepad"
+            )
+        )
+
+        # STEP 8
+
+        recovery = (
+            self.retry_engine.retry(
+
+                "open notepad",
+
+                verification
+
+            )
+        )
+
         runtime_state = {
 
             "status":
@@ -105,8 +141,14 @@ class NovaRuntime:
                 memories,
 
             "plan":
-                plan
+                plan,
+
+            "verification":
+                verification,
+
+            "recovery":
+                recovery
 
         }
 
-        return runtime_state
+        return runtime_state 
