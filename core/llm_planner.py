@@ -34,7 +34,7 @@ Return ONLY concise executable workflow steps.
             print("\n==============================")
             print("Nova Reasoning Engine Activated")
             print("==============================")
-            print("Model: Qwen 3 32B")
+            print("Model: Qwen 3 14B")
             print("Generating intelligent plan...")
             print(
                 "This may take time depending "
@@ -46,7 +46,7 @@ Return ONLY concise executable workflow steps.
             response = requests.post(
                 "http://127.0.0.1:11434/api/chat",
                 json={
-                    "model": "qwen3:32b",
+                    "model": "qwen3:14b",
                     "messages": [
                         {
                             "role": "system",

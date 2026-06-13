@@ -1,0 +1,5 @@
+{
+    "project": "Nova v0.7.1",
+    "current_goal": "Build Persistent Context Engine",
+    "current_step": "Testing save/load"
+}
