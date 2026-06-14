@@ -1,0 +1,30 @@
+[
+    {
+        "timestamp": "2026-06-14 16:38:21.050173",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.2,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-06-14 16:38:21.058072",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.1,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-06-14 16:38:21.065205",
+        "action": "open notepad",
+        "success": false,
+        "duration": 2.5,
+        "failure_reason": "process not found"
+    },
+    {
+        "timestamp": "2026-06-14 16:41:48.650567",
+        "action": "open notepad",
+        "success": true,
+        "duration": 0,
+        "failure_reason": null
+    }
+]
