@@ -14,7 +14,19 @@ class SelfCorrectionEngine:
             failure_reason.lower()
         )
 
-        if "not found" in failure_reason:
+        if (
+
+            "not found" in failure_reason
+
+            or
+
+            "unknown app" in failure_reason
+
+            or
+
+            "process not found" in failure_reason
+
+        ):
 
             return {
 

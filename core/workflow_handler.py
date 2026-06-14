@@ -1,9 +1,5 @@
-from core.application_handler import (
-    ApplicationHandler
-)
-
-from core.terminal_handler import (
-    TerminalHandler
+from core.execution_router import (
+    ExecutionRouter
 )
 
 
@@ -11,12 +7,8 @@ class WorkflowHandler:
 
     def __init__(self):
 
-        self.apps = (
-            ApplicationHandler()
-        )
-
-        self.terminal = (
-            TerminalHandler()
+        self.router = (
+            ExecutionRouter()
         )
 
     def prepare_coding_environment(
@@ -27,21 +19,33 @@ class WorkflowHandler:
 
         results.append(
 
-            self.apps.open_app(
-                "vscode"
+            self.router.execute(
+
+                action_type="open_app",
+
+                target="vscode"
+
             )
 
         )
 
         results.append(
 
-            self.terminal.open_terminal()
+            self.router.execute(
+
+                action_type="open_terminal"
+
+            )
 
         )
 
         results.append(
 
-            self.terminal.git_status()
+            self.router.execute(
+
+                action_type="git_status"
+
+            )
 
         )
 

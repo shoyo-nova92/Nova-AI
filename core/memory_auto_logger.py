@@ -35,7 +35,17 @@ class MemoryAutoLogger:
         details
 
     ):
-    
+
+        with open(
+
+            self.memory_file,
+
+            "r"
+
+        ) as f:
+
+            history = json.load(f)
+
         event = {
 
             "event_id":
@@ -52,17 +62,8 @@ class MemoryAutoLogger:
 
             "details":
                 details
+
         }
-
-        with open(
-
-            self.memory_file,
-
-            "r"
-
-        ) as f:
-
-            history = json.load(f)
 
         history.append(event)
 

@@ -7,30 +7,101 @@ class ExecutionVerifier:
 
         action = action.lower()
 
-        if "notepad" in action:
+        verification_rules = {
 
-            for proc in psutil.process_iter(['name']):
+            "notepad": "notepad",
 
-                try:
+            "vscode": "code",
 
-                    if proc.info['name']:
+            "calculator": "calculator",
 
-                        if "notepad" in proc.info['name'].lower():
+            "chrome": "chrome",
 
-                            return {
-                                "success": True,
-                                "reason": "Notepad process detected."
-                            }
+            "edge": "msedge",
 
-                except:
-                    pass
+            "terminal": "cmd"
+
+        }
+
+        if "git_status" in action:
 
             return {
-                "success": False,
-                "reason": "Notepad process not found."
+
+                "success": True,
+
+                "reason":
+                    "git status completed",
+
+                "process_found": True
+
             }
 
+        for key, process_name in (
+
+            verification_rules.items()
+
+        ):
+
+            if key in action:
+
+                for proc in psutil.process_iter(
+
+                    ['name']
+
+                ):
+
+                    try:
+
+                        if proc.info['name']:
+
+                            if (
+
+                                process_name
+
+                                in
+
+                                proc.info[
+                                    'name'
+                                ].lower()
+
+                            ):
+
+                                return {
+
+                                    "success": True,
+
+                                    "reason":
+
+                                        f"{key} process detected.",
+
+                                    "process_found": True
+
+                                }
+
+                    except:
+
+                        pass
+
+                return {
+
+                    "success": False,
+
+                    "reason":
+
+                        f"{key} process not found.",
+
+                    "process_found": False
+
+                }
+
         return {
+
             "success": False,
-            "reason": "No verification rule exists."
+
+            "reason":
+
+                "No verification rule exists.",
+
+            "process_found": False
+
         }

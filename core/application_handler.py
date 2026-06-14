@@ -6,6 +6,28 @@ import os
 
 class ApplicationHandler:
 
+    def is_running(self, process_keyword):
+
+        try:
+
+            for proc in psutil.process_iter(["name"]):
+
+                try:
+
+                    if process_keyword.lower() in proc.info["name"].lower():
+
+                        return True
+
+                except:
+
+                    continue
+
+            return False
+
+        except:
+
+            return False
+
     def open_app(self, app_name):
 
         try:
@@ -21,6 +43,20 @@ class ApplicationHandler:
                 subprocess.Popen("calc.exe")
 
             elif app_name == "vscode":
+
+                if self.is_running("Code"):
+
+                    focus_result = self.focus_app("Visual Studio Code")
+
+                    if focus_result["success"]:
+
+                        return {
+
+                            "success": True,
+
+                            "action": "focus vscode"
+
+                        }
 
                 vscode_paths = [
 

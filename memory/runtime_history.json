@@ -7,5 +7,75 @@
             "plan_steps": 5,
             "verification": true
         }
+    },
+    {
+        "event_id": 2,
+        "timestamp": "2026-06-14 17:40:35.646393",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 3,
+        "timestamp": "2026-06-14 17:48:27.973293",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 4,
+        "timestamp": "2026-06-14 17:48:28.001719",
+        "event_type": "execution_failure",
+        "goal": "open_terminal None",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 5,
+        "timestamp": "2026-06-14 17:48:28.086236",
+        "event_type": "execution_failure",
+        "goal": "git_status None",
+        "details": {
+            "duration": 0.06,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 6,
+        "timestamp": "2026-06-14 17:53:03.497673",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 7,
+        "timestamp": "2026-06-14 17:53:03.533334",
+        "event_type": "execution_success",
+        "goal": "open_terminal None",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 8,
+        "timestamp": "2026-06-14 17:53:03.615239",
+        "event_type": "execution_success",
+        "goal": "git_status None",
+        "details": {
+            "duration": 0.06,
+            "state": "complete"
+        }
     }
 ]
