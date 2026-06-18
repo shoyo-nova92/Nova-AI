@@ -315,12 +315,14 @@ class ExecutionRouter:
 
         )
 
+        skill_name = action_type
+
+        if target:
+            skill_name = f"{action_type}:{target}"
+
         self.skills.update_skill(
-
-            action_type,
-
-            success
-
+            skill_name,
+            verification["success"]
         )
 
         self.logger.log_event(
@@ -349,14 +351,30 @@ class ExecutionRouter:
 
         )
 
-        confidence = (
+        self.logger.log_event(
 
-            self.confidence.estimate(
+            event_type=
+                "execution_success"
+                if success
+                else
+                "execution_failure",
 
-                f"{action_type} {target}"
+            goal=f"{action_type} {target}",
 
-            )
+            details={
 
+                "duration":
+                    duration,
+
+                "state":
+                    self.state.value
+
+            }
+
+        )
+
+        confidence = self.confidence.estimate(
+            skill_name
         )
 
         return {

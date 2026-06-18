@@ -1,3 +1,5 @@
+import time
+
 from core.execution_router import (
     ExecutionRouter
 )
@@ -15,37 +17,100 @@ class WorkflowHandler:
         self
     ):
 
+        start_time = time.time()
+
         results = []
 
-        results.append(
+        progress = []
 
-            self.router.execute(
+        steps_completed = 0
 
-                action_type="open_app",
+        steps_failed = 0
 
-                target="vscode"
+        workflow_steps = [
+
+            (
+                "Open VS Code",
+
+                "open_app",
+
+                "vscode"
+
+            ),
+
+            (
+                "Open Terminal",
+
+                "open_terminal",
+
+                None
+
+            ),
+
+            (
+                "Git Status",
+
+                "git_status",
+
+                None
 
             )
 
-        )
+        ]
 
-        results.append(
+        for index, step in enumerate(
 
-            self.router.execute(
+            workflow_steps,
 
-                action_type="open_terminal"
+            start=1
+
+        ):
+
+            step_name = step[0]
+
+            action_type = step[1]
+
+            target = step[2]
+
+            result = self.router.execute(
+
+                action_type=action_type,
+
+                target=target
 
             )
 
-        )
-
-        results.append(
-
-            self.router.execute(
-
-                action_type="git_status"
-
+            results.append(
+                result
             )
+
+            if result["state"] == "complete":
+
+                steps_completed += 1
+
+                progress.append(
+
+                    f"[{index}/{len(workflow_steps)}] "
+                    f"{step_name} ✓"
+
+                )
+
+            else:
+
+                steps_failed += 1
+
+                progress.append(
+
+                    f"[{index}/{len(workflow_steps)}] "
+                    f"{step_name} ✗"
+
+                )
+
+        duration = round(
+
+            time.time() - start_time,
+
+            2
 
         )
 
@@ -53,6 +118,18 @@ class WorkflowHandler:
 
             "workflow":
                 "prepare_coding_environment",
+
+            "steps_completed":
+                steps_completed,
+
+            "steps_failed":
+                steps_failed,
+
+            "duration":
+                duration,
+
+            "progress":
+                progress,
 
             "results":
                 results
