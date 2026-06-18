@@ -60,6 +60,42 @@ class FilesystemHandler:
 
             }
 
+    def open_file(self, path):
+
+        try:
+
+            if not os.path.exists(path):
+
+                return {
+
+                    "success": False,
+
+                    "reason":
+                        "file not found"
+
+                }
+
+            os.startfile(path)
+
+            return {
+
+                "success": True,
+
+                "action":
+                    f"open file {path}"
+
+            }
+
+        except Exception as e:
+
+            return {
+
+                "success": False,
+
+                "reason": str(e)
+
+            }
+
     def rename_folder(
 
         self,
@@ -159,7 +195,7 @@ class FilesystemHandler:
 
     ):
 
-        return {
+        return { 
 
             "success": False,
 
