@@ -2,6 +2,7 @@ import subprocess
 import psutil
 import pygetwindow as gw
 import os
+import time
 
 
 class ApplicationHandler:
@@ -198,3 +199,116 @@ class ApplicationHandler:
                 "reason": str(e)
 
             }
+
+    def minimize_app(self, title_keyword):
+
+        try:
+
+            windows = gw.getWindowsWithTitle(
+                title_keyword
+            )
+
+            if windows:
+
+                windows[0].minimize()
+
+                return {
+
+                    "success": True,
+
+                    "action":
+                        f"minimize {title_keyword}"
+
+                }
+
+            return {
+
+                "success": False,
+
+                "reason":
+                    "window not found"
+
+            }
+
+        except Exception as e:
+
+            return {
+
+                "success": False,
+
+                "reason": str(e)
+
+            }
+
+
+    def maximize_app(self, title_keyword):
+
+        try:
+
+            windows = gw.getWindowsWithTitle(
+                title_keyword
+            )
+
+            if windows:
+
+                windows[0].maximize()
+
+                return {
+
+                    "success": True,
+
+                    "action":
+                        f"maximize {title_keyword}"
+
+                }
+
+            return {
+
+                "success": False,
+
+                "reason":
+                    "window not found"
+
+            }
+
+        except Exception as e:
+
+            return {
+
+                "success": False,
+
+                "reason": str(e)
+
+            }
+
+
+    def restart_app(
+        self,
+        process_name,
+        app_name
+    ):
+
+        close_result = self.close_app(
+            process_name
+        )
+
+        if not close_result["success"]:
+
+            return close_result
+
+        timeout = 5
+
+        while timeout > 0:
+
+            if not self.is_running(
+                process_name
+            ):
+                break
+
+            time.sleep(1)
+
+            timeout -= 1
+
+        return self.open_app(
+            app_name
+        )
