@@ -6,7 +6,7 @@ class OCRReader:
     def __init__(self):
         self.reader = easyocr.Reader(
             ['en'],
-            gpu=False
+            gpu=True
         )
     
     def read_text(self, image_path):
