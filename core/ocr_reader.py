@@ -1,15 +1,63 @@
-import easyocr
 from core.error_handler import NovaErrorHandler
+
+try:
+    import easyocr
+except ImportError:
+    easyocr = None
+
 
 class OCRReader:
 
     def __init__(self):
-        self.reader = easyocr.Reader(
-            ['en'],
-            gpu=True
-        )
+
+        self.reader = None
+        self.init_error = None
+
+        if easyocr is None:
+
+            self.init_error = (
+                "easyocr is not installed"
+            )
+
+            return
+
+        try:
+
+            self.reader = easyocr.Reader(
+                ['en'],
+                gpu=True
+            )
+
+        except Exception as e:
+
+            try:
+
+                self.reader = easyocr.Reader(
+                    ['en'],
+                    gpu=False
+                )
+
+            except Exception:
+
+                self.init_error = str(e)
     
     def read_text(self, image_path):
+
+        if self.reader is None:
+
+            return {
+
+                "status":
+                    "unavailable",
+
+                "text":
+                    [],
+
+                "reason":
+                    self.init_error
+
+            }
+
         try:
             results = self.reader.readtext(image_path)
 
@@ -68,6 +116,22 @@ class OCRReader:
             )
 
     def read_text_with_positions(self, image_path):
+
+        if self.reader is None:
+
+            return {
+
+                "status":
+                    "unavailable",
+
+                "elements":
+                    [],
+
+                "reason":
+                    self.init_error
+
+            }
+
         try:
             results = self.reader.readtext(image_path)
 

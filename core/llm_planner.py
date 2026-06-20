@@ -1,9 +1,25 @@
 import requests
 import time
 
+from core.contextual_prompt_builder import (
+    ContextualPromptBuilder
+)
+
+
 class LLMPlanner:
 
-    def create_plan(self, user_goal):
+    def __init__(self):
+
+        self.prompt_builder = (
+            ContextualPromptBuilder()
+        )
+
+    def create_plan(
+        self,
+        goal,
+        context=None,
+        memories=None
+    ):
 
         try:
 
@@ -43,6 +59,20 @@ Return ONLY concise executable workflow steps.
 
             start_time = time.time()
 
+            user_prompt = goal
+
+            if (
+                context
+                is not
+                None
+            ):
+
+                user_prompt = (
+                    f"Goal:\n{goal}\n\n"
+                    "Runtime Context:\n"
+                    f"{self.prompt_builder.build(context, memories or [])}"
+                )
+
             response = requests.post(
                 "http://127.0.0.1:11434/api/chat",
                 json={
@@ -54,11 +84,12 @@ Return ONLY concise executable workflow steps.
                         },
                         {
                             "role": "user",
-                            "content": user_goal
+                            "content": user_prompt
                         }
                     ],
                     "stream": False
-                }
+                },
+                timeout=(3, 120)
             )
 
             response = response.json()
@@ -111,7 +142,7 @@ Return ONLY concise executable workflow steps.
 
                 )
 
-                return [user_goal]
+                return [goal]
 
             return steps
 
@@ -123,4 +154,4 @@ Return ONLY concise executable workflow steps.
                 "Falling back to basic execution.\n"
             )
 
-            return [user_goal]
+            return [goal]
