@@ -1,13 +1,9 @@
-from core.nova_runtime import (
-    NovaRuntime
-)
+from core.nova_runtime import NovaRuntime
 
-nova = NovaRuntime()
+runtime = NovaRuntime()
 
-result = nova.run()
-
-print(
-    "\n=== RUNTIME STATE ===\n"
+result = runtime.process_goal(
+    "prepare coding environment"
 )
 
 print(result)

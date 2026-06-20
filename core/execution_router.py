@@ -283,22 +283,6 @@ class ExecutionRouter:
 
         )
 
-        duration = round(
-
-            time.time() - start_time,
-
-            2
-
-        )
-
-        success = (
-
-            self.state
-            ==
-            RuntimeState.COMPLETE
-
-        )
-
         self.memory.record(
 
             action=f"{action_type} {target}",
@@ -323,32 +307,6 @@ class ExecutionRouter:
         self.skills.update_skill(
             skill_name,
             verification["success"]
-        )
-
-        self.logger.log_event(
-
-            event_type=
-
-                "execution_success"
-
-                if success
-
-                else
-
-                "execution_failure",
-
-            goal=f"{action_type} {target}",
-
-            details={
-
-                "duration":
-                    duration,
-
-                "state":
-                    self.state.value
-
-            }
-
         )
 
         self.logger.log_event(

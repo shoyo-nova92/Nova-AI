@@ -1,22 +1,20 @@
 from core.vision_engine import VisionEngine
 from core.reasoning_engine import ReasoningEngine
+from core.runtime_trace import RuntimeTrace
+from core.runtime_events import RuntimeEvents
+
+from core.execution_router import (
+    ExecutionRouter
+)
+from core.action_interpreter import (
+    ActionInterpreter
+)
 from core.context_fusion_engine import (
     ContextFusionEngine
-)
-from core.execution_verifier import (
-    ExecutionVerifier
-)
-
-from core.adaptive_retry_engine import (
-    AdaptiveRetryEngine
 )
 
 from core.memory_retriever import (
     MemoryRetriever
-)
-
-from core.contextual_prompt_builder import (
-    ContextualPromptBuilder
 )
 
 from core.llm_planner import LLMPlanner
@@ -25,10 +23,8 @@ from core.llm_planner import LLMPlanner
 class NovaRuntime:
 
     def __init__(self):
-        self.verifier = ExecutionVerifier()
-        self.retry_engine = AdaptiveRetryEngine()
         self.vision = VisionEngine()
-
+        self.trace = RuntimeTrace()
         self.reasoner = (
             ReasoningEngine()
         )
@@ -41,23 +37,45 @@ class NovaRuntime:
             MemoryRetriever()
         )
 
-        self.prompt_builder = (
-            ContextualPromptBuilder()
-        )
-
         self.planner = (
             LLMPlanner()
         )
 
-    def run(self):
+        self.router = (
+            ExecutionRouter()
+        )
+
+        self.interpreter = (
+            ActionInterpreter()
+        )
+
+    def run(
+        self,
+        goal=None
+    ):
 
         print(
             "\n=== NOVA RUNTIME STARTED ===\n"
         )
 
+        runtime_goal = (
+            goal
+            or
+            "continue_current_workflow"
+        )
+
+        self.trace.start_trace(
+            runtime_goal
+        )
+
         # STEP 1
         vision_data = (
             self.vision.analyze_screen()
+        )
+
+        self.trace.log_event(
+            RuntimeEvents.OBSERVE_COMPLETE,
+            vision_data
         )
 
         # STEP 2
@@ -76,6 +94,11 @@ class NovaRuntime:
 
         )
 
+        self.trace.log_event(
+            RuntimeEvents.CONTEXT_UPDATED,
+            context
+        )
+
         # STEP 4
         memories = (
             self.memory.retrieve_relevant_context(
@@ -84,55 +107,76 @@ class NovaRuntime:
         )
 
         # STEP 5
-        prompt = (
-            self.prompt_builder.build(
-
-                context,
-
-                memories
-
-            )
-        )
-
-        # STEP 6
         plan = (
             self.planner.create_plan(
-                prompt
+                runtime_goal,
+                context,
+                memories
             )
         )
 
-        # STEP 7
-        verification = {
-            "success": False,
-            "reason": "Verification not executed."
-        }
-
-        recovery = {
-            "status": "not_executed"
-        }
-        
-        verification = (
-            self.verifier.verify(
-                "open notepad"
-            )
+        self.trace.log_event(
+            RuntimeEvents.PLAN_CREATED,
+            {
+                "plan": plan
+            }
         )
 
-        # STEP 8
+        execution_results = []
 
-        recovery = (
-            self.retry_engine.retry(
+        for step in plan:
 
-                "open notepad",
-
-                verification
-
+            action = (
+                self.interpreter.interpret(
+                    step
+                )
             )
-        )
+
+            if action["action_type"]:
+                result = self.router.execute(
+                    action_type=action[
+                        "action_type"
+                    ],
+                    target=action[
+                        "target"
+                    ]
+                )
+
+            else:
+
+                result = {
+
+                    "success": False,
+
+                    "reason":
+                        f"unknown plan step: {step}"
+
+                }
+
+            execution_results.append(
+                result
+            )
+
+            self.trace.log_event(
+                RuntimeEvents.ACTION_EXECUTED,
+                {
+
+                    "step":
+                        step,
+
+                    "action":
+                        action,
+
+                    "result":
+                        result
+
+                }
+            )
 
         runtime_state = {
 
             "status":
-                "planning",
+                "executing",
 
             "context":
                 context,
@@ -143,12 +187,24 @@ class NovaRuntime:
             "plan":
                 plan,
 
-            "verification":
-                verification,
-
-            "recovery":
-                recovery
-
+            "executions":
+                execution_results
         }
 
-        return runtime_state 
+        self.trace.log_event(
+            RuntimeEvents.GOAL_COMPLETED,
+            runtime_state
+        )
+
+        self.trace.save_trace()
+
+        return runtime_state
+
+    def process_goal(
+        self,
+        goal
+    ):
+
+        return self.run(
+            goal
+        )
