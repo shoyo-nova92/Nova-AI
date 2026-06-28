@@ -101,6 +101,60 @@ class ExecutionRouter:
             MemoryAutoLogger()
         )
 
+        self.routes = {
+
+            (
+                "application",
+                "open_app"
+            ):
+                lambda target:
+                    self.apps.open_app(
+                        target
+                    ),
+
+            (
+                "browser",
+                "search"
+            ):
+                lambda target:
+                    self.browser.search_query(
+                        target
+                    ),
+
+            (
+                "filesystem",
+                "create_folder"
+            ):
+                lambda target:
+                    self.filesystem.create_folder(
+                        target
+                    ),
+
+            (
+                "filesystem",
+                "create_file"
+            ):
+                lambda target:
+                    self.filesystem.create_file(
+                        target
+                    ),
+
+            (
+                "terminal",
+                "open_terminal"
+            ):
+                lambda target:
+                    self.terminal.open_terminal(),
+
+            (
+                "terminal",
+                "git_status"
+            ):
+                lambda target:
+                    self.terminal.git_status()
+
+        }
+
     def execute(
 
         self,
@@ -111,6 +165,48 @@ class ExecutionRouter:
 
     ):
 
+        return self.route(
+            {
+                "type":
+                    self._infer_action_type(
+                        action_type
+                    ),
+
+                "action":
+                    action_type,
+
+                "action_type":
+                    action_type,
+
+                "target":
+                    target
+            }
+        )
+
+    def route(
+
+        self,
+
+        action
+
+    ):
+
+        action_category = action.get(
+            "type"
+        )
+
+        action_name = action.get(
+            "action"
+        )
+
+        target = action.get(
+            "target"
+        )
+
+        action_label = (
+            f"{action_name} {target}"
+        )
+
         self.state = (
             RuntimeState.RUNNING
         )
@@ -119,50 +215,21 @@ class ExecutionRouter:
 
         result = None
 
-        if action_type == "open_app":
+        route_key = (
+            action_category,
+            action_name
+        )
+
+        handler = self.routes.get(
+            route_key
+        )
+
+        if handler:
 
             result = (
-
-                self.apps.open_app(
+                handler(
                     target
                 )
-
-            )
-
-        elif action_type == "search":
-
-            result = (
-
-                self.browser.search_query(
-                    target
-                )
-
-            )
-
-        elif action_type == "create_folder":
-
-            result = (
-
-                self.filesystem.create_folder(
-                    target
-                )
-
-            )
-
-        elif action_type == "open_terminal":
-
-            result = (
-
-                self.terminal.open_terminal()
-
-            )
-
-        elif action_type == "git_status":
-
-            result = (
-
-                self.terminal.git_status()
-
             )
 
         else:
@@ -172,7 +239,7 @@ class ExecutionRouter:
                 "success": False,
 
                 "reason":
-                    f"Unknown action: {action_type}"
+                    f"Unknown action: {action_category}:{action_name}"
 
             }
 
@@ -195,7 +262,7 @@ class ExecutionRouter:
 
                 self.verifier.verify(
 
-                    f"{action_type} {target}"
+                    action_label
 
                 )
 
@@ -231,7 +298,7 @@ class ExecutionRouter:
 
                 self.retry_engine.retry(
 
-                    f"{action_type} {target}",
+                    action_label,
 
                     verification
 
@@ -243,7 +310,7 @@ class ExecutionRouter:
 
                 self.corrector.diagnose(
 
-                    f"{action_type} {target}",
+                    action_label,
 
                     verification[
                         "reason"
@@ -285,7 +352,7 @@ class ExecutionRouter:
 
         self.memory.record(
 
-            action=f"{action_type} {target}",
+            action=action_label,
 
             success=success,
 
@@ -299,10 +366,10 @@ class ExecutionRouter:
 
         )
 
-        skill_name = action_type
+        skill_name = action_name
 
         if target:
-            skill_name = f"{action_type}:{target}"
+            skill_name = f"{action_name}:{target}"
 
         self.skills.update_skill(
             skill_name,
@@ -317,7 +384,7 @@ class ExecutionRouter:
                 else
                 "execution_failure",
 
-            goal=f"{action_type} {target}",
+            goal=action_label,
 
             details={
 
@@ -356,3 +423,32 @@ class ExecutionRouter:
                 duration
 
         }
+
+    def _infer_action_type(
+        self,
+        action_name
+    ):
+
+        if action_name in [
+            "create_file",
+            "create_folder"
+        ]:
+
+            return "filesystem"
+
+        if action_name in [
+            "open_terminal",
+            "git_status"
+        ]:
+
+            return "terminal"
+
+        if action_name == "open_app":
+
+            return "application"
+
+        if action_name == "search":
+
+            return "browser"
+
+        return None

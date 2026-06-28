@@ -1,3 +1,4 @@
+import os
 import psutil
 
 
@@ -33,6 +34,54 @@ class ExecutionVerifier:
                     "git status completed",
 
                 "process_found": True
+
+            }
+
+        if action.startswith("create_file "):
+
+            path = action.replace(
+                "create_file ",
+                "",
+                1
+            ).strip()
+
+            return {
+
+                "success":
+                    os.path.isfile(path),
+
+                "reason":
+                    "file exists"
+                    if os.path.isfile(path)
+                    else
+                    "file not found",
+
+                "process_found":
+                    os.path.isfile(path)
+
+            }
+
+        if action.startswith("create_folder "):
+
+            path = action.replace(
+                "create_folder ",
+                "",
+                1
+            ).strip()
+
+            return {
+
+                "success":
+                    os.path.isdir(path),
+
+                "reason":
+                    "folder exists"
+                    if os.path.isdir(path)
+                    else
+                    "folder not found",
+
+                "process_found":
+                    os.path.isdir(path)
 
             }
 

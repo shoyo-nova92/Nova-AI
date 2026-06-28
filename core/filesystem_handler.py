@@ -5,6 +5,73 @@ import subprocess
 
 class FilesystemHandler:
 
+    def create_file(
+        self,
+        path
+    ):
+
+        try:
+
+            if not path:
+
+                return {
+
+                    "success": False,
+
+                    "reason":
+                        "path is required"
+
+                }
+
+            folder = os.path.dirname(
+                path
+            )
+
+            if folder:
+
+                os.makedirs(
+                    folder,
+                    exist_ok=True
+                )
+
+            if os.path.exists(path):
+
+                return {
+
+                    "success": True,
+
+                    "action":
+                        f"file already exists {path}"
+
+                }
+
+            with open(
+                path,
+                "x",
+                encoding="utf-8"
+            ):
+
+                pass
+
+            return {
+
+                "success": True,
+
+                "action":
+                    f"create file {path}"
+
+            }
+
+        except Exception as e:
+
+            return {
+
+                "success": False,
+
+                "reason": str(e)
+
+            }
+
     def create_folder(self, path):
 
         try:

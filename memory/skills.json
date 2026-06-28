@@ -4,11 +4,35 @@
         "success_count": 4
     },
     "open_terminal": {
-        "usage_count": 1,
-        "success_count": 1
+        "usage_count": 2,
+        "success_count": 2
     },
     "git_status": {
         "usage_count": 1,
         "success_count": 1
+    },
+    "create_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpc_p41abj\\nested\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "create_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp1kkii5_0\\nested\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "create_file:executor/core.ts": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "create_file:context_fusion/processor.ts": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "create_file:context_fusion/input.ts": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "create_file:workflow_validator.py": {
+        "usage_count": 4,
+        "success_count": 4
     }
 }
