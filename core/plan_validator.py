@@ -1,27 +1,41 @@
 class PlanValidator:
 
-    VALID_ACTIONS = [
-        "open",
-        "search",
-        "click",
-        "close",
-        "download",
-        "play",
-        "create",
-        "move",
-        "delete"
+    REQUIRED_FIELDS = [
+
+        "type",
+
+        "action",
+
+        "target"
+
     ]
 
-    def validate(self, steps):
-        clean_steps = []
+    def validate(
+        self,
+        actions
+    ):
 
-        for step in steps:
-            lower = step.lower()
+        valid_actions = []
 
-            if any(
-                lower.startswith(action)
-                for action in self.VALID_ACTIONS
+        for action in actions:
+
+            if not isinstance(
+                action,
+                dict
             ):
-                clean_steps.append(step)
+                continue
 
-        return clean_steps
+            if not all(
+                field in action
+                for field in self.REQUIRED_FIELDS
+            ):
+                continue
+
+            if action["action"] is None:
+                continue
+
+            valid_actions.append(
+                action
+            )
+
+        return valid_actions
