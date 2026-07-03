@@ -2,6 +2,10 @@ from core.task_translator import (
     TaskTranslator
 )
 
+from core.plan_parser import (
+    PlanParser
+)
+
 
 class PlanNormalizer:
 
@@ -13,20 +17,26 @@ class PlanNormalizer:
 
     def normalize(
         self,
-        plan
+        parsed_plan
     ):
 
         normalized_plan = []
 
-        for step in plan:
+        for item in parsed_plan:
+
+            if item["type"] != PlanParser.ACTION:
+                continue
 
             action = (
                 self.translator.translate(
-                    step
+                    item["text"]
                 )
             )
 
             if action.get("action") is not None:
-                normalized_plan.append(action)
+
+                normalized_plan.append(
+                    action
+                )
 
         return normalized_plan
