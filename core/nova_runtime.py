@@ -1,7 +1,9 @@
 from datetime import datetime
-from core.plan_parser import (
-    PlanParser
+
+from core.planner_pipeline import (
+    PlannerPipeline
 )
+
 from core.vision_engine import VisionEngine
 from core.reasoning_engine import ReasoningEngine
 from core.runtime_trace import RuntimeTrace
@@ -9,14 +11,6 @@ from core.runtime_events import RuntimeEvents
 
 from core.execution_router import (
     ExecutionRouter
-)
-
-from core.plan_normalizer import (
-    PlanNormalizer
-)
-
-from core.plan_validator import (
-    PlanValidator
 )
 
 from core.execution_policy import (
@@ -60,24 +54,16 @@ class NovaRuntime:
             LLMPlanner()
         )
 
+        self.pipeline = (
+            PlannerPipeline()
+        )
+
         self.router = (
             ExecutionRouter()
         )
 
-        self.normalizer = (
-            PlanNormalizer()
-        )
-
-        self.validator = (
-                PlanValidator()
-            )
-
         self.policy = (
             ExecutionPolicy()
-        )
-
-        self.parser = (
-            PlanParser()
         )
 
     def run(
@@ -170,58 +156,35 @@ class NovaRuntime:
             memories
         )
 
-        parsed_plan = (
-            self.parser.parse(
-                "\n".join(raw_plan)
-            )
-        )
-
-        normalized_plan = (
-            self.normalizer.normalize(
-                parsed_plan
+        planner_result = (
+            self.pipeline.process(
+                raw_plan
             )
         )
 
         validated_plan = (
-            self.validator.validate(
-                normalized_plan
-            )
+            planner_result[
+                "validated_plan"
+            ]
         )
 
         self.trace.log_event(
 
             RuntimeEvents.PLAN_CREATED,
 
-            {
-                "raw_plan":
-                    raw_plan,
-
-                "parsed_plan":
-                    parsed_plan,
-
-                "normalized_plan":
-                    normalized_plan,
-
-                "validated_plan":
-                    validated_plan
-            }
+            planner_result
 
         )
 
         # -------------------------------------------------
-        # STEP 6 — TRANSLATE → POLICY → EXECUTE
+        # STEP 6 — POLICY → EXECUTE
         # -------------------------------------------------
 
         execution_results = []
 
-        for raw_step, action in zip(
-            raw_plan,
-            validated_plan):
+        for action in validated_plan:
 
             print("\n========================")
-            print("STEP:")
-            print(raw_step)
-
             print("ACTION:")
             print(action)
 
@@ -234,17 +197,7 @@ class NovaRuntime:
             print("POLICY:")
             print(policy)
 
-            if not action["action"]:
-
-                result = {
-
-                    "success": False,
-
-                    "reason": f"unknown action: {action}"
-
-                }
-
-            elif policy["allowed"]:
+            if policy["allowed"]:
 
                 result = (
                     self.router.route(
@@ -309,13 +262,23 @@ class NovaRuntime:
             "memories":
                 memories,
 
-            "raw_plan": raw_plan,
+            "raw_plan":
+                planner_result["raw_plan"],
 
-            "parsed_plan": parsed_plan,
+            "parsed_plan":
+                planner_result["parsed_plan"],
 
-            "normalized_plan": normalized_plan,
+            "quality":
+                planner_result["quality"],
 
-            "validated_plan": validated_plan,
+            "confidence":
+                planner_result["confidence"],
+
+            "normalized_plan":
+                planner_result["normalized_plan"],
+
+            "validated_plan":
+                planner_result["validated_plan"],
 
             "executions":
                 execution_results,
