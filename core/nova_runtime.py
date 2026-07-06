@@ -162,9 +162,9 @@ class NovaRuntime:
             )
         )
 
-        validated_plan = (
+        repaired_plan = (
             planner_result[
-                "validated_plan"
+                "repaired_plan"
             ]
         )
 
@@ -182,7 +182,7 @@ class NovaRuntime:
 
         execution_results = []
 
-        for action in validated_plan:
+        for action in repaired_plan:
 
             print("\n========================")
             print("ACTION:")
@@ -277,8 +277,14 @@ class NovaRuntime:
             "normalized_plan":
                 planner_result["normalized_plan"],
 
+            "expanded_plan":
+                planner_result["expanded_plan"],
+
             "validated_plan":
                 planner_result["validated_plan"],
+
+            "repaired_plan":
+                planner_result["repaired_plan"],
 
             "executions":
                 execution_results,

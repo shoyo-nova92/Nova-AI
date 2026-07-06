@@ -140,6 +140,15 @@ class ExecutionRouter:
                     ),
 
             (
+                "filesystem",
+                "read_file"
+            ):
+                lambda target:
+                    self.filesystem.read_file(
+                        target
+                    ),
+
+            (
                 "terminal",
                 "open_terminal"
             ):
@@ -231,7 +240,27 @@ class ExecutionRouter:
                     target
                 )
             )
+        if (
 
+            action_name == "read_file"
+
+            and
+
+            result.get("success")
+
+        ):
+
+            result = {
+
+                "success": True,
+
+                "action": result["action"],
+
+                "path": result["path"],
+
+                "lines": result["lines"]
+
+            }
         else:
 
             result = {
@@ -431,7 +460,8 @@ class ExecutionRouter:
 
         if action_name in [
             "create_file",
-            "create_folder"
+            "create_folder",
+            "read_file"
         ]:
 
             return "filesystem"

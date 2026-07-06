@@ -9,6 +9,24 @@ plan = [
         "type": "engineering",
         "action": "implement",
         "target": "parser.py"
+    },
+
+    {
+        "type": "engineering",
+        "action": "optimize",
+        "target": "llm_planner.py"
+    },
+
+    {
+        "type": "engineering",
+        "action": "refactor",
+        "target": "execution_router.py"
+    },
+
+    {
+        "type": "engineering",
+        "action": "test",
+        "target": "parser.py"
     }
 
 ]

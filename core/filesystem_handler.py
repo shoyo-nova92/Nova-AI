@@ -1,9 +1,75 @@
 import os
 import shutil
 import subprocess
+from pathlib import Path
 
 
 class FilesystemHandler:
+
+    def read_file(
+        self,
+        target
+    ):
+
+        try:
+
+            path = Path(target)
+
+            if not path.exists():
+
+                return {
+
+                    "success": False,
+
+                    "reason":
+                        "file does not exist"
+
+                }
+
+            if not path.is_file():
+
+                return {
+
+                    "success": False,
+
+                    "reason":
+                        "target is not a file"
+
+                }
+
+            content = path.read_text(
+                encoding="utf-8"
+            )
+
+            return {
+
+                "success": True,
+
+                "action":
+                    f"read file {target}",
+
+                "path":
+                    str(path),
+
+                "content":
+                    content,
+
+                "lines":
+                    len(
+                        content.splitlines()
+                    )
+
+            }
+
+        except Exception as e:
+
+            return {
+
+                "success": False,
+
+                "reason": str(e)
+
+            }
 
     def create_file(
         self,

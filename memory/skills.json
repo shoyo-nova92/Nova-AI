@@ -34,5 +34,17 @@
     "create_file:workflow_validator.py": {
         "usage_count": 7,
         "success_count": 7
+    },
+    "read_file:core/task_translator.py": {
+        "usage_count": 2,
+        "success_count": 2
+    },
+    "read_file:workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "read_file:context_fusion_engine.py": {
+        "usage_count": 1,
+        "success_count": 0
     }
 }

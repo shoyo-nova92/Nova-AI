@@ -7,6 +7,8 @@ pipeline = PlannerPipeline()
 raw_plan = """
 Open VS Code
 Create workflow_validator.py
+Implement parser
+Optimize planner
 Run git status
 
 class Example:

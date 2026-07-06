@@ -30,6 +30,11 @@ class ExecutionPolicy:
             ),
 
             (
+                "filesystem",
+                "read_file"
+            ),
+
+            (
                 "terminal",
                 "git_status"
             ),

@@ -14,8 +14,16 @@ from core.plan_normalizer import (
     PlanNormalizer
 )
 
+from core.intent_expander import (
+    IntentExpander
+)
+
 from core.plan_validator import (
     PlanValidator
+)
+
+from core.plan_repair_engine import (
+    PlanRepairEngine
 )
 
 
@@ -39,8 +47,16 @@ class PlannerPipeline:
             PlanNormalizer()
         )
 
+        self.expander = (
+            IntentExpander()
+        )
+
         self.validator = (
             PlanValidator()
+        )
+
+        self.repair_engine = (
+            PlanRepairEngine()
         )
 
     def process(
@@ -83,9 +99,22 @@ class PlannerPipeline:
             )
         )
 
+        expanded = [
+            self.expander.expand(
+                action
+            )
+            for action in normalized
+        ]
+
         validated = (
             self.validator.validate(
-                normalized
+                expanded
+            )
+        )
+
+        repaired = (
+            self.repair_engine.repair(
+                validated
             )
         )
 
@@ -106,7 +135,13 @@ class PlannerPipeline:
             "normalized_plan":
                 normalized,
 
+            "expanded_plan":
+                expanded,
+
             "validated_plan":
-                validated
+                validated,
+
+            "repaired_plan":
+                repaired
 
         }

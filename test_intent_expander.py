@@ -30,6 +30,30 @@ tests = [
     },
 
     {
+        "raw": "Add validation",
+        "action": None,
+        "target": None
+    },
+
+    {
+        "raw": "Optimize planner",
+        "action": None,
+        "target": None
+    },
+
+    {
+        "raw": "Refactor router",
+        "action": None,
+        "target": None
+    },
+
+    {
+        "raw": "Test parser",
+        "action": None,
+        "target": None
+    },
+
+    {
         "raw": "Open VS Code",
         "type": "application",
         "action": "open_app",

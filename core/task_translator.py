@@ -86,6 +86,31 @@ class TaskTranslator:
                     modify_target
 
             }
+
+        read_target = (
+            self._extract_read_file_target(
+                step
+            )
+        )
+
+        if read_target:
+
+            return {
+
+                "type":
+                    "filesystem",
+
+                "action":
+                    "read_file",
+
+                "action_type":
+                    "read_file",
+
+                "target":
+                    read_target
+
+            }
+
         vscode_open_phrases = [
 
             "open vscode",
@@ -308,6 +333,56 @@ class TaskTranslator:
 
             return self._clean_target(
                 add_to_match.group(1)
+            )
+
+        return None
+
+    def _extract_read_file_target(
+        self,
+        step
+    ):
+
+        if not step:
+
+            return None
+
+        normalized_step = step.lower()
+
+        if "read" not in normalized_step:
+
+            return None
+
+        file_pattern = (
+            r"[\w./\\-]+"
+            r"\."
+            r"(?:json|yaml|yml|tsx|jsx|toml|html|"
+            r"css|txt|ini|py|ts|js|md)"
+        )
+
+        backtick_match = re.search(
+            rf"`({file_pattern})`",
+            step,
+            re.IGNORECASE
+        )
+
+        if backtick_match:
+
+            return self._clean_target(
+                backtick_match.group(1)
+            )
+
+        read_match = re.search(
+            rf"\bread\b\s+"
+            rf"(?:file\s+)?"
+            rf"[\"']?({file_pattern})[\"']?",
+            step,
+            re.IGNORECASE
+        )
+
+        if read_match:
+
+            return self._clean_target(
+                read_match.group(1)
             )
 
         return None
