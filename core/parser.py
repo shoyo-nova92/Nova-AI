@@ -3,79 +3,99 @@ class IntentParser:
     def parse(self, command):
         text = command.lower().strip()
 
-        #How App is Opening
+        actions = []
+
+        # ---------------- OPEN APP ----------------
+
         open_words = ["open", "launch", "start", "run"]
 
-        for word in open_words:
-            if word in text:
+        if any(word in text for word in open_words):
 
-                if "chrome" in text or "browser" in text:
-                    return {
-                        "intent": "open_app",
-                        "target": "chrome"
-                    }
-                elif "notepad" in text:
-                    return {
-                        "intent": "open_app",
-                        "target": "notepad"
-                    }
-                elif "calculator" in text:
-                    return {
-                        "intent": "open_app",
-                        "target": "calculator"
-                    }
-                elif "paint" in text:
-                    return {
-                        "intent": "open_app",
-                        "target": "paint"
-                    }
+            if "chrome" in text or "browser" in text:
+                actions.append({
+                    "intent": "open_app",
+                    "target": "chrome"
+                })
 
-        #How to close everything
+            elif "notepad" in text:
+                actions.append({
+                    "intent": "open_app",
+                    "target": "notepad"
+                })
+
+            elif "calculator" in text:
+                actions.append({
+                    "intent": "open_app",
+                    "target": "calculator"
+                })
+
+            elif "paint" in text:
+                actions.append({
+                    "intent": "open_app",
+                    "target": "paint"
+                })
+
+        # ---------------- SEARCH ----------------
+
+        if "search for" in text:
+
+            query = text.split("search for", 1)[1].strip()
+
+            actions.append({
+                "intent": "search_web",
+                "target": query
+            })
+
+        elif text.startswith("google "):
+
+            query = text.replace("google", "", 1).strip()
+
+            actions.append({
+                "intent": "search_web",
+                "target": query
+            })
+
+        # ---------------- CLOSE EVERYTHING ----------------
 
         if "close everything" in text:
-            return {
-                "intent": "close_app",
-                "target": "all"
-            }
-        
-        #How App is Closing
-        if "close" in text:
 
-                if "chrome" in text or "browser" in text:
-                    return {
-                        "intent": "close_app",
-                        "target": "chrome"
-                    }
-                elif "notepad" in text:
-                    return {
-                        "intent": "close_app",
-                        "target": "notepad"
-                    }
-                elif "calculator" in text:
-                    return {
-                        "intent": "close_app",
-                        "target": "calculator"
-                    }
-                elif "paint" in text:
-                    return {
-                        "intent": "close_app",
-                        "target": "paint"
-                    }
+            actions.append({
+                "intent": "close_all",
+                "target": ""
+            })
 
-        #How App is Searching
+        # ---------------- CLOSE APP ----------------
 
-        if "search for" in text or "google" in text:
+        elif "close" in text:
 
-            query = text.replace("search", "").strip()
+            if "chrome" in text:
+                actions.append({
+                    "intent": "close_app",
+                    "target": "chrome"
+                })
 
-            return {
-                "intent": "search_web", 
-                "target": query
-            }
+            elif "notepad" in text:
+                actions.append({
+                    "intent": "close_app",
+                    "target": "notepad"
+                })
 
-        #How App is Catering Unknown Commands
+            elif "calculator" in text:
+                actions.append({
+                    "intent": "close_app",
+                    "target": "calculator"
+                })
 
-        return {
-            "intent": "unknown",
-            "target": command   
-        }
+            elif "paint" in text:
+                actions.append({
+                    "intent": "close_app",
+                    "target": "paint"
+                })
+
+        if not actions:
+            actions.append({
+                "intent": "unknown",
+                "target": command
+            })
+
+        return actions

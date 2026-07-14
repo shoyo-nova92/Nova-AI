@@ -387,5 +387,405 @@
             "duration": 0.0,
             "state": "failed"
         }
+    },
+    {
+        "event_id": 40,
+        "timestamp": "2026-07-12 17:35:58.044954",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vjkofum\\sample.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 41,
+        "timestamp": "2026-07-12 17:36:34.989754",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp39hpplhj\\sample.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 42,
+        "timestamp": "2026-07-12 17:37:03.353581",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpn544y9h0\\workflow_validator.py",
+        "details": {
+            "duration": 0.02,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 43,
+        "timestamp": "2026-07-12 17:37:17.113375",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp3t3d28pf\\sample.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 44,
+        "timestamp": "2026-07-12 17:37:23.451221",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp7k14nz27\\workflow_validator.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 45,
+        "timestamp": "2026-07-12 17:43:54.459218",
+        "event_type": "execution_success",
+        "goal": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmp7jx8vuzw\\parser.py",
+        "details": {
+            "duration": 0.03,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 46,
+        "timestamp": "2026-07-12 17:44:00.377229",
+        "event_type": "execution_success",
+        "goal": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6huygchi\\parser.py",
+        "details": {
+            "duration": 0.02,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 47,
+        "timestamp": "2026-07-12 17:44:01.979801",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpunkepond\\sample.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 48,
+        "timestamp": "2026-07-12 17:44:07.982902",
+        "event_type": "execution_success",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzkcg6grr\\workflow_validator.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 49,
+        "timestamp": "2026-07-12 21:00:43.464572",
+        "event_type": "execution_success",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_sjo8_et\\notes.txt",
+        "details": {
+            "duration": 0.02,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 50,
+        "timestamp": "2026-07-12 21:00:58.979884",
+        "event_type": "execution_success",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmph0g3epdq\\notes.txt",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 51,
+        "timestamp": "2026-07-12 21:01:01.085879",
+        "event_type": "execution_success",
+        "goal": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd3fsj_te\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 52,
+        "timestamp": "2026-07-12 21:01:09.169622",
+        "event_type": "execution_success",
+        "goal": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmps85_y3br\\parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 53,
+        "timestamp": "2026-07-12 21:03:12.677135",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw0u876gv\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 54,
+        "timestamp": "2026-07-12 21:03:20.208377",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmp4fjxh2zs\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 55,
+        "timestamp": "2026-07-12 21:03:21.773270",
+        "event_type": "execution_success",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfxnr_wn9\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 56,
+        "timestamp": "2026-07-12 21:03:26.721739",
+        "event_type": "execution_success",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_t2_0es1\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 57,
+        "timestamp": "2026-07-12 21:05:11.025145",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpr9ws7kwj\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 58,
+        "timestamp": "2026-07-12 21:05:21.390064",
+        "event_type": "execution_failure",
+        "goal": "rollback_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd5pq9l4k\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 59,
+        "timestamp": "2026-07-12 21:05:22.911856",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpeyt3ksa1\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 60,
+        "timestamp": "2026-07-12 21:05:28.968781",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfq41v35d\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 61,
+        "timestamp": "2026-07-12 21:05:42.892931",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpj5y3b18e\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 62,
+        "timestamp": "2026-07-12 21:09:41.174716",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpjmrbdei7\\parser.py",
+        "details": {
+            "duration": 0.02,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 63,
+        "timestamp": "2026-07-12 21:17:50.682667",
+        "event_type": "execution_success",
+        "goal": "run_python C:\\Users\\shour\\AppData\\Local\\Temp\\tmpk7e04h3x\\hello.py",
+        "details": {
+            "duration": 0.03,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 64,
+        "timestamp": "2026-07-12 21:17:56.641253",
+        "event_type": "execution_success",
+        "goal": "run_python C:\\Users\\shour\\AppData\\Local\\Temp\\tmpc5gx88wx\\hello.py",
+        "details": {
+            "duration": 0.04,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 65,
+        "timestamp": "2026-07-12 21:20:18.094366",
+        "event_type": "execution_failure",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuwfwic4y\\test_sample.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 66,
+        "timestamp": "2026-07-12 21:20:23.303526",
+        "event_type": "execution_failure",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpo3hamkyv\\test_sample.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 67,
+        "timestamp": "2026-07-12 21:20:45.588499",
+        "event_type": "execution_success",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp17a08o_o\\test_sample.py",
+        "details": {
+            "duration": 0.37,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 68,
+        "timestamp": "2026-07-12 21:20:51.365898",
+        "event_type": "execution_success",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp8r62eu87\\test_sample.py",
+        "details": {
+            "duration": 0.38,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 69,
+        "timestamp": "2026-07-12 21:27:18.230163",
+        "event_type": "execution_success",
+        "goal": "pip_install requests",
+        "details": {
+            "duration": 0.87,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 70,
+        "timestamp": "2026-07-12 21:27:26.706330",
+        "event_type": "execution_success",
+        "goal": "pip_install requests",
+        "details": {
+            "duration": 0.81,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 71,
+        "timestamp": "2026-07-12 21:42:05.358006",
+        "event_type": "execution_failure",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 769.81,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 72,
+        "timestamp": "2026-07-12 21:42:57.655083",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.14,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 73,
+        "timestamp": "2026-07-12 21:43:10.069381",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.14,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 74,
+        "timestamp": "2026-07-12 21:43:23.499796",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.14,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 75,
+        "timestamp": "2026-07-14 20:56:50.121471",
+        "event_type": "execution_failure",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py",
+        "details": {
+            "duration": 0.06,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 76,
+        "timestamp": "2026-07-14 21:35:28.400236",
+        "event_type": "execution_success",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_e8oyzn7\\notes.txt",
+        "details": {
+            "duration": 0.01,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 77,
+        "timestamp": "2026-07-14 21:38:50.264815",
+        "event_type": "execution_failure",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5jag3puv\\test_sample.py",
+        "details": {
+            "duration": 0.05,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 78,
+        "timestamp": "2026-07-14 21:39:15.397591",
+        "event_type": "execution_success",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vpoyh89\\test_sample.py",
+        "details": {
+            "duration": 0.4,
+            "state": "complete"
+        }
+    },
+    {
+        "event_id": 79,
+        "timestamp": "2026-07-14 21:39:31.948362",
+        "event_type": "execution_success",
+        "goal": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw1t80aja\\test_sample.py",
+        "details": {
+            "duration": 0.31,
+            "state": "complete"
+        }
     }
 ]

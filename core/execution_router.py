@@ -149,11 +149,98 @@ class ExecutionRouter:
                     ),
 
             (
+                "filesystem",
+                "modify_file"
+            ):
+                lambda target:
+                    self.filesystem.modify_file(
+                        target,
+                        ""
+                    ),
+
+            (
+                "filesystem",
+                "replace_text"
+            ):
+                lambda target:
+                    self.filesystem.replace_text(
+                        target,
+                        "",
+                        ""
+                    ),
+
+            (
+                "filesystem",
+                "append_file"
+            ):
+                lambda target:
+                    self.filesystem.append_file(
+                        target,
+                        ""
+                    ),
+
+            (
+                "filesystem",
+                "insert_at_line"
+            ):
+                lambda target:
+                    self.filesystem.insert_at_line(
+                        target,
+                        0,
+                        ""
+                    ),
+
+            (
+                "filesystem",
+                "rollback_file"
+            ):
+                lambda target:
+                    self.filesystem.rollback_file(
+                        target
+                    ),
+
+            (
                 "terminal",
                 "open_terminal"
             ):
                 lambda target:
                     self.terminal.open_terminal(),
+
+            (
+                "terminal",
+                "run_python"
+            ):
+                lambda target:
+                    self.terminal.run_python(
+                        target
+                    ),
+
+            (
+                "terminal",
+                "run_pytest"
+            ):
+                lambda target:
+                    self.terminal.run_pytest(
+                        target
+                    ),
+
+            (
+                "terminal",
+                "pip_install"
+            ):
+                lambda target:
+                    self.terminal.pip_install(
+                        target
+                    ),
+
+            (
+                "terminal",
+                "build_project"
+            ):
+                lambda target:
+                    self.terminal.build_project(
+                        target
+                    ),
 
             (
                 "terminal",
@@ -170,7 +257,8 @@ class ExecutionRouter:
 
         action_type,
 
-        target=None
+        target=None,
+        new_content=None
 
     ):
 
@@ -188,7 +276,10 @@ class ExecutionRouter:
                     action_type,
 
                 "target":
-                    target
+                    target,
+
+                "new_content":
+                    new_content
             }
         )
 
@@ -235,11 +326,67 @@ class ExecutionRouter:
 
         if handler:
 
-            result = (
-                handler(
+            if action_name == "modify_file":
+
+                result = self.filesystem.modify_file(
+                    target,
+                    action.get("new_content", "")
+                )
+
+            elif action_name == "replace_text":
+
+                parameters = action.get("parameters", {})
+
+                result = self.filesystem.replace_text(
+                    target,
+                    parameters.get("old"),
+                    parameters.get("new")
+                )
+
+            elif action_name == "append_file":
+
+                parameters = action.get("parameters", {})
+
+                result = self.filesystem.append_file(
+                    target,
+                    parameters.get("content", "")
+                )
+
+            elif action_name == "insert_at_line":
+
+                parameters = action.get("parameters", {})
+
+                result = self.filesystem.insert_at_line(
+                    target,
+                    parameters.get("line"),
+                    parameters.get("content", "")
+                )
+
+            elif action_name == "rollback_file":
+
+                result = self.filesystem.rollback_file(
                     target
                 )
-            )
+
+            else:
+
+                result = (
+                    handler(
+                        target
+                    )
+                )
+
+        else:
+
+            result = {
+
+                "success": False,
+
+                "reason":
+                    f"Unknown action: {action_category}:{action_name}"
+
+            }
+
         if (
 
             action_name == "read_file"
@@ -259,16 +406,6 @@ class ExecutionRouter:
                 "path": result["path"],
 
                 "lines": result["lines"]
-
-            }
-        else:
-
-            result = {
-
-                "success": False,
-
-                "reason":
-                    f"Unknown action: {action_category}:{action_name}"
 
             }
 
@@ -323,6 +460,26 @@ class ExecutionRouter:
                 RuntimeState.RECOVERING
             )
 
+            rollback_result = None
+
+            if action_name in {
+
+                "modify_file",
+
+                "replace_text",
+
+                "append_file",
+
+                "insert_at_line"
+
+            } and target:
+
+                rollback_result = (
+                    self.filesystem.rollback_file(
+                        target
+                    )
+                )
+
             recovery = (
 
                 self.retry_engine.retry(
@@ -334,6 +491,10 @@ class ExecutionRouter:
                 )
 
             )
+
+            if rollback_result is not None:
+
+                recovery["rollback"] = rollback_result
 
             correction = (
 
@@ -461,14 +622,23 @@ class ExecutionRouter:
         if action_name in [
             "create_file",
             "create_folder",
-            "read_file"
+            "read_file",
+            "modify_file",
+            "replace_text",
+            "append_file",
+            "insert_at_line",
+            "rollback_file"
         ]:
 
             return "filesystem"
 
         if action_name in [
             "open_terminal",
-            "git_status"
+            "git_status",
+            "run_python",
+            "run_pytest",
+            "pip_install",
+            "build_project"
         ]:
 
             return "terminal"

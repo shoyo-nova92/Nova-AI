@@ -11,8 +11,12 @@ class ExecutionMemory:
 
     def __init__(self):
 
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_parent = os.path.dirname(base_dir)
+        self.FILE_PATH = os.path.join(base_parent, "memory", "execution_history.json")
+
         os.makedirs(
-            "memory",
+            os.path.dirname(self.FILE_PATH),
             exist_ok=True
         )
 

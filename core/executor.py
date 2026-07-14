@@ -5,31 +5,37 @@ import os
 
 class Executor:
 
-    def execute(self, result):
-        intent = result["intent"]
-        target = result["target"]
+    def execute(self, actions):
 
-        # OPEN APPLICATIONS
-        if intent == "open_app":
-            return self.open_app(target)
+        responses = []
 
-        # SEARCH WEB
-        elif intent == "search_web":
-            webbrowser.open(f"https://www.google.com/search?q={target}")
-            return f"Searching {target}"
+        for result in actions:
 
-        # CLOSE APPLICATIONS
-        elif intent == "close_app":
-            return self.close_app(target)
+            intent = result["intent"]
+            target = result["target"]
 
-        # CLOSE EVERYTHING
-        elif intent == "close_all":
-            os.system("taskkill /f /im chrome.exe")
-            os.system("taskkill /f /im notepad.exe")
-            os.system("taskkill /f /im msedge.exe")
-            return "Closing everything"
+            if intent == "open_app":
+                responses.append(self.open_app(target))
 
-        return "Command not understood"
+            elif intent == "search_web":
+                webbrowser.open(
+                    f"https://www.google.com/search?q={target}"
+                )
+                responses.append(f"Searching {target}")
+
+            elif intent == "close_app":
+                responses.append(self.close_app(target))
+
+            elif intent == "close_all":
+                os.system("taskkill /f /im chrome.exe")
+                os.system("taskkill /f /im notepad.exe")
+                os.system("taskkill /f /im msedge.exe")
+                responses.append("Closing everything")
+
+            else:
+                responses.append("Command not understood")
+
+            return " | ".join(responses)
 
     # ---------------- OPEN APP ----------------
     def open_app(self, target):

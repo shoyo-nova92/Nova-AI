@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -7,9 +8,9 @@ class MemoryAutoLogger:
 
     def __init__(self):
 
-        self.memory_file = Path(
-            "memory/runtime_history.json"
-        )
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_parent = os.path.dirname(base_dir)
+        self.memory_file = Path(os.path.join(base_parent, "memory", "runtime_history.json"))
 
         self.memory_file.parent.mkdir(
             exist_ok=True

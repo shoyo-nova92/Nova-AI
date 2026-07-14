@@ -46,5 +46,149 @@
     "read_file:context_fusion_engine.py": {
         "usage_count": 1,
         "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vjkofum\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp39hpplhj\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpn544y9h0\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp3t3d28pf\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp7k14nz27\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "replace_text:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp7jx8vuzw\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "replace_text:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6huygchi\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpunkepond\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzkcg6grr\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_sjo8_et\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmph0g3epdq\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "replace_text:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd3fsj_te\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "replace_text:C:\\Users\\shour\\AppData\\Local\\Temp\\tmps85_y3br\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw0u876gv\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp4fjxh2zs\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfxnr_wn9\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_t2_0es1\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "rollback_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpr9ws7kwj\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "rollback_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd5pq9l4k\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpeyt3ksa1\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfq41v35d\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "rollback_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpj5y3b18e\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpjmrbdei7\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "run_python:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpk7e04h3x\\hello.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "run_python:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpc5gx88wx\\hello.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuwfwic4y\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpo3hamkyv\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp17a08o_o\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp8r62eu87\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "pip_install:requests": {
+        "usage_count": 2,
+        "success_count": 2
+    },
+    "build_project:python -m compileall .": {
+        "usage_count": 10,
+        "success_count": 9
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_e8oyzn7\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5jag3puv\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vpoyh89\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw1t80aja\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
     }
 }

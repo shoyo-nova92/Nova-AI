@@ -173,5 +173,355 @@
         "success": false,
         "duration": 0.0,
         "failure_reason": "Unknown action: filesystem:read_file"
+    },
+    {
+        "timestamp": "2026-07-12 17:35:58.028928",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vjkofum\\sample.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:36:34.968685",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp39hpplhj\\sample.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:37:03.325040",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpn544y9h0\\workflow_validator.py",
+        "success": true,
+        "duration": 0.02,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:37:17.084416",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp3t3d28pf\\sample.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:37:23.423454",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp7k14nz27\\workflow_validator.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:43:54.435884",
+        "action": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmp7jx8vuzw\\parser.py",
+        "success": true,
+        "duration": 0.03,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:44:00.355070",
+        "action": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6huygchi\\parser.py",
+        "success": true,
+        "duration": 0.02,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:44:01.956721",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpunkepond\\sample.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 17:44:07.959033",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzkcg6grr\\workflow_validator.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:00:43.433613",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_sjo8_et\\notes.txt",
+        "success": true,
+        "duration": 0.02,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:00:58.952681",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmph0g3epdq\\notes.txt",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:01:01.061186",
+        "action": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd3fsj_te\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:01:09.142069",
+        "action": "replace_text C:\\Users\\shour\\AppData\\Local\\Temp\\tmps85_y3br\\parser.py",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:03:12.662643",
+        "action": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw0u876gv\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:03:20.184421",
+        "action": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmp4fjxh2zs\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:03:21.752624",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfxnr_wn9\\notes.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:03:26.701878",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_t2_0es1\\notes.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:05:11.011360",
+        "action": "rollback_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpr9ws7kwj\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:05:21.361243",
+        "action": "rollback_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd5pq9l4k\\parser.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "backup does not exist"
+    },
+    {
+        "timestamp": "2026-07-12 21:05:22.888836",
+        "action": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpeyt3ksa1\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:05:28.944548",
+        "action": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfq41v35d\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:05:42.871968",
+        "action": "rollback_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpj5y3b18e\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:09:41.152625",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpjmrbdei7\\parser.py",
+        "success": false,
+        "duration": 0.02,
+        "failure_reason": "SyntaxError line 1"
+    },
+    {
+        "timestamp": "2026-07-12 21:17:50.661113",
+        "action": "run_python C:\\Users\\shour\\AppData\\Local\\Temp\\tmpk7e04h3x\\hello.py",
+        "success": true,
+        "duration": 0.03,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:17:56.615663",
+        "action": "run_python C:\\Users\\shour\\AppData\\Local\\Temp\\tmpc5gx88wx\\hello.py",
+        "success": true,
+        "duration": 0.04,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:20:18.071144",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuwfwic4y\\test_sample.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "[WinError 2] The system cannot find the file specified"
+    },
+    {
+        "timestamp": "2026-07-12 21:20:23.281081",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpo3hamkyv\\test_sample.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "[WinError 2] The system cannot find the file specified"
+    },
+    {
+        "timestamp": "2026-07-12 21:20:45.565677",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp17a08o_o\\test_sample.py",
+        "success": true,
+        "duration": 0.37,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:20:51.342308",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp8r62eu87\\test_sample.py",
+        "success": true,
+        "duration": 0.38,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:27:18.206764",
+        "action": "pip_install requests",
+        "success": true,
+        "duration": 0.87,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:27:26.683349",
+        "action": "pip_install requests",
+        "success": true,
+        "duration": 0.81,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:41:11.644707",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:41:26.389803",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.16,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:41:41.712413",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:41:58.254208",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:42:05.309574",
+        "action": "build_project python -m compileall .",
+        "success": false,
+        "duration": 434.32,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-07-12 21:42:05.324859",
+        "action": "build_project python -m compileall .",
+        "success": false,
+        "duration": 769.81,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-07-12 21:42:13.795838",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:42:19.111760",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:42:29.180830",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:42:34.568994",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.22,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:42:34.924259",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.16,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:42:57.617805",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.14,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:43:10.026802",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.14,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-12 21:43:23.457370",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.14,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-14 20:56:50.102936",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py",
+        "success": false,
+        "duration": 0.06,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-07-14 21:35:28.385752",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_e8oyzn7\\notes.txt",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-14 21:38:50.240770",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5jag3puv\\test_sample.py",
+        "success": false,
+        "duration": 0.05,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-07-14 21:39:15.373551",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vpoyh89\\test_sample.py",
+        "success": true,
+        "duration": 0.4,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-07-14 21:39:31.923284",
+        "action": "run_pytest C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw1t80aja\\test_sample.py",
+        "success": true,
+        "duration": 0.31,
+        "failure_reason": null
     }
 ]

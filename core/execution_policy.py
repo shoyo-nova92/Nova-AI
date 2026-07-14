@@ -45,6 +45,26 @@ class ExecutionPolicy:
             ),
 
             (
+                "terminal",
+                "run_python"
+            ),
+
+            (
+                "terminal",
+                "run_pytest"
+            ),
+
+            (
+                "terminal",
+                "pip_install"
+            ),
+
+            (
+                "terminal",
+                "build_project"
+            ),
+
+            (
                 "application",
                 "open_app"
             ),
@@ -57,6 +77,51 @@ class ExecutionPolicy:
         }
 
         confirmation_actions = {
+
+            (
+                "filesystem",
+                "modify_file"
+            ),
+
+            (
+                "filesystem",
+                "replace_text"
+            ),
+
+            (
+                "filesystem",
+                "append_file"
+            ),
+
+            (
+                "filesystem",
+                "insert_at_line"
+            ),
+
+            (
+                "filesystem",
+                "rollback_file"
+            ),
+
+            (
+                "terminal",
+                "run_python"
+            ),
+
+            (
+                "terminal",
+                "run_pytest"
+            ),
+
+            (
+                "terminal",
+                "pip_install"
+            ),
+
+            (
+                "terminal",
+                "build_project"
+            ),
 
             (
                 "filesystem",
