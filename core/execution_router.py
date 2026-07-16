@@ -18,6 +18,10 @@ from core.terminal_handler import (
     TerminalHandler
 )
 
+from core.git_handler import (
+    GitHandler
+)
+
 from core.execution_verifier import (
     ExecutionVerifier
 )
@@ -52,10 +56,7 @@ import time
 class ExecutionRouter:
 
     def __init__(self):
-
-        self.state = (
-            RuntimeState.PENDING
-        )
+        self.state = RuntimeState.IDLE
 
         self.apps = (
             ApplicationHandler()
@@ -71,6 +72,10 @@ class ExecutionRouter:
 
         self.terminal = (
             TerminalHandler()
+        )
+
+        self.git = (
+            GitHandler()
         )
 
         self.verifier = (
@@ -247,7 +252,42 @@ class ExecutionRouter:
                 "git_status"
             ):
                 lambda target:
-                    self.terminal.git_status()
+                    self.terminal.git_status(),
+
+            (
+                "git",
+                "git_add"
+            ):
+                lambda target:
+                    self.git.git_add(target),
+
+            (
+                "git",
+                "git_commit"
+            ):
+                lambda target:
+                    self.git.git_commit(target),
+
+            (
+                "git",
+                "git_checkout"
+            ):
+                lambda target:
+                    self.git.git_checkout(target),
+
+            (
+                "git",
+                "git_pull"
+            ):
+                lambda target:
+                    self.git.git_pull(),
+
+            (
+                "git",
+                "git_push"
+            ):
+                lambda target:
+                    self.git.git_push()
 
         }
 
@@ -307,9 +347,7 @@ class ExecutionRouter:
             f"{action_name} {target}"
         )
 
-        self.state = (
-            RuntimeState.RUNNING
-        )
+        self.state = RuntimeState.EXECUTING
 
         start_time = time.time()
 
@@ -520,9 +558,7 @@ class ExecutionRouter:
 
         else:
 
-            self.state = (
-                RuntimeState.COMPLETE
-            )
+            self.state = RuntimeState.COMPLETED
 
         duration = round(
 
@@ -536,7 +572,7 @@ class ExecutionRouter:
 
             self.state
             ==
-            RuntimeState.COMPLETE
+            RuntimeState.COMPLETED
 
         )
 
@@ -642,6 +678,16 @@ class ExecutionRouter:
         ]:
 
             return "terminal"
+
+        if action_name in [
+            "git_add",
+            "git_commit",
+            "git_checkout",
+            "git_pull",
+            "git_push"
+        ]:
+
+            return "git"
 
         if action_name == "open_app":
 

@@ -1,7 +1,7 @@
 {
     "open_app:vscode": {
-        "usage_count": 4,
-        "success_count": 4
+        "usage_count": 8,
+        "success_count": 8
     },
     "open_terminal": {
         "usage_count": 3,
@@ -36,8 +36,8 @@
         "success_count": 7
     },
     "read_file:core/task_translator.py": {
-        "usage_count": 2,
-        "success_count": 2
+        "usage_count": 5,
+        "success_count": 5
     },
     "read_file:workflow_validator.py": {
         "usage_count": 1,
@@ -188,6 +188,58 @@
         "success_count": 1
     },
     "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpw1t80aja\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "git_add:.": {
+        "usage_count": 2,
+        "success_count": 2
+    },
+    "git_commit:feat: test commit": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "git_checkout:-b feature-test": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "git_pull": {
+        "usage_count": 2,
+        "success_count": 2
+    },
+    "git_push": {
+        "usage_count": 2,
+        "success_count": 2
+    },
+    "read_file:parser.py": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "run_pytest": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "open_app:notepad": {
+        "usage_count": 4,
+        "success_count": 4
+    },
+    "modify_file:workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "replace_text:workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:core/parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:core/parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "rollback_file:core/parser.py": {
         "usage_count": 1,
         "success_count": 1
     }

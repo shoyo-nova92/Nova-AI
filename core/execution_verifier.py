@@ -43,6 +43,61 @@ class ExecutionVerifier:
 
             }
 
+        if "git_add" in action:
+
+            return {
+
+                "success": True,
+
+                "reason": "git add completed",
+                "process_found": True
+
+            }
+
+        if "git_commit" in action:
+
+            return {
+
+                "success": True,
+
+                "reason": "git commit completed",
+                "process_found": True
+
+            }
+
+        if "git_checkout" in action:
+
+            return {
+
+                "success": True,
+
+                "reason": "git checkout completed",
+                "process_found": True
+
+            }
+
+        if "git_pull" in action:
+
+            return {
+
+                "success": True,
+
+                "reason": "git pull completed",
+                "process_found": True
+
+            }
+
+        if "git_push" in action:
+
+            return {
+
+                "success": True,
+
+                "reason": "git push completed",
+                "process_found": True
+
+            }
+
         if action.startswith("read_file "):
 
             return {

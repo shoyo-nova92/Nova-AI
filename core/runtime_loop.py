@@ -48,7 +48,6 @@ class RuntimeLoop:
             )
 
             time.sleep(2)
-
         print(
             "\n=== LOOP COMPLETE ==="
         )
