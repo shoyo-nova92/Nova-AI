@@ -218,8 +218,27 @@ class TaskTranslator:
 
             }
 
-        vscode_open_phrases = [
+        # Open Notepad phrases
+        notepad_open_phrases = [
+            "open notepad",
+            "launch notepad",
+            "start notepad",
+            "focus notepad"
+        ]
 
+        if any(
+            phrase in normalized_step
+            for phrase in notepad_open_phrases
+        ):
+            return {
+                "type": "application",
+                "action": "open_app",
+                "action_type": "open_app",
+                "target": "notepad"
+            }
+
+        # Open VS Code phrases
+        vscode_open_phrases = [
             "open vscode",
             "open vs code",
             "open visual studio code",
@@ -232,7 +251,6 @@ class TaskTranslator:
             "focus vscode",
             "focus vs code",
             "focus visual studio code"
-
         ]
 
         if any(
@@ -272,6 +290,66 @@ class TaskTranslator:
                 "target":
                     None
 
+            }
+
+        if re.search(r"\b(?:stage|git add|add all changes)\b", normalized_step):
+
+            target = "."
+            if "stage" in normalized_step and "." not in normalized_step:
+                match = re.search(r"stage\s+([\w./\\-]+)", step, re.IGNORECASE)
+                if match:
+                    target = self._clean_target(match.group(1))
+
+            return {
+
+                "type": "git",
+
+                "action": "git_add",
+
+                "action_type": "git_add",
+
+                "target": target
+
+            }
+
+        if re.search(r"\b(?:commit|create commit)\b", normalized_step):
+            message = ""
+            match = re.search(r'commit(?: with message)?\s+["\']([^"\']+)["\']', step, re.IGNORECASE)
+            if match:
+                message = match.group(1)
+            return {
+                "type": "git",
+                "action": "git_commit",
+                "action_type": "git_commit",
+                "target": message or "commit"
+            }
+
+        if re.search(r"\b(?:checkout|switch to|change branch|create branch)\b", normalized_step):
+            branch = None
+            match = re.search(r"(?:checkout|switch to|create branch)\s+([\w./\\-]+)", step, re.IGNORECASE)
+            if match:
+                branch = self._clean_target(match.group(1))
+            return {
+                "type": "git",
+                "action": "git_checkout",
+                "action_type": "git_checkout",
+                "target": branch or "-b feature"
+            }
+
+        if re.search(r"\b(?:pull|update repository|sync repository|git pull)\b", normalized_step):
+            return {
+                "type": "git",
+                "action": "git_pull",
+                "action_type": "git_pull",
+                "target": None
+            }
+
+        if re.search(r"\b(?:push|publish repository|upload commits|git push)\b", normalized_step):
+            return {
+                "type": "git",
+                "action": "git_push",
+                "action_type": "git_push",
+                "target": None
             }
 
         if re.search(r"\b(?:install|pip install)\b", normalized_step):
@@ -435,7 +513,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"
@@ -515,7 +593,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"
@@ -734,7 +812,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"
@@ -768,7 +846,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"

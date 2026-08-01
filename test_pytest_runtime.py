@@ -18,7 +18,7 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         }
     )
 
-    assert result["state"] == "complete", result
+    assert result["state"] == "completed", result
     assert result["execution"]["success"] is True, result
     assert result["verification"]["success"] is True, result
 

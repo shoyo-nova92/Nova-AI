@@ -162,13 +162,6 @@ class TerminalHandler:
             command = self._build_pytest_command(target)
 
             cwd = os.getcwd()
-            if target:
-
-                target_path = Path(str(target))
-                if target_path.exists() and target_path.is_file():
-                    cwd = str(target_path.parent)
-                elif target_path.parent != Path('.'):
-                    cwd = str(target_path.parent)
 
             print("\nCOMMAND:")
             print(command)

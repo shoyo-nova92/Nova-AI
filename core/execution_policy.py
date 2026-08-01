@@ -40,6 +40,31 @@ class ExecutionPolicy:
             ),
 
             (
+                "git",
+                "git_add"
+            ),
+
+            (
+                "git",
+                "git_commit"
+            ),
+
+            (
+                "git",
+                "git_checkout"
+            ),
+
+            (
+                "git",
+                "git_pull"
+            ),
+
+            (
+                "git",
+                "git_push"
+            ),
+
+            (
                 "terminal",
                 "open_terminal"
             ),
@@ -121,6 +146,26 @@ class ExecutionPolicy:
             (
                 "terminal",
                 "build_project"
+            ),
+
+            (
+                "git",
+                "git_commit"
+            ),
+
+            (
+                "git",
+                "git_checkout"
+            ),
+
+            (
+                "git",
+                "git_pull"
+            ),
+
+            (
+                "git",
+                "git_push"
             ),
 
             (

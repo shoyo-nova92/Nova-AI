@@ -29,7 +29,7 @@ def process_command(command, orb, parser, executor, logger):
     if not command:
         return  
 
-    if should_exit(command):
+    if should_exit(command):``
         orb.set_state("Bye", (255, 50, 50))
         QApplication.quit()
         return
