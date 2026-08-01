@@ -1,11 +1,11 @@
 {
     "open_app:vscode": {
-        "usage_count": 8,
-        "success_count": 8
+        "usage_count": 28,
+        "success_count": 28
     },
     "open_terminal": {
-        "usage_count": 3,
-        "success_count": 3
+        "usage_count": 4,
+        "success_count": 4
     },
     "git_status": {
         "usage_count": 1,
@@ -32,12 +32,12 @@
         "success_count": 1
     },
     "create_file:workflow_validator.py": {
-        "usage_count": 7,
-        "success_count": 7
+        "usage_count": 17,
+        "success_count": 17
     },
     "read_file:core/task_translator.py": {
-        "usage_count": 5,
-        "success_count": 5
+        "usage_count": 9,
+        "success_count": 9
     },
     "read_file:workflow_validator.py": {
         "usage_count": 1,
@@ -168,8 +168,8 @@
         "success_count": 2
     },
     "build_project:python -m compileall .": {
-        "usage_count": 10,
-        "success_count": 9
+        "usage_count": 34,
+        "success_count": 33
     },
     "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py": {
         "usage_count": 1,
@@ -192,36 +192,36 @@
         "success_count": 1
     },
     "git_add:.": {
-        "usage_count": 2,
-        "success_count": 2
+        "usage_count": 22,
+        "success_count": 21
     },
     "git_commit:feat: test commit": {
-        "usage_count": 2,
+        "usage_count": 22,
         "success_count": 0
     },
     "git_checkout:-b feature-test": {
-        "usage_count": 2,
+        "usage_count": 22,
         "success_count": 0
     },
     "git_pull": {
-        "usage_count": 2,
-        "success_count": 2
+        "usage_count": 22,
+        "success_count": 22
     },
     "git_push": {
-        "usage_count": 2,
-        "success_count": 2
+        "usage_count": 22,
+        "success_count": 22
     },
     "read_file:parser.py": {
         "usage_count": 2,
         "success_count": 0
     },
     "run_pytest": {
-        "usage_count": 2,
-        "success_count": 0
+        "usage_count": 20,
+        "success_count": 14
     },
     "open_app:notepad": {
-        "usage_count": 4,
-        "success_count": 4
+        "usage_count": 31,
+        "success_count": 27
     },
     "modify_file:workflow_validator.py": {
         "usage_count": 1,
@@ -242,5 +242,357 @@
     "rollback_file:core/parser.py": {
         "usage_count": 1,
         "success_count": 1
+    },
+    "read_file:tests/runtime_workspace/sample.txt": {
+        "usage_count": 3,
+        "success_count": 3
+    },
+    "read_file:tests\\runtime_workspace\\sample.txt": {
+        "usage_count": 6,
+        "success_count": 6
+    },
+    "modify_file:tests\\runtime_workspace\\workflow_validator.py": {
+        "usage_count": 5,
+        "success_count": 2
+    },
+    "insert_at_line:tests\\runtime_workspace\\parser.py": {
+        "usage_count": 5,
+        "success_count": 0
+    },
+    "run_pytest:tests\\runtime_workspace\\test_sample.py": {
+        "usage_count": 5,
+        "success_count": 3
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp0dgdf_a3\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp9km3ikon\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuv5f5sec\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpsjsbzeci\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "open_app:fakeapp": {
+        "usage_count": 10,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmptk1fe43p\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzgb_aqhg\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz4tvsfw3\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp9ql74c7m\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpittq07nl\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpgi1xxspr\\test_sample.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
+        "usage_count": 37,
+        "success_count": 9
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzf_mel4h\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmppxteqz1l\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxbh678tm\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpa276lcbm\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5uu24hwo\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpsu9ppjvd\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxck7ny07\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpho2htjai\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmprj2mpiu0\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmprkt3ajrs\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_2era4tz\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpi52ri6q8\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpcgb5zh5v\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmptxg2qkbh\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp4j8btrc1\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmph1q5893w\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpl5uka2v3\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpkzi30i3t\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp1p4_92z6\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpkkpov2a1\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp9nsffnvl\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpifm9capa\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuxk_ecjj\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpbfe8n2bz\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpjgg_qceu\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzcrky5f5\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpn9z3x1px\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpf96m6daw\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxkcm7b4e\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5ke_l_jr\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmplio1m3hn\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfw689g2y\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmprg424xt3\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpkk9_q7rh\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp35ndb66y\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpr5gbornp\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpiihyjuqo\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp4d7vaicr\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp2j6lu_bw\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpgywi787r\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpd5bf57oo\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzzyjht3l\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpaybgrowc\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpi8dkovxi\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpmlnjnhr2\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpfv8hs4d5\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp4x92aqul\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpy_rmaa3z\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpapgjimv6\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpeiantzq2\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpu76ta_m8\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp1yimlrpn\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpdc3hgul2\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpruocfbwt\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpm1118788\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpi9fr22ah\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp9aompwh1\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp__5oes67\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpvxucpc6b\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpt8g4ims7\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpyatflgyn\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6h6br2_m\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp1n2dxglo\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpa1gvjg57\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpanw1mh07\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpaerm6smy\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz2se4zt2\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpjevqsw_m\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "read_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
+        "usage_count": 15,
+        "success_count": 15
+    },
+    "create_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
+        "usage_count": 15,
+        "success_count": 15
+    },
+    "rollback_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
+        "usage_count": 16,
+        "success_count": 16
     }
 }

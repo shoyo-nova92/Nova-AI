@@ -1,0 +1,2 @@
+# Sample requirements
+# We'll install nothing for now

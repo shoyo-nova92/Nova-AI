@@ -513,7 +513,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"
@@ -593,7 +593,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"
@@ -812,7 +812,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"
@@ -846,7 +846,7 @@ class TaskTranslator:
             return None
 
         file_pattern = (
-            r"[\w./\\-]+"
+            r"[\w.:/\\-]+"
             r"\."
             r"(?:json|yaml|yml|tsx|jsx|toml|html|"
             r"css|txt|ini|py|ts|js|md)"

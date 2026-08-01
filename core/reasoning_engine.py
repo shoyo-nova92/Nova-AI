@@ -6,7 +6,7 @@ class ReasoningEngine:
             vision_data["active_window"]["title"]
         ).lower()
 
-        ocr_data = vision_data["visible_text"]
+        ocr_data = vision_data.get("visible_text", "")
 
         visible_text = ""
 

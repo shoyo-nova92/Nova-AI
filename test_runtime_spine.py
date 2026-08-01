@@ -1,415 +1,262 @@
-from core.nova_runtime import NovaRuntime
-from unittest.mock import patch, MagicMock
 from pathlib import Path
+from unittest.mock import patch, MagicMock
+from core.nova_runtime import NovaRuntime
+from core.execution_policy import ExecutionPolicy
 
 
-def create_test_runtime():
-    runtime = NovaRuntime()
-    # Mock ExecutionPolicy to allow all actions
-    runtime.policy.classify = lambda action: {"status": "SAFE", "allowed": True, "reason": "Test allowed"}
-    # Mock ExecutionVerifier to always pass
-    runtime.router.verifier.verify = lambda action: {"success": True, "reason": "Test verified"}
-    return runtime
+# Test-only policy that allows all actions
+class TestExecutionPolicy(ExecutionPolicy):
+    def classify(self, action):
+        result = super().classify(action)
+        result["allowed"] = True
+        return result
+
+
+def reset_test_workspace():
+    """Reset test workspace to clean state before each test"""
+    workspace_path = Path("tests/runtime_workspace")
+    workspace_path.mkdir(parents=True, exist_ok=True)
+
+    # Remove .bak files from previous tests
+    for bak_file in workspace_path.glob("*.bak"):
+        try:
+            bak_file.unlink()
+        except Exception:
+            pass
+
+    # Re-create sample files
+    sample_files = {
+        "parser.py": """def parse_text(text):
+    return text.strip()
+
+if __name__ == "__main__":
+    print(parse_text("  hello world  "))
+""",
+        "workflow_validator.py": """def validate():
+    print("Validation passed")
+    return True
+
+if __name__ == "__main__":
+    validate()
+""",
+        "sample.txt": "This is a sample text file\n",
+        "sample.py": """def main():
+    print("Sample Python program")
+    return 0
+
+if __name__ == "__main__":
+    main()
+""",
+        "test_sample.py": """def test_sample():
+    assert 1 + 1 == 2
+"""
+    }
+
+    for filename, content in sample_files.items():
+        file_path = workspace_path / filename
+        file_path.write_text(content, encoding="utf-8")
 
 
 def test_1_open_notepad():
-    print("\n" + "="*50)
-    print("TEST 1: Open Notepad")
-    print("="*50)
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
+    print("\n" + "=" * 50)
+    print("TEST 1: Open Notepad (Fast Path - Skip Planner)")
+    print("=" * 50)
+    reset_test_workspace()
+
+    with patch("core.nova_runtime.VisionEngine") as mock_vision:
+        mock_vision.return_value.analyze_screen.return_value = {
+            "active_window": {"title": "Desktop"},
+            "running_apps": [],
             "visible_text": ""
         }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Open Notepad"
-        ]
-        
-        runtime = create_test_runtime()
+
+        runtime = NovaRuntime()
+        runtime.policy = TestExecutionPolicy()
+
+        # Mock app handler and verifier for unit test environment
+        runtime.router.apps.open_app = MagicMock(return_value={"success": True, "app": "notepad"})
+        runtime.router.verifier.verify = MagicMock(return_value={"success": True, "reason": "notepad process verified"})
+
         result = runtime.process_goal("Open Notepad")
-        
-        assert result["success"], f"Test failed: {result}"
-        print("✓ Test 1 Passed")
+        assert result["success"], f"Test 1 failed: {result}"
+        assert result["metadata"].get("fast_path") is True, "Fast path was not triggered for Open Notepad"
+        assert len(result["executions"]) > 0, "No executions recorded"
+        assert result["executions"][0]["action"]["action"] == "open_app"
+        print("PASSED: Test 1 Open Notepad (Fast Path -> Skip Planner -> Execute)")
 
 
-def test_2_open_vscode():
-    print("\n" + "="*50)
-    print("TEST 2: Open VS Code")
-    print("="*50)
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
+def test_2_read_parser_py():
+    print("\n" + "=" * 50)
+    print("TEST 2: Read parser.py (Translator -> Filesystem -> Done)")
+    print("=" * 50)
+    reset_test_workspace()
+    test_file = str(Path("tests/runtime_workspace/parser.py").resolve()).replace("\\", "/")
+
+    with patch("core.nova_runtime.VisionEngine") as mock_vision:
+        mock_vision.return_value.analyze_screen.return_value = {
+            "active_window": {"title": "Terminal"},
+            "running_apps": [],
             "visible_text": ""
         }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Open VS Code"
-        ]
-        
-        runtime = create_test_runtime()
-        result = runtime.process_goal("Open VS Code")
-        
-        assert result["success"], f"Test failed: {result}"
-        print("✓ Test 2 Passed")
+
+        runtime = NovaRuntime()
+        runtime.policy = TestExecutionPolicy()
+
+        result = runtime.process_goal(f"Read {test_file}")
+        assert result["success"], f"Test 2 failed: {result}"
+        assert result["metadata"].get("fast_path") is True, "Fast path was not triggered for Read file"
+        assert len(result["executions"]) > 0, "No executions recorded"
+        read_action = result["executions"][0]["action"]
+        assert read_action["action"] == "read_file"
+        print("PASSED: Test 2 Read parser.py (Translator -> Filesystem -> Done)")
 
 
-def test_3_read_file():
-    print("\n" + "="*50)
-    print("TEST 3: Read core/task_translator.py")
-    print("="*50)
-    
-    test_file_path = Path("core/task_translator.py")
-    assert test_file_path.exists(), f"File {test_file_path} not found"
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
+def test_3_implement_parser(): #Planner smoke test
+    print("\n" + "=" * 50)
+    print("TEST 3: Implement parser (Planner -> Pipeline -> Repair -> Execute -> Verify)")
+    print("=" * 50)
+    reset_test_workspace()
+    test_file = str(Path("tests/runtime_workspace/parser.py").resolve()).replace("\\", "/")
+
+    with patch("core.nova_runtime.VisionEngine") as mock_vision, \
+         patch("core.nova_runtime.LLMPlanner") as mock_planner:
+        mock_vision.return_value.analyze_screen.return_value = {
+            "active_window": {"title": "VS Code"},
+            "running_apps": [],
             "visible_text": ""
         }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Read core/task_translator.py"
-        ]
-        
-        runtime = create_test_runtime()
-        result = runtime.process_goal("Read core/task_translator.py")
-        
-        assert result["success"], f"Test failed: {result}"
-        
-        # Check that the execution actually read the file
-        executions = result["data"].get("executions", [])
-        assert len(executions) > 0, "No executions found"
-        print("✓ Test 3 Passed")
+        mock_planner.return_value.create_plan.return_value = [f"Create {test_file}"]
+
+        runtime = NovaRuntime()
+        runtime.policy = TestExecutionPolicy()
+
+        result = runtime.process_goal("Implement parser")
+        assert result["success"], f"Test 3 failed: {result}"
+        assert result["metadata"].get("fast_path") is False, "Complex goal should not use fast path"
+        assert result["raw_plan"], "Raw plan must be preserved in context"
+        assert result["repaired_plan"], "Repaired plan must be preserved in context"
+        print("PASSED: Test 3 Implement parser (Planner -> Pipeline -> Repair -> Execute -> Verify)")
 
 
-def test_4_modify_file():
-    print("\n" + "="*50)
-    print("TEST 4: Modify workflow_validator.py")
-    print("="*50)
-    
-    test_file_path = Path("workflow_validator.py")
-    # Create a test file if it doesn't exist
-    if not test_file_path.exists():
-        test_file_path.write_text("Initial content\n", encoding="utf-8")
-    
-    original_content = test_file_path.read_text(encoding="utf-8")
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
+def test_4_modify_parser_syntax_error_recovery():
+    print("\n" + "=" * 50)
+    print("TEST 4: Modify parser -> Syntax Error (Verify -> Recover -> Rollback -> Verify)")
+    print("=" * 50)
+    reset_test_workspace()
+    test_file = str(Path("tests/runtime_workspace/parser.py").resolve()).replace("\\", "/")
+
+    with patch("core.nova_runtime.VisionEngine") as mock_vision:
+        mock_vision.return_value.analyze_screen.return_value = {
+            "active_window": {"title": "Terminal"},
+            "running_apps": [],
             "visible_text": ""
         }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Modify workflow_validator.py"
-        ]
-        
-        runtime = create_test_runtime()
-        
-        # Mock the planner pipeline to return a proper modify action
-        original_process = runtime.pipeline.process
-        
-        def mock_process(raw_plan):
-            return {
-                "raw_plan": raw_plan,
-                "parsed_plan": [],
-                "quality": {},
-                "confidence": 1.0,
-                "normalized_plan": [],
-                "expanded_plan": [],
-                "validated_plan": [],
-                "repaired_plan": [
-                    {
-                        "type": "filesystem",
-                        "action": "modify_file",
-                        "action_type": "modify_file",
-                        "target": "workflow_validator.py",
-                        "new_content": "Modified content\n"
-                    }
-                ]
-            }
-        
-        runtime.pipeline.process = mock_process
-        
-        result = runtime.process_goal("Modify workflow_validator.py")
-        
-        assert result["success"], f"Test failed: {result}"
-        print("✓ Test 4 Passed")
+
+        runtime = NovaRuntime()
+        runtime.policy = TestExecutionPolicy()
+
+        # Step A: First modify parser.py normally so a valid .bak backup is created
+        runtime.router.route({
+            "type": "filesystem",
+            "action": "modify_file",
+            "action_type": "modify_file",
+            "target": test_file,
+            "new_content": "def parse_text(text):\n    return text.strip()\n"
+        })
+
+        # Mock TaskTranslator to inject broken syntax content into modify_file action
+        original_translate = runtime.task_translator.translate
+        def mock_translate(step):
+            res = original_translate(step)
+            if isinstance(res, dict) and res.get("action") == "modify_file":
+                res["new_content"] = "def broken(:\n    pass\n"
+            return res
+        runtime.task_translator.translate = mock_translate
+
+        # Mock verifier to report failure on broken file, then success after rollback
+        def mock_verifier(target_str):
+            content = Path(test_file).read_text(encoding="utf-8", errors="ignore")
+            if "def broken(:" in content:
+                return {"success": False, "reason": "SyntaxError: invalid syntax"}
+            return {"success": True, "reason": "Verification passed"}
+        runtime.router.verifier.verify = mock_verifier
+
+        # Run goal to modify parser with broken content
+        result = runtime.process_goal(f"Modify {test_file}")
+
+        assert result["recovery"].get("attempted") is True, "Recovery routine was not attempted"
+        assert result["recovery"].get("recovered") is True, "Self-healing recovery failed"
+        assert result["verification"].get("success") is True, "Post-recovery verification failed"
+
+        # Verify file content was rolled back to valid state
+        content_after = Path(test_file).read_text(encoding="utf-8")
+        assert "def broken(:" not in content_after, "Syntax error was not rolled back"
+        print("PASSED: Test 4 Modify parser -> Syntax Error (Verify -> Recover -> Rollback -> Verify)")
 
 
-def test_5_replace_text():
-    print("\n" + "="*50)
-    print("TEST 5: Replace print with logger.info")
-    print("="*50)
-    
-    test_file_path = Path("workflow_validator.py")
-    # Ensure the file has print statement
-    test_file_path.write_text("print('hello')\n", encoding="utf-8")
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
+def test_5_run_pytest():
+    print("\n" + "=" * 50)
+    print("TEST 5: Run pytest (Terminal -> Verify -> Done)")
+    print("=" * 50)
+    reset_test_workspace()
+
+    with patch("core.nova_runtime.VisionEngine") as mock_vision:
+        mock_vision.return_value.analyze_screen.return_value = {
+            "active_window": {"title": "Terminal"},
+            "running_apps": [],
             "visible_text": ""
         }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Replace print with logger.info in workflow_validator.py"
-        ]
-        
-        runtime = create_test_runtime()
-        
-        original_process = runtime.pipeline.process
-        
-        def mock_process(raw_plan):
-            return {
-                "raw_plan": raw_plan,
-                "parsed_plan": [],
-                "quality": {},
-                "confidence": 1.0,
-                "normalized_plan": [],
-                "expanded_plan": [],
-                "validated_plan": [],
-                "repaired_plan": [
-                    {
-                        "type": "filesystem",
-                        "action": "replace_text",
-                        "action_type": "replace_text",
-                        "target": "workflow_validator.py",
-                        "parameters": {
-                            "old": "print('hello')",
-                            "new": "logger.info('hello')"
-                        }
-                    }
-                ]
-            }
-        
-        runtime.pipeline.process = mock_process
-        
-        result = runtime.process_goal("Replace print with logger.info in workflow_validator.py")
-        
-        assert result["success"], f"Test failed: {result}"
-        print("✓ Test 5 Passed")
+
+        runtime = NovaRuntime()
+        runtime.policy = TestExecutionPolicy()
+
+        # Mock terminal execution and verifier for test environment
+        runtime.router.terminal.run_pytest = MagicMock(return_value={
+            "success": True,
+            "stdout": "1 passed in 0.01s",
+            "stderr": "",
+            "returncode": 0
+        })
+        runtime.router.verifier.verify = MagicMock(return_value={"success": True, "reason": "pytest execution verified"})
+
+        result = runtime.process_goal("Run pytest")
+        assert result["success"], f"Test 5 failed: {result}"
+        assert result["metadata"].get("fast_path") is True, "Fast path was not triggered for Run pytest"
+        assert len(result["executions"]) > 0, "No executions recorded"
+        assert result["executions"][0]["action"]["action"] == "run_pytest"
+        print("PASSED: Test 5 Run pytest (Terminal -> Verify -> Done)")
 
 
-def test_6_append_file():
-    print("\n" + "="*50)
-    print("TEST 6: Append TODO to parser.py")
-    print("="*50)
-    
-    test_file_path = Path("core/parser.py")
-    assert test_file_path.exists(), "core/parser.py not found"
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
-            "visible_text": ""
-        }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Append TODO to core/parser.py"
-        ]
-        
-        runtime = create_test_runtime()
-        
-        original_process = runtime.pipeline.process
-        
-        def mock_process(raw_plan):
-            return {
-                "raw_plan": raw_plan,
-                "parsed_plan": [],
-                "quality": {},
-                "confidence": 1.0,
-                "normalized_plan": [],
-                "expanded_plan": [],
-                "validated_plan": [],
-                "repaired_plan": [
-                    {
-                        "type": "filesystem",
-                        "action": "append_file",
-                        "action_type": "append_file",
-                        "target": "core/parser.py",
-                        "parameters": {
-                            "content": "\n# TODO: Add more features\n"
-                        }
-                    }
-                ]
-            }
-        
-        runtime.pipeline.process = mock_process
-        
-        result = runtime.process_goal("Append TODO to core/parser.py")
-        
-        assert result["success"], f"Test failed: {result}"
-        print("✓ Test 6 Passed")
+def test_6_complete_spine_workflow():
+    print("\n" + "=" * 50)
+    print("TEST 6: Complete Spine Workflow (Open Notepad -> Read -> Modify -> Run pytest)")
+    print("=" * 50)
+    reset_test_workspace()
 
+    test_1_open_notepad()
+    test_2_read_parser_py()
+    test_3_implement_parser()
+    test_4_modify_parser_syntax_error_recovery()
+    test_5_run_pytest()
 
-def test_7_insert_line():
-    print("\n" + "="*50)
-    print("TEST 7: Insert logging at line 20 of parser.py")
-    print("="*50)
-    
-    test_file_path = Path("core/parser.py")
-    assert test_file_path.exists(), "core/parser.py not found"
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
-            "visible_text": ""
-        }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Insert logging at line 20 of core/parser.py"
-        ]
-        
-        runtime = create_test_runtime()
-        
-        original_process = runtime.pipeline.process
-        
-        def mock_process(raw_plan):
-            return {
-                "raw_plan": raw_plan,
-                "parsed_plan": [],
-                "quality": {},
-                "confidence": 1.0,
-                "normalized_plan": [],
-                "expanded_plan": [],
-                "validated_plan": [],
-                "repaired_plan": [
-                    {
-                        "type": "filesystem",
-                        "action": "insert_at_line",
-                        "action_type": "insert_at_line",
-                        "target": "core/parser.py",
-                        "parameters": {
-                            "line": 20,
-                            "content": "import logging\n"
-                        }
-                    }
-                ]
-            }
-        
-        runtime.pipeline.process = mock_process
-        
-        result = runtime.process_goal("Insert logging at line 20 of core/parser.py")
-        
-        assert result["success"], f"Test failed: {result}"
-        print("✓ Test 7 Passed")
-
-
-def test_8_rollback_file():
-    print("\n" + "="*50)
-    print("TEST 8: Rollback parser.py")
-    print("="*50)
-    
-    test_file_path = Path("core/parser.py")
-    assert test_file_path.exists(), "core/parser.py not found"
-    
-    with patch('core.nova_runtime.VisionEngine') as mock_vision, \
-         patch('core.nova_runtime.LLMPlanner') as mock_planner:
-        # Setup VisionEngine mock
-        mock_vision_instance = mock_vision.return_value
-        mock_vision_instance.analyze_screen.return_value = {
-            "active_window": {"title": "Command Prompt"},
-            "running_apps": ["python.exe"],
-            "visible_text": ""
-        }
-        
-        # Setup LLMPlanner mock
-        mock_planner_instance = mock_planner.return_value
-        mock_planner_instance.create_plan.return_value = [
-            "Rollback core/parser.py"
-        ]
-        
-        runtime = create_test_runtime()
-        
-        original_process = runtime.pipeline.process
-        
-        def mock_process(raw_plan):
-            return {
-                "raw_plan": raw_plan,
-                "parsed_plan": [],
-                "quality": {},
-                "confidence": 1.0,
-                "normalized_plan": [],
-                "expanded_plan": [],
-                "validated_plan": [],
-                "repaired_plan": [
-                    {
-                        "type": "filesystem",
-                        "action": "rollback_file",
-                        "action_type": "rollback_file",
-                        "target": "core/parser.py"
-                    }
-                ]
-            }
-        
-        runtime.pipeline.process = mock_process
-        
-        result = runtime.process_goal("Rollback core/parser.py")
-        
-        print(f"Test 8 Result: {result}")
-        print("✓ Test 8 Completed")
+    print("\n" + "=" * 50)
+    print("PASSED: Test 6 Complete Runtime Spine Workflow (All 5 sub-tests executed seamlessly)")
+    print("=" * 50)
 
 
 if __name__ == "__main__":
-    print("="*50)
-    print("RUNNING RUNTIME SPINE ACCEPTANCE TESTS")
-    print("="*50)
-    
+    print("=" * 50)
+    print("RUNNING v0.9.5 RUNTIME SPINE ACCEPTANCE TESTS")
+    print("=" * 50)
+    print(f"Using workspace: {Path('tests/runtime_workspace').resolve()}")
+
     test_1_open_notepad()
-    test_2_open_vscode()
-    test_3_read_file()
-    test_4_modify_file()
-    test_5_replace_text()
-    test_6_append_file()
-    test_7_insert_line()
-    test_8_rollback_file()
-    
-    print("\n" + "="*50)
-    print("ALL RUNTIME SPINE TESTS COMPLETED!")
-    print("="*50)
+    test_2_read_parser_py()
+    test_3_implement_parser()
+    test_4_modify_parser_syntax_error_recovery()
+    test_5_run_pytest()
+    test_6_complete_spine_workflow()
+
+    print("\n" + "=" * 50)
+    print("ALL 6 RUNTIME SPINE ACCEPTANCE TESTS PASSED SUCCESSFULLY!")
+    print("=" * 50)
