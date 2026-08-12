@@ -711,7 +711,11 @@ def voice_wake_worker(spine, ui_queue, command_queue):
     try:
         from core.wake_local import LocalWake, WakeKeyMonitor
         if wake_cls is not None:
-            wake_engine = LocalWake()
+            wake_engine = LocalWake(
+            wakeword_models=["hey_jarvis"],
+            inference_framework="onnx",
+            threshold=0.35,
+        )
         else:
             wake_engine = None
         key_monitor = WakeKeyMonitor(key_name="v")
