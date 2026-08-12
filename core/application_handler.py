@@ -89,6 +89,37 @@ class ApplicationHandler:
 
                 }
 
+            elif app_name in {"chrome", "edge"}:
+
+                browser_executable = "chrome.exe" if app_name == "chrome" else "msedge.exe"
+                browser_paths = [
+                    browser_executable,
+                    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+                ]
+
+                for path in browser_paths:
+                    if os.path.exists(path):
+                        subprocess.Popen(path)
+                        return {
+                            "success": True,
+                            "action": f"open {app_name}"
+                        }
+
+                try:
+                    subprocess.Popen(browser_executable)
+                    return {
+                        "success": True,
+                        "action": f"open {app_name}"
+                    }
+                except Exception as exc:
+                    return {
+                        "success": False,
+                        "reason": str(exc)
+                    }
+
             else:
 
                 return {

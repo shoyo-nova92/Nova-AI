@@ -1,7 +1,7 @@
 {
     "open_app:vscode": {
-        "usage_count": 28,
-        "success_count": 28
+        "usage_count": 33,
+        "success_count": 33
     },
     "open_terminal": {
         "usage_count": 4,
@@ -32,19 +32,19 @@
         "success_count": 1
     },
     "create_file:workflow_validator.py": {
-        "usage_count": 17,
-        "success_count": 17
+        "usage_count": 18,
+        "success_count": 18
     },
     "read_file:core/task_translator.py": {
         "usage_count": 9,
         "success_count": 9
     },
     "read_file:workflow_validator.py": {
-        "usage_count": 1,
-        "success_count": 1
+        "usage_count": 2,
+        "success_count": 2
     },
     "read_file:context_fusion_engine.py": {
-        "usage_count": 1,
+        "usage_count": 2,
         "success_count": 0
     },
     "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp5vjkofum\\sample.txt": {
@@ -168,8 +168,8 @@
         "success_count": 2
     },
     "build_project:python -m compileall .": {
-        "usage_count": 34,
-        "success_count": 33
+        "usage_count": 40,
+        "success_count": 39
     },
     "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py": {
         "usage_count": 1,
@@ -192,36 +192,36 @@
         "success_count": 1
     },
     "git_add:.": {
-        "usage_count": 22,
-        "success_count": 21
+        "usage_count": 24,
+        "success_count": 23
     },
     "git_commit:feat: test commit": {
-        "usage_count": 22,
+        "usage_count": 26,
         "success_count": 0
     },
     "git_checkout:-b feature-test": {
-        "usage_count": 22,
+        "usage_count": 26,
         "success_count": 0
     },
     "git_pull": {
-        "usage_count": 22,
-        "success_count": 22
+        "usage_count": 26,
+        "success_count": 26
     },
     "git_push": {
-        "usage_count": 22,
-        "success_count": 22
+        "usage_count": 26,
+        "success_count": 26
     },
     "read_file:parser.py": {
         "usage_count": 2,
         "success_count": 0
     },
     "run_pytest": {
-        "usage_count": 20,
-        "success_count": 14
+        "usage_count": 25,
+        "success_count": 18
     },
     "open_app:notepad": {
-        "usage_count": 31,
-        "success_count": 27
+        "usage_count": 39,
+        "success_count": 35
     },
     "modify_file:workflow_validator.py": {
         "usage_count": 1,
@@ -280,7 +280,7 @@
         "success_count": 0
     },
     "open_app:fakeapp": {
-        "usage_count": 10,
+        "usage_count": 13,
         "success_count": 0
     },
     "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmptk1fe43p\\parser.py": {
@@ -308,8 +308,8 @@
         "success_count": 1
     },
     "modify_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 37,
-        "success_count": 9
+        "usage_count": 45,
+        "success_count": 11
     },
     "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzf_mel4h\\notes.txt": {
         "usage_count": 1,
@@ -584,15 +584,95 @@
         "success_count": 0
     },
     "read_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 15,
-        "success_count": 15
+        "usage_count": 19,
+        "success_count": 19
     },
     "create_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 15,
-        "success_count": 15
+        "usage_count": 19,
+        "success_count": 19
     },
     "rollback_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 16,
-        "success_count": 16
+        "usage_count": 20,
+        "success_count": 20
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxnwg0e84\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmppmwx19_l\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp0so1f5r8\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp8_go5viy\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6vkeoeuc\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpvy44fi9f\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpopcmotc8\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpl4t5099x\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp20k8_xph\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmptqgo3o5e\\workflow_validator.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "read_file:tests/runtime_workspace/parser.py": {
+        "usage_count": 4,
+        "success_count": 4
+    },
+    "build_project": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmphzjav53_\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmph_fpc6xj\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpakla6tdb\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "create_file:test.txt": {
+        "usage_count": 2,
+        "success_count": 1
+    },
+    "rollback_file:test.txt": {
+        "usage_count": 3,
+        "success_count": 0
+    },
+    "null": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "open_app:chrome": {
+        "usage_count": 8,
+        "success_count": 8
+    },
+    "open_app:calculator": {
+        "usage_count": 2,
+        "success_count": 0
     }
 }

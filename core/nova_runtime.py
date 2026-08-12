@@ -62,13 +62,74 @@ class NovaRuntime:
         self.recovery_engine = RecoveryEngine()
         self.learning_engine = None
 
+    def _dispatch_goal(self, goal):
+        normalized_goal = (goal or "").strip().lower()
+
+        runtime_command_keywords = {
+            "exit",
+            "quit",
+            "stop",
+            "cancel",
+            "clear",
+            "help",
+        }
+
+        conversation_phrases = {
+            "hi",
+            "hello",
+            "hey",
+            "thanks",
+            "thank you",
+            "how are you",
+        }
+
+        if normalized_goal in runtime_command_keywords:
+            return {
+                "route": "runtime_command",
+                "response": "runtime command handled",
+            }
+
+        if normalized_goal in conversation_phrases or normalized_goal.startswith(("hi ", "hello ", "hey ", "thanks ", "thank you ")):
+            return {
+                "route": "conversation",
+                "response": "Hello! How can I help?",
+            }
+
+        return {
+            "route": "default",
+            "response": None,
+        }
+
     def process_goal(self, goal):
         self.current_goal = goal
+        normalized_goal = (goal or "").strip().lower()
         ctx = RuntimeContext(goal=goal)
         self.ctx = ctx
 
         self.trace.start_trace(goal)
         self._log("OBSERVE", f"Starting runtime orchestration for goal: {goal}")
+
+        dispatch = self._dispatch_goal(goal)
+        route = dispatch.get("route")
+
+        if route == "runtime_command":
+            ctx.status = "COMPLETED"
+            ctx.metadata["runtime_command"] = True
+            ctx.metadata["exit_requested"] = normalized_goal in {"exit", "quit"}
+            ctx.metadata["response"] = dispatch.get("response")
+            ctx.verification = {"success": True, "reason": dispatch.get("response")}
+            self._log("DISPATCH", f"Runtime command routed without planner: {goal}")
+            self._finalize(ctx.to_dict())
+            return ctx.to_dict()
+
+        if route == "conversation":
+            ctx.status = "COMPLETED"
+            ctx.metadata["conversation"] = True
+            ctx.metadata["response"] = dispatch.get("response")
+            ctx.verification = {"success": True, "reason": dispatch.get("response")}
+            self._log("DISPATCH", f"Conversation response returned without planner: {goal}")
+            self._finalize(ctx.to_dict())
+            return ctx.to_dict()
 
         ctx = self._observe(ctx)
         ctx = self._build_context(ctx)
@@ -176,20 +237,26 @@ class NovaRuntime:
         ctx.executions = []
 
         for action in plan_to_execute:
-            self._log("EXECUTE", f"Executing action: {action}")
-            policy = self.policy.classify(action)
+            normalized_action = action
+            if not isinstance(action, dict):
+                translated_action = self.task_translator.translate(str(action))
+                if isinstance(translated_action, dict) and translated_action.get("action"):
+                    normalized_action = translated_action
+
+            self._log("EXECUTE", f"Executing action: {normalized_action}")
+            policy = self.policy.classify(normalized_action)
 
             if policy.get("allowed"):
-                execution_result = self.router.route(action)
+                execution_result = self.router.route(normalized_action)
             else:
                 execution_result = {
                     "success": False,
                     "reason": policy.get("reason", "policy blocked action"),
-                    "action": action.get("action") if isinstance(action, dict) else str(action),
+                    "action": normalized_action.get("action") if isinstance(normalized_action, dict) else str(normalized_action),
                 }
 
             execution_entry = {
-                "action": action,
+                "action": normalized_action,
                 "policy": policy,
                 "result": execution_result,
             }

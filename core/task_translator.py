@@ -218,6 +218,21 @@ class TaskTranslator:
 
             }
 
+        generic_open_match = re.search(
+            r"\b(?:open|launch|start|focus)\s+([\w\s.-]+)",
+            normalized_step,
+            re.IGNORECASE
+        )
+        if generic_open_match:
+            target = self._clean_target(generic_open_match.group(1))
+            if target in {"notepad", "calculator", "vscode", "vs code", "visual studio code", "chrome", "edge"}:
+                return {
+                    "type": "application",
+                    "action": "open_app",
+                    "action_type": "open_app",
+                    "target": "vscode" if target in {"vscode", "vs code", "visual studio code"} else target
+                }
+
         # Open Notepad phrases
         notepad_open_phrases = [
             "open notepad",

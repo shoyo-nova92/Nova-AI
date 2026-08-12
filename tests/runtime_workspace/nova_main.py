@@ -9,7 +9,7 @@ from core.parser import IntentParser
 from core.executor import Executor
 from core.logger import NovaLogger
 from core.voice import VoiceEngine
-from core.wake_local import LocalWake
+from core.wake_local import LocalWake, WakeKeyMonitor
 
 
 SESSION_TIMEOUT = 300  # 5 min
@@ -45,7 +45,7 @@ def should_exit(command):
         "terminate"
     ]
 
-    command = command.lower()
+    command = command.lower().strip()
 
     return any(trigger in command for trigger in triggers)
 
@@ -131,41 +131,38 @@ def voice_loop(
     logger,
     voice,
     wake,
+    key_monitor,
     session
 ):
     while True:
         try:
-            # sleep mode
-            if not session.active:
+            if not key_monitor.is_held():
                 orb.set_state("Idle", (0, 120, 255))
+                time.sleep(0.1)
+                continue
 
-                wake_text = wake.listen_for_nova()
+            orb.set_state("Wake listening", (0, 220, 120))
+            wake_text = wake.listen_for_nova()
 
-                if wake_text:
-                    session.activate()
-
-                    orb.set_state(
-                        "Listening",
-                        (0, 220, 120)
-                    )
-
-                    voice.speak("Yes?")
+            if wake_text:
+                session.activate()
+                orb.set_state(
+                    "Listening",
+                    (0, 220, 120)
+                )
+                voice.speak("Yes?")
 
             else:
-                # auto sleep
+                orb.set_state("Idle", (0, 120, 255))
+
+            if session.active:
                 if session.should_sleep():
                     session.sleep()
-
-                    orb.set_state(
-                        "Idle",
-                        (0, 120, 255)
-                    )
-
+                    orb.set_state("Idle", (0, 120, 255))
                     voice.speak("Going to sleep")
                     continue
 
                 command = voice.listen()
-
                 process_command(
                     command,
                     orb,
@@ -193,6 +190,7 @@ def main():
     logger = NovaLogger()
     voice = VoiceEngine()
     wake = LocalWake()
+    key_monitor = WakeKeyMonitor(key_name="v")
 
     session = NovaSession()
 
@@ -219,6 +217,7 @@ def main():
             logger,
             voice,
             wake,
+            key_monitor,
             session
         ),
         daemon=True

@@ -2,22 +2,24 @@ class ReasoningEngine:
 
     def analyze_context(self, vision_data):
 
-        active_window = (
-            vision_data["active_window"]["title"]
-        ).lower()
+        if not vision_data:
+            vision_data = {}
+
+        active_window_block = vision_data.get("active_window", {})
+        if isinstance(active_window_block, dict):
+            active_window = str(active_window_block.get("title") or active_window_block.get("name") or "unknown").lower()
+        else:
+            active_window = str(active_window_block or "unknown").lower()
 
         ocr_data = vision_data.get("visible_text", "")
-
         visible_text = ""
 
-        if (
-            isinstance(ocr_data, dict)
-            and "text" in ocr_data
-        ):
-
-            visible_text = " ".join(
-                [str(x) for x in ocr_data["text"]]
-            ).lower()
+        if isinstance(ocr_data, dict) and "text" in ocr_data:
+            visible_text = " ".join([str(x) for x in ocr_data["text"]]).lower()
+        elif isinstance(ocr_data, dict):
+            visible_text = " ".join([str(value) for value in ocr_data.values()]).lower()
+        else:
+            visible_text = str(ocr_data or "").lower()
 
         combined_context = (
             active_window + " " + visible_text

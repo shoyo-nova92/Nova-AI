@@ -7,17 +7,25 @@ class ContextFusionEngine:
         memory_data=None
     ):
 
-        active_window = (
-            vision_data["active_window"]["title"]
-        )
+        if not vision_data:
+            vision_data = {}
 
-        visible_text = (
-            vision_data["visible_text"]
-        )
+        window_block = vision_data.get("active_window", {})
+        if isinstance(window_block, dict):
+            active_window = window_block.get("title") or window_block.get("name") or "unknown"
+        else:
+            active_window = str(window_block or "unknown")
 
-        activity = (
-            reasoning_data["current_activity"]
-        )
+        visible_text = vision_data.get("visible_text", {})
+        if isinstance(visible_text, dict) and "text" in visible_text:
+            visible_text = visible_text.get("text", [])
+            visible_text = " ".join(str(item) for item in visible_text)
+        elif isinstance(visible_text, dict):
+            visible_text = " ".join(str(value) for value in visible_text.values())
+        else:
+            visible_text = str(visible_text or "")
+
+        activity = reasoning_data.get("current_activity", "unknown") if reasoning_data else "unknown"
 
         combined_text = (
             str(active_window) +

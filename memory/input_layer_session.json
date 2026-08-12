@@ -1,0 +1,206 @@
+{
+  "session_id": "20260802T171736Z",
+  "turns": [
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:17:38.042260+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hey nova",
+      "received_at": "2026-08-02T17:19:25.780808+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:19:29.134223+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hello",
+      "received_at": "2026-08-02T17:19:32.217525+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:19:33.536336+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:19:40.358965+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:31:44.192369+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chomre",
+      "received_at": "2026-08-02T17:33:00.785965+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:33:12.414400+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hello nova",
+      "received_at": "2026-08-02T17:33:25.980806+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:33:35.841569+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:38:54.555417+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:40:17.613680+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hey",
+      "received_at": "2026-08-02T17:40:24.822212+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:40:32.174436+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:44:58.130508+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:46:55.876443+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hey nova",
+      "received_at": "2026-08-02T17:47:33.670579+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open notepad",
+      "received_at": "2026-08-02T17:47:42.910068+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:48:08.432812+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open calc",
+      "received_at": "2026-08-02T17:48:23.168423+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open calculator",
+      "received_at": "2026-08-02T17:48:31.853474+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:48:39.368668+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:52:51.497501+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hey nova",
+      "received_at": "2026-08-02T17:54:00.328697+00:00"
+    },
+    {
+      "source": "text",
+      "command": "what am i working on",
+      "received_at": "2026-08-02T17:54:24.869089+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:54:32.312888+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:54:43.204716+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open crhome",
+      "received_at": "2026-08-02T17:55:47.756088+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-02T17:55:56.839088+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-02T17:57:14.513218+00:00"
+    },
+    {
+      "source": "text",
+      "command": "what am i working on",
+      "received_at": "2026-08-02T17:58:26.416239+00:00"
+    },
+    {
+      "source": "text",
+      "command": "hey nova",
+      "received_at": "2026-08-04T07:19:53.792374+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-04T07:20:10.201591+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open calculator",
+      "received_at": "2026-08-04T07:20:28.115585+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome",
+      "received_at": "2026-08-12T06:07:37.119058+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open vscode",
+      "received_at": "2026-08-12T06:07:43.495404+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open calc",
+      "received_at": "2026-08-12T06:07:52.228507+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open calculator",
+      "received_at": "2026-08-12T06:07:55.638115+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-12T06:08:04.256831+00:00"
+    }
+  ],
+  "created_at": "2026-08-02T17:17:36.028503+00:00"
+}

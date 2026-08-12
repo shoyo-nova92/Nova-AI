@@ -4787,5 +4787,1085 @@
             "duration": 0.0,
             "state": "completed"
         }
+    },
+    {
+        "event_id": 480,
+        "timestamp": "2026-08-01 22:57:36.000434",
+        "event_type": "execution_failure",
+        "goal": "read_file context_fusion_engine.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 481,
+        "timestamp": "2026-08-01 22:57:38.158660",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxnwg0e84\\notes.txt",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 482,
+        "timestamp": "2026-08-01 22:57:43.912300",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmppmwx19_l\\notes.txt",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 483,
+        "timestamp": "2026-08-01 22:58:05.541490",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.08,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 484,
+        "timestamp": "2026-08-01 22:58:07.273108",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.09,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 485,
+        "timestamp": "2026-08-01 22:59:40.111194",
+        "event_type": "execution_failure",
+        "goal": "open_app fakeapp",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 486,
+        "timestamp": "2026-08-01 22:59:40.219629",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.04,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 487,
+        "timestamp": "2026-08-01 22:59:42.415213",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp0so1f5r8\\parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 488,
+        "timestamp": "2026-08-01 22:59:49.018673",
+        "event_type": "execution_failure",
+        "goal": "git_checkout -b feature-test",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 489,
+        "timestamp": "2026-08-01 22:59:51.925260",
+        "event_type": "execution_failure",
+        "goal": "git_checkout -b feature-test",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 490,
+        "timestamp": "2026-08-01 22:59:52.506355",
+        "event_type": "execution_failure",
+        "goal": "git_commit feat: test commit",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 491,
+        "timestamp": "2026-08-01 22:59:55.180182",
+        "event_type": "execution_failure",
+        "goal": "git_commit feat: test commit",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 492,
+        "timestamp": "2026-08-01 22:59:56.984155",
+        "event_type": "execution_success",
+        "goal": "git_pull None",
+        "details": {
+            "duration": 0.15,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 493,
+        "timestamp": "2026-08-01 23:00:00.243978",
+        "event_type": "execution_success",
+        "goal": "git_pull None",
+        "details": {
+            "duration": 0.14,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 494,
+        "timestamp": "2026-08-01 23:00:01.491996",
+        "event_type": "execution_success",
+        "goal": "git_push None",
+        "details": {
+            "duration": 0.07,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 495,
+        "timestamp": "2026-08-01 23:00:03.780958",
+        "event_type": "execution_success",
+        "goal": "git_push None",
+        "details": {
+            "duration": 0.09,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 496,
+        "timestamp": "2026-08-01 23:00:05.141328",
+        "event_type": "execution_failure",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 149.06,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 497,
+        "timestamp": "2026-08-01 23:00:05.202944",
+        "event_type": "execution_success",
+        "goal": "read_file workflow_validator.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 498,
+        "timestamp": "2026-08-01 23:00:07.387926",
+        "event_type": "execution_success",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp8_go5viy\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 499,
+        "timestamp": "2026-08-01 23:00:14.214420",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6vkeoeuc\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 500,
+        "timestamp": "2026-08-01 23:00:35.648886",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.07,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 501,
+        "timestamp": "2026-08-01 23:00:37.188518",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.08,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 502,
+        "timestamp": "2026-08-01 23:02:15.528908",
+        "event_type": "execution_failure",
+        "goal": "open_app fakeapp",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 503,
+        "timestamp": "2026-08-01 23:02:15.597817",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 504,
+        "timestamp": "2026-08-01 23:02:17.236486",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpvy44fi9f\\parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 505,
+        "timestamp": "2026-08-01 23:02:23.829803",
+        "event_type": "execution_failure",
+        "goal": "git_checkout -b feature-test",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 506,
+        "timestamp": "2026-08-01 23:02:26.031334",
+        "event_type": "execution_failure",
+        "goal": "git_checkout -b feature-test",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 507,
+        "timestamp": "2026-08-01 23:02:26.551715",
+        "event_type": "execution_failure",
+        "goal": "git_commit feat: test commit",
+        "details": {
+            "duration": 0.04,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 508,
+        "timestamp": "2026-08-01 23:02:28.258072",
+        "event_type": "execution_failure",
+        "goal": "git_commit feat: test commit",
+        "details": {
+            "duration": 0.03,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 509,
+        "timestamp": "2026-08-01 23:02:29.847491",
+        "event_type": "execution_success",
+        "goal": "git_pull None",
+        "details": {
+            "duration": 0.15,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 510,
+        "timestamp": "2026-08-01 23:02:32.052396",
+        "event_type": "execution_success",
+        "goal": "git_pull None",
+        "details": {
+            "duration": 0.14,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 511,
+        "timestamp": "2026-08-01 23:02:33.151185",
+        "event_type": "execution_success",
+        "goal": "git_push None",
+        "details": {
+            "duration": 0.07,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 512,
+        "timestamp": "2026-08-01 23:02:35.152441",
+        "event_type": "execution_success",
+        "goal": "git_push None",
+        "details": {
+            "duration": 0.07,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 513,
+        "timestamp": "2026-08-01 23:02:35.253069",
+        "event_type": "execution_success",
+        "goal": "git_add .",
+        "details": {
+            "duration": 0.04,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 514,
+        "timestamp": "2026-08-01 23:02:36.818029",
+        "event_type": "execution_success",
+        "goal": "git_add .",
+        "details": {
+            "duration": 0.05,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 515,
+        "timestamp": "2026-08-01 23:02:36.950207",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpopcmotc8\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 516,
+        "timestamp": "2026-08-01 23:02:38.504495",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpl4t5099x\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 517,
+        "timestamp": "2026-08-01 23:02:38.583993",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 518,
+        "timestamp": "2026-08-01 23:02:38.638811",
+        "event_type": "plan_success",
+        "goal": "Improve OCR performance",
+        "details": {
+            "plan_steps": 5,
+            "verification": true
+        }
+    },
+    {
+        "event_id": 519,
+        "timestamp": "2026-08-01 23:02:38.731374",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp20k8_xph\\sample.txt",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 520,
+        "timestamp": "2026-08-01 23:02:41.187610",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmptqgo3o5e\\workflow_validator.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 521,
+        "timestamp": "2026-08-01 23:02:46.470580",
+        "event_type": "execution_success",
+        "goal": "create_file workflow_validator.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 522,
+        "timestamp": "2026-08-01 23:10:56.409208",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.04,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 523,
+        "timestamp": "2026-08-01 23:11:15.753828",
+        "event_type": "execution_success",
+        "goal": "read_file tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 524,
+        "timestamp": "2026-08-01 23:11:32.467694",
+        "event_type": "execution_success",
+        "goal": "read_file tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 525,
+        "timestamp": "2026-08-01 23:15:07.151329",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 526,
+        "timestamp": "2026-08-01 23:15:07.218040",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 527,
+        "timestamp": "2026-08-01 23:15:07.269683",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 528,
+        "timestamp": "2026-08-01 23:15:07.417281",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 529,
+        "timestamp": "2026-08-01 23:15:07.472264",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 530,
+        "timestamp": "2026-08-01 23:15:07.526144",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 531,
+        "timestamp": "2026-08-01 23:15:07.590493",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 532,
+        "timestamp": "2026-08-01 23:15:07.662857",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 533,
+        "timestamp": "2026-08-01 23:15:07.718266",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 534,
+        "timestamp": "2026-08-01 23:15:07.776687",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 535,
+        "timestamp": "2026-08-01 23:15:07.839249",
+        "event_type": "execution_success",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 536,
+        "timestamp": "2026-08-01 23:15:07.901467",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 537,
+        "timestamp": "2026-08-01 23:15:07.950861",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 538,
+        "timestamp": "2026-08-01 23:15:08.008871",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 539,
+        "timestamp": "2026-08-01 23:20:41.592884",
+        "event_type": "execution_failure",
+        "goal": "build_project None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 540,
+        "timestamp": "2026-08-01 23:20:41.640930",
+        "event_type": "execution_failure",
+        "goal": "build_project None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 541,
+        "timestamp": "2026-08-01 23:21:02.220550",
+        "event_type": "execution_success",
+        "goal": "read_file tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 542,
+        "timestamp": "2026-08-01 23:21:17.255240",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.03,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 543,
+        "timestamp": "2026-08-01 23:21:36.336789",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmphzjav53_\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 544,
+        "timestamp": "2026-08-01 23:21:40.371800",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmph_fpc6xj\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 545,
+        "timestamp": "2026-08-01 23:22:01.986504",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.1,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 546,
+        "timestamp": "2026-08-01 23:22:03.609583",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.1,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 547,
+        "timestamp": "2026-08-01 23:22:20.327268",
+        "event_type": "execution_failure",
+        "goal": "open_app fakeapp",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 548,
+        "timestamp": "2026-08-01 23:22:20.419943",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.02,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 549,
+        "timestamp": "2026-08-01 23:22:22.151451",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpakla6tdb\\parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 550,
+        "timestamp": "2026-08-01 23:34:53.012083",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 551,
+        "timestamp": "2026-08-01 23:34:53.083974",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 552,
+        "timestamp": "2026-08-01 23:34:53.237580",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 553,
+        "timestamp": "2026-08-01 23:34:53.296293",
+        "event_type": "execution_success",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 554,
+        "timestamp": "2026-08-01 23:34:53.354369",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 555,
+        "timestamp": "2026-08-01 23:34:53.405645",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 556,
+        "timestamp": "2026-08-01 23:34:53.469545",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 557,
+        "timestamp": "2026-08-01 23:34:53.532936",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 558,
+        "timestamp": "2026-08-01 23:34:53.591588",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 559,
+        "timestamp": "2026-08-01 23:34:53.653601",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 560,
+        "timestamp": "2026-08-01 23:34:53.715656",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 561,
+        "timestamp": "2026-08-01 23:34:53.774028",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 562,
+        "timestamp": "2026-08-01 23:34:53.826821",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 563,
+        "timestamp": "2026-08-01 23:34:53.881249",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 564,
+        "timestamp": "2026-08-01 23:40:17.699914",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.04,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 565,
+        "timestamp": "2026-08-01 23:41:59.812688",
+        "event_type": "execution_success",
+        "goal": "read_file tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 566,
+        "timestamp": "2026-08-01 23:42:23.710140",
+        "event_type": "execution_failure",
+        "goal": "create_file test.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 567,
+        "timestamp": "2026-08-01 23:42:23.754549",
+        "event_type": "execution_failure",
+        "goal": "rollback_file test.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 568,
+        "timestamp": "2026-08-01 23:42:35.239374",
+        "event_type": "execution_failure",
+        "goal": "rollback_file test.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 569,
+        "timestamp": "2026-08-01 23:42:49.329601",
+        "event_type": "execution_failure",
+        "goal": "rollback_file test.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 570,
+        "timestamp": "2026-08-01 23:45:45.749768",
+        "event_type": "execution_success",
+        "goal": "create_file test.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 571,
+        "timestamp": "2026-08-02 23:15:02.196461",
+        "event_type": "execution_failure",
+        "goal": "None None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 572,
+        "timestamp": "2026-08-02 23:16:15.090812",
+        "event_type": "execution_failure",
+        "goal": "None None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 573,
+        "timestamp": "2026-08-02 23:16:41.600985",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.01,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 574,
+        "timestamp": "2026-08-02 23:17:01.766542",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.01,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 575,
+        "timestamp": "2026-08-02 23:17:46.800063",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.07,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 576,
+        "timestamp": "2026-08-02 23:18:12.692381",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 577,
+        "timestamp": "2026-08-02 23:18:27.094291",
+        "event_type": "execution_failure",
+        "goal": "None None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 578,
+        "timestamp": "2026-08-02 23:18:35.657435",
+        "event_type": "execution_failure",
+        "goal": "open_app calculator",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 579,
+        "timestamp": "2026-08-02 23:22:53.138820",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 580,
+        "timestamp": "2026-08-02 23:24:36.158810",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 581,
+        "timestamp": "2026-08-02 23:25:52.243109",
+        "event_type": "execution_failure",
+        "goal": "None None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 582,
+        "timestamp": "2026-08-02 23:26:01.142856",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 583,
+        "timestamp": "2026-08-04 12:50:16.708199",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.01,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 584,
+        "timestamp": "2026-08-12 11:37:37.378415",
+        "event_type": "execution_success",
+        "goal": "open_app chrome",
+        "details": {
+            "duration": 0.01,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 585,
+        "timestamp": "2026-08-12 11:37:43.736847",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.01,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 586,
+        "timestamp": "2026-08-12 11:37:52.456889",
+        "event_type": "execution_failure",
+        "goal": "None None",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 587,
+        "timestamp": "2026-08-12 11:37:55.887632",
+        "event_type": "execution_failure",
+        "goal": "open_app calculator",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
     }
 ]

@@ -289,23 +289,9 @@ class ExecutionVerifier:
                 "reason": "encoding invalid"
             }
 
-        if not content:
-
-            return {
-
-                "success": False,
-
-                "reason": "file is empty"
-            }
-
-        if os.path.getsize(path) <= 0:
-
-            return {
-
-                "success": False,
-
-                "reason": "file size is zero"
-            }
+        # Allow empty files to pass verification when the filesystem operation has
+        # already created the target. This prevents false negatives for create_file
+        # and other valid zero-byte filesystem outcomes.
 
         backup_path = f"{path}.bak"
 

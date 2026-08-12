@@ -3806,5 +3806,824 @@
         "success": true,
         "duration": 0.0,
         "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 22:57:35.943086",
+        "action": "read_file context_fusion_engine.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "file does not exist"
+    },
+    {
+        "timestamp": "2026-08-01 22:57:38.129915",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxnwg0e84\\notes.txt",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 22:57:43.880071",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmppmwx19_l\\notes.txt",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 22:58:05.518859",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.08,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 22:58:07.248608",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.09,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 22:59:39.947414",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.2,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 22:59:39.969871",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.1,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 22:59:39.989010",
+        "action": "open notepad",
+        "success": false,
+        "duration": 2.5,
+        "failure_reason": "process not found"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:40.076394",
+        "action": "open_app fakeapp",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown app: fakeapp"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:40.182210",
+        "action": "open_app vscode",
+        "success": true,
+        "duration": 0.04,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 22:59:42.380740",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp0so1f5r8\\parser.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:48.992767",
+        "action": "git_checkout -b feature-test",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:51.893139",
+        "action": "git_checkout -b feature-test",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:52.475279",
+        "action": "git_commit feat: test commit",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:55.146791",
+        "action": "git_commit feat: test commit",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 22:59:56.948834",
+        "action": "git_pull None",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:00.211225",
+        "action": "git_pull None",
+        "success": true,
+        "duration": 0.14,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:01.458500",
+        "action": "git_push None",
+        "success": true,
+        "duration": 0.07,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:03.739309",
+        "action": "git_push None",
+        "success": true,
+        "duration": 0.09,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:05.103213",
+        "action": "run_pytest None",
+        "success": false,
+        "duration": 149.06,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 23:00:05.170156",
+        "action": "read_file workflow_validator.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:07.356115",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp8_go5viy\\notes.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:14.188823",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp6vkeoeuc\\notes.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 23:00:35.622066",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.07,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:00:37.158450",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.08,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:15.411533",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.2,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:15.432917",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.1,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:15.451190",
+        "action": "open notepad",
+        "success": false,
+        "duration": 2.5,
+        "failure_reason": "process not found"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:15.498498",
+        "action": "open_app fakeapp",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown app: fakeapp"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:15.562576",
+        "action": "open_app vscode",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:17.199733",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpvy44fi9f\\parser.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:23.800547",
+        "action": "git_checkout -b feature-test",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:26.003412",
+        "action": "git_checkout -b feature-test",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:26.524116",
+        "action": "git_commit feat: test commit",
+        "success": false,
+        "duration": 0.04,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:28.230246",
+        "action": "git_commit feat: test commit",
+        "success": false,
+        "duration": 0.03,
+        "failure_reason": "execution failed"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:29.820824",
+        "action": "git_pull None",
+        "success": true,
+        "duration": 0.15,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:32.026505",
+        "action": "git_pull None",
+        "success": true,
+        "duration": 0.14,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:33.121675",
+        "action": "git_push None",
+        "success": true,
+        "duration": 0.07,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:35.122935",
+        "action": "git_push None",
+        "success": true,
+        "duration": 0.07,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:35.228361",
+        "action": "git_add .",
+        "success": true,
+        "duration": 0.04,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:36.788520",
+        "action": "git_add .",
+        "success": true,
+        "duration": 0.05,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:36.867357",
+        "action": "open notepad",
+        "success": true,
+        "duration": 0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:36.921004",
+        "action": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpopcmotc8\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:38.473207",
+        "action": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpl4t5099x\\parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:38.550803",
+        "action": "open_app vscode",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:02:38.693684",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp20k8_xph\\sample.txt",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "file is empty"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:41.156575",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmptqgo3o5e\\workflow_validator.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "file is empty"
+    },
+    {
+        "timestamp": "2026-08-01 23:02:46.439860",
+        "action": "create_file workflow_validator.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:10:56.378785",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.04,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:11:15.723338",
+        "action": "read_file tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:11:32.441459",
+        "action": "read_file tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.119586",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.186469",
+        "action": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.244743",
+        "action": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.298460",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.443386",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "SyntaxError: invalid syntax"
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.497003",
+        "action": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.556348",
+        "action": "run_pytest None",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.629915",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.689949",
+        "action": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.746873",
+        "action": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.807805",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.870132",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "SyntaxError: invalid syntax"
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.921951",
+        "action": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:15:07.976368",
+        "action": "run_pytest None",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:20:41.562866",
+        "action": "build_project None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "build command is required"
+    },
+    {
+        "timestamp": "2026-08-01 23:20:41.612485",
+        "action": "build_project None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "build command is required"
+    },
+    {
+        "timestamp": "2026-08-01 23:21:02.198122",
+        "action": "read_file tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:21:17.228396",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.03,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:21:36.316642",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmphzjav53_\\notes.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 23:21:40.342985",
+        "action": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmph_fpc6xj\\notes.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 23:22:01.956459",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.1,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:22:03.578321",
+        "action": "build_project python -m compileall .",
+        "success": true,
+        "duration": 0.1,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:22:20.206319",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.2,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:22:20.226645",
+        "action": "open notepad",
+        "success": true,
+        "duration": 1.1,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:22:20.247784",
+        "action": "open notepad",
+        "success": false,
+        "duration": 2.5,
+        "failure_reason": "process not found"
+    },
+    {
+        "timestamp": "2026-08-01 23:22:20.297082",
+        "action": "open_app fakeapp",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown app: fakeapp"
+    },
+    {
+        "timestamp": "2026-08-01 23:22:20.370891",
+        "action": "open_app vscode",
+        "success": true,
+        "duration": 0.02,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:22:22.112310",
+        "action": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpakla6tdb\\parser.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "SyntaxError line 1"
+    },
+    {
+        "timestamp": "2026-08-01 23:34:52.977288",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.050692",
+        "action": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.111485",
+        "action": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.268531",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.324160",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "SyntaxError: invalid syntax"
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.376441",
+        "action": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.437496",
+        "action": "run_pytest None",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.502028",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.560635",
+        "action": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.622212",
+        "action": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.688203",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "modification time not updated"
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.742025",
+        "action": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "SyntaxError: invalid syntax"
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.796004",
+        "action": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:34:53.853052",
+        "action": "run_pytest None",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:40:17.672838",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.04,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:41:59.790641",
+        "action": "read_file tests/runtime_workspace/parser.py",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-01 23:42:23.684016",
+        "action": "create_file test.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "file is empty"
+    },
+    {
+        "timestamp": "2026-08-01 23:42:23.727503",
+        "action": "rollback_file test.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "backup does not exist"
+    },
+    {
+        "timestamp": "2026-08-01 23:42:35.206511",
+        "action": "rollback_file test.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "backup does not exist"
+    },
+    {
+        "timestamp": "2026-08-01 23:42:49.299562",
+        "action": "rollback_file test.txt",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "backup does not exist"
+    },
+    {
+        "timestamp": "2026-08-01 23:45:45.726047",
+        "action": "create_file test.txt",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:15:02.186694",
+        "action": "None None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown action: None:None"
+    },
+    {
+        "timestamp": "2026-08-02 23:16:15.061850",
+        "action": "None None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown action: None:None"
+    },
+    {
+        "timestamp": "2026-08-02 23:16:41.563990",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:17:01.731934",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:17:46.776529",
+        "action": "open_app notepad",
+        "success": true,
+        "duration": 0.07,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:18:12.669249",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:18:27.071060",
+        "action": "None None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown action: None:None"
+    },
+    {
+        "timestamp": "2026-08-02 23:18:35.630983",
+        "action": "open_app calculator",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "calculator process not found."
+    },
+    {
+        "timestamp": "2026-08-02 23:22:53.102066",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:24:36.131650",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-02 23:25:52.217134",
+        "action": "None None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown action: None:None"
+    },
+    {
+        "timestamp": "2026-08-02 23:26:01.113287",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.0,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-04 12:50:16.662704",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-12 11:37:37.359892",
+        "action": "open_app chrome",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-12 11:37:43.693995",
+        "action": "open_app vscode",
+        "success": true,
+        "duration": 0.01,
+        "failure_reason": null
+    },
+    {
+        "timestamp": "2026-08-12 11:37:52.417493",
+        "action": "None None",
+        "success": false,
+        "duration": 0.0,
+        "failure_reason": "Unknown action: None:None"
+    },
+    {
+        "timestamp": "2026-08-12 11:37:55.845713",
+        "action": "open_app calculator",
+        "success": false,
+        "duration": 0.01,
+        "failure_reason": "calculator process not found."
     }
 ]
