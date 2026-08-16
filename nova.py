@@ -16,6 +16,10 @@ from core.context_fusion_engine import ContextFusionEngine
 from core.execution_router import ExecutionRouter
 from core.reasoning_engine import ReasoningEngine
 from core.task_translator import TaskTranslator
+from core.runtime_entrygate import RuntimeEntrygate
+from core.app_search_engine import AppSearchEngine
+from core.conversation_handler import ConversationHandler
+from core.nova_runtime import NovaRuntime
 from ui.orb import NovaOrb
 
 
@@ -332,24 +336,6 @@ class ObservationLayer:
         return snapshot
 
 
-class ConversationHandler:
-    """Handles conversational greeting and small-talk prompt routing."""
-
-    @staticmethod
-    def respond(command: str):
-        if any(keyword in command for keyword in ("hi", "hello", "hey")):
-            return {
-                "branch": "conversation",
-                "status": "handled",
-                "response": "Hello! I am Nova. I am currently in input and observation mode. Tell me what you want me to receive or inspect.",
-            }
-
-        return {
-            "branch": "conversation",
-            "status": "handled",
-            "response": "I am listening. Please provide a command or a goal.",
-        }
-
 
 class UnderstandingHandler:
     """Turns observation into a short understanding answer for status-style queries."""
@@ -496,16 +482,22 @@ class BranchRouter:
 
 
 class NovaRuntimeSpine:
-    """Main stateful owner for Branch 1 through Branch 16 composition."""
+    """Frontend integration layer for Nova.
+    Responsibilities:
+    1. Receive user input
+    2. Send through ONE RuntimeEntrygate for classification
+    3. Execute fast branches directly (open/close/conversation/exit)
+    4. Send complex goals to ONE canonical core.NovaRuntime.process_goal()
+    5. Expose results to UI handle_runtime_result()
+    """
 
     def __init__(self):
         self.input_layer = NovaInputLayer()
-        self.observation_layer = ObservationLayer()
-        self.router = BranchRouter()
-        self.reasoner = ReasoningEngine()
-        self.fuser = ContextFusionEngine()
-        self.translator = TaskTranslator()
-        self.execution_router = ExecutionRouter()
+        self.entrygate = RuntimeEntrygate(
+            app_search_engine=AppSearchEngine(auto_index=True),
+            conversation_handler=ConversationHandler(),
+        )
+        self.nova_runtime = NovaRuntime()
         self.voice_engine = None
         self.state = "PENDING"
 
@@ -527,59 +519,63 @@ class NovaRuntimeSpine:
         if received.get("status") != "received":
             return {"status": received.get("status"), "state": self.state}
 
-        self.state = "OBSERVING"
-        snapshot = self.observation_layer.observe()
+        # Step 0: ONE RuntimeEntrygate — single top-level classification
+        self.state = "ENTRYGATE"
+        command = received.get("command", "")
+        entrygate_result = self.entrygate.process(command)
+        entrygate_action = entrygate_result.get("action", "runtime")
 
-        self.state = "THINKING"
-        reasoning = self.reasoner.analyze_context(snapshot.get("vision") or {"active_window": {"title": "unknown"}, "visible_text": {}})
+        # Fast path: skip planner entirely for open / close / conversation / exit
+        if entrygate_action in {"open", "close", "conversation", "exit"}:
+            self.state = "EXECUTING"
+            execution = {
+                "state": "completed",
+                "execution": {
+                    "success": entrygate_result.get("success", False),
+                    "action": entrygate_action,
+                    "result": entrygate_result.get("result"),
+                },
+                "verification": {
+                    "success": entrygate_result.get("success", True),
+                    "reason": f"entrygate fast-path: {entrygate_action}",
+                },
+            }
+            self.state = "VERIFYING"
+            verification = execution.get("verification")
+            self.state = "LEARNING"
+            return {
+                "status": "handled",
+                "state": "COMPLETED",
+                "received": received,
+                "entrygate": entrygate_result,
+                "category": entrygate_action,
+                "plan": [command],
+                "translated": None,
+                "execution": execution,
+                "verification": verification,
+                "response": entrygate_result.get("response"),
+            }
 
-        self.state = "CONTEXT_FUSION"
-        context = self.fuser.fuse(
-            snapshot.get("vision") or {"active_window": {"title": "unknown"}, "visible_text": {}},
-            reasoning,
-            memory_data={"last_command": received.get("command")}
-        )
+        # Complex goal -> ONE canonical NovaRuntime.process_goal
+        goal = entrygate_result.get("goal") or command or raw_text
+        runtime_result = self.nova_runtime.process_goal(goal)
+        runtime_status = runtime_result.get("status")
+        runtime_category = entrygate_action  # "runtime" from EntryGate
+        self.state = str(runtime_status) if runtime_status else "COMPLETED"
 
-        self.state = "PLANNING"
-        category = CommandClassifier.classify(received.get("command", ""))
-        plan = []
-
-        if category == "open":
-            plan = [received.get("command")]
-        elif category == "conversation":
-            plan = [received.get("command")]
-        elif category == "exit":
-            plan = [received.get("command")]
-        else:
-            plan = [received.get("command")]
-
-        self.state = "TRANSLATING"
-        translated = None
-        for step in plan:
-            translated = self.translator.translate(step)
-            if isinstance(translated, dict) and translated.get("action"):
-                break
-
-        self.state = "EXECUTING"
-        execution = None
-        if category == "open" and isinstance(translated, dict):
-            execution = self.execution_router.route(translated)
-        elif category == "conversation":
-            execution = {"state": "completed", "execution": {"success": True, "action": "conversation"}, "verification": {"success": True, "reason": "conversation handled"}}
-        elif category == "understanding":
-            execution = {"state": "completed", "execution": {"success": True, "action": "understand_context"}, "verification": {"success": True, "reason": "understanding resolved from observation"}}
-        elif category == "exit":
-            execution = {"state": "completed", "execution": {"success": True, "action": "exit"}, "verification": {"success": True, "reason": "runtime command handled"}}
-        else:
-            execution = {"state": "completed", "execution": {"success": True, "action": "received"}, "verification": {"success": True, "reason": "unknown input received"}}
-
-        self.state = "VERIFYING"
-        if execution and isinstance(execution, dict):
-            verification = execution.get("verification") or {"success": True, "reason": "verified"}
-        else:
-            verification = {"success": True, "reason": "verified"}
-
-        self.state = "LEARNING"
+        # Bridge canonical NovaRuntime schema to the UI-layer schema handle_runtime_result expects
+        executions_list = runtime_result.get("executions") or []
+        execution_last = executions_list[-1] if isinstance(executions_list, list) and executions_list else None
+        execution = execution_last if isinstance(execution_last, dict) else {
+            "execution": {"success": runtime_result.get("success", True), "action": "runtime"},
+            "verification": runtime_result.get("verification") or {"success": runtime_result.get("success", True)},
+        }
+        verification = execution.get("verification") if isinstance(execution, dict) else (runtime_result.get("verification") or {"success": True})
+        snapshot = runtime_result.get("vision")
+        context = runtime_result.get("context")
+        reasoning = runtime_result.get("reasoning")
+        plan = runtime_result.get("raw_plan") or [goal]
+        translated = runtime_result.get("validated_plan") or runtime_result.get("repaired_plan") or runtime_result.get("parsed_plan")
         understanding = {
             "activity": reasoning.get("current_activity") if isinstance(reasoning, dict) else None,
             "suggested_actions": reasoning.get("suggested_actions") if isinstance(reasoning, dict) else [],
@@ -588,52 +584,57 @@ class NovaRuntimeSpine:
             "workflow_stage": context.get("workflow_stage") if isinstance(context, dict) else None,
             "environment_summary": context.get("environment_summary") if isinstance(context, dict) else None,
         }
-
-        result = {
+        return {
             "status": "handled",
-            "state": "COMPLETED",
+            "state": runtime_result.get("status", "COMPLETED"),
             "received": received,
             "snapshot": snapshot,
             "reasoning": reasoning,
             "context": context,
             "understanding": understanding,
-            "category": category,
+            "category": runtime_category,
+            "entrygate": entrygate_result,
             "plan": plan,
             "translated": translated,
             "execution": execution,
             "verification": verification,
+            "runtime_result": runtime_result,
         }
-        return result
 
 
 def handle_runtime_result(orb, spine, result):
     status = result.get("status", "unknown")
     category = result.get("category", "unknown")
-    branch = "branch_unknown"
+    entrygate = result.get("entrygate") or {}
+    branch = entrygate.get("branch", "branch_unknown")
 
-    if category == "open":
-        branch = "application_handler"
+    if category == "open" or category == "close":
+        branch = entrygate.get("branch", "application_handler")
     elif category == "conversation":
-        branch = "conversation"
+        branch = entrygate.get("branch", "conversation")
     elif category == "understanding":
         branch = "understanding"
     elif category == "exit":
-        branch = "runtime_command"
+        branch = entrygate.get("branch", "runtime_command")
 
     if status == "handled":
         orb.set_state("Observing", (255, 170, 0))
         print("INPUT ACCEPTED:", result["received"]["command"])
         print("INTENT CATEGORY:", category)
         print("DISPATCHED BRANCH:", branch)
-        print("OBSERVATION SNAPSHOT:", result["snapshot"])
+        if entrygate:
+            print("ENTRYGATE:", entrygate)
+        print("OBSERVATION SNAPSHOT:", result.get("snapshot"))
         print("UNDERSTANDING:", result.get("understanding"))
         print("STATE:", result["state"])
 
         if category == "conversation":
             orb.set_state("Conversation", (180, 0, 255))
             voice_engine = spine.get_voice_engine()
+            reply = result.get("response") or "Hello! I am Nova. I am currently in input and observation mode. Tell me what you want me to receive or inspect."
+            print("NOVA REPLY:", reply)
             if voice_engine is not None:
-                voice_engine.speak("Hello! I am Nova. I am currently in input and observation mode. Tell me what you want me to receive or inspect.")
+                voice_engine.speak(reply)
         elif category == "understanding":
             orb.set_state("Understanding", (0, 190, 255))
             voice_engine = spine.get_voice_engine()
@@ -642,8 +643,9 @@ def handle_runtime_result(orb, spine, result):
         elif category == "exit":
             orb.set_state("Bye", (255, 50, 50))
             voice_engine = spine.get_voice_engine()
+            reply = result.get("response") or "Shutting down"
             if voice_engine is not None:
-                voice_engine.speak("Shutting down")
+                voice_engine.speak(reply)
             QTimer.singleShot(400, lambda: QApplication.instance().quit())
             return
         else:

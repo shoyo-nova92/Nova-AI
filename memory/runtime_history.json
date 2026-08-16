@@ -5867,5 +5867,525 @@
             "duration": 0.01,
             "state": "failed"
         }
+    },
+    {
+        "event_id": 588,
+        "timestamp": "2026-08-15 16:58:48.249868",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 589,
+        "timestamp": "2026-08-15 16:58:51.122086",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 590,
+        "timestamp": "2026-08-15 16:58:53.932902",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 591,
+        "timestamp": "2026-08-15 16:58:56.851738",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 592,
+        "timestamp": "2026-08-15 16:58:56.915113",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 593,
+        "timestamp": "2026-08-15 16:58:56.969091",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 594,
+        "timestamp": "2026-08-15 16:59:00.077662",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 595,
+        "timestamp": "2026-08-15 16:59:03.063361",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 596,
+        "timestamp": "2026-08-15 16:59:05.937784",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 597,
+        "timestamp": "2026-08-15 16:59:08.936158",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 598,
+        "timestamp": "2026-08-15 16:59:11.938588",
+        "event_type": "execution_success",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 599,
+        "timestamp": "2026-08-15 16:59:12.002458",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 600,
+        "timestamp": "2026-08-15 16:59:12.065535",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 601,
+        "timestamp": "2026-08-15 16:59:15.035710",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 602,
+        "timestamp": "2026-08-15 17:16:35.872339",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 603,
+        "timestamp": "2026-08-15 17:16:38.687097",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 604,
+        "timestamp": "2026-08-15 17:16:41.610317",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 605,
+        "timestamp": "2026-08-15 17:16:44.421649",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 606,
+        "timestamp": "2026-08-15 17:16:44.477069",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 607,
+        "timestamp": "2026-08-15 17:16:44.526635",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 608,
+        "timestamp": "2026-08-15 17:16:47.531793",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 609,
+        "timestamp": "2026-08-15 17:16:50.377958",
+        "event_type": "execution_success",
+        "goal": "open_app notepad",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 610,
+        "timestamp": "2026-08-15 17:16:53.218073",
+        "event_type": "execution_success",
+        "goal": "read_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 611,
+        "timestamp": "2026-08-15 17:16:56.092145",
+        "event_type": "execution_success",
+        "goal": "create_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 612,
+        "timestamp": "2026-08-15 17:16:58.976222",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 613,
+        "timestamp": "2026-08-15 17:16:59.030341",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 614,
+        "timestamp": "2026-08-15 17:16:59.086826",
+        "event_type": "execution_success",
+        "goal": "rollback_file C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 615,
+        "timestamp": "2026-08-15 17:17:02.121381",
+        "event_type": "execution_success",
+        "goal": "run_pytest None",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 616,
+        "timestamp": "2026-08-15 17:22:02.955395",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpb_awv_oz\\notes.txt",
+        "details": {
+            "duration": 0.02,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 617,
+        "timestamp": "2026-08-15 17:22:06.957152",
+        "event_type": "execution_failure",
+        "goal": "append_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp__bj92r9\\notes.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 618,
+        "timestamp": "2026-08-15 17:22:39.491825",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.1,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 619,
+        "timestamp": "2026-08-15 17:22:42.467947",
+        "event_type": "execution_success",
+        "goal": "build_project python -m compileall .",
+        "details": {
+            "duration": 0.1,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 620,
+        "timestamp": "2026-08-15 17:22:48.755052",
+        "event_type": "execution_failure",
+        "goal": "open_app fakeapp",
+        "details": {
+            "duration": 0.04,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 621,
+        "timestamp": "2026-08-15 17:22:51.706922",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.03,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 622,
+        "timestamp": "2026-08-15 17:22:55.249283",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp3ncn_5xn\\parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 623,
+        "timestamp": "2026-08-15 17:23:08.297816",
+        "event_type": "execution_failure",
+        "goal": "git_checkout -b feature-test",
+        "details": {
+            "duration": 0.04,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 624,
+        "timestamp": "2026-08-15 17:23:13.762192",
+        "event_type": "execution_failure",
+        "goal": "git_checkout -b feature-test",
+        "details": {
+            "duration": 0.04,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 625,
+        "timestamp": "2026-08-15 17:23:21.777104",
+        "event_type": "execution_failure",
+        "goal": "git_commit feat: test commit",
+        "details": {
+            "duration": 0.12,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 626,
+        "timestamp": "2026-08-15 17:23:27.296448",
+        "event_type": "execution_failure",
+        "goal": "git_commit feat: test commit",
+        "details": {
+            "duration": 0.13,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 627,
+        "timestamp": "2026-08-15 17:23:44.165139",
+        "event_type": "execution_success",
+        "goal": "git_pull None",
+        "details": {
+            "duration": 0.46,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 628,
+        "timestamp": "2026-08-15 17:23:55.668877",
+        "event_type": "execution_success",
+        "goal": "git_pull None",
+        "details": {
+            "duration": 0.46,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 629,
+        "timestamp": "2026-08-15 17:24:11.838224",
+        "event_type": "execution_success",
+        "goal": "git_push None",
+        "details": {
+            "duration": 0.17,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 630,
+        "timestamp": "2026-08-15 17:24:20.439496",
+        "event_type": "execution_success",
+        "goal": "git_push None",
+        "details": {
+            "duration": 0.18,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 631,
+        "timestamp": "2026-08-15 17:24:26.759501",
+        "event_type": "execution_success",
+        "goal": "git_add .",
+        "details": {
+            "duration": 0.17,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 632,
+        "timestamp": "2026-08-15 17:24:30.230723",
+        "event_type": "execution_success",
+        "goal": "git_add .",
+        "details": {
+            "duration": 0.2,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 633,
+        "timestamp": "2026-08-15 17:24:34.127026",
+        "event_type": "execution_success",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_4yeuocq\\parser.py",
+        "details": {
+            "duration": 0.01,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 634,
+        "timestamp": "2026-08-15 17:24:37.339076",
+        "event_type": "execution_failure",
+        "goal": "insert_at_line C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuswr6na6\\parser.py",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 635,
+        "timestamp": "2026-08-15 17:24:40.799757",
+        "event_type": "execution_success",
+        "goal": "open_app vscode",
+        "details": {
+            "duration": 0.03,
+            "state": "completed"
+        }
+    },
+    {
+        "event_id": 636,
+        "timestamp": "2026-08-15 17:24:42.853343",
+        "event_type": "plan_success",
+        "goal": "Improve OCR performance",
+        "details": {
+            "plan_steps": 5,
+            "verification": true
+        }
+    },
+    {
+        "event_id": 637,
+        "timestamp": "2026-08-15 17:24:47.726593",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_yfljk3e\\sample.txt",
+        "details": {
+            "duration": 0.0,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 638,
+        "timestamp": "2026-08-15 17:24:51.017033",
+        "event_type": "execution_failure",
+        "goal": "modify_file C:\\Users\\shour\\AppData\\Local\\Temp\\tmpha_ui7mz\\workflow_validator.py",
+        "details": {
+            "duration": 0.01,
+            "state": "failed"
+        }
+    },
+    {
+        "event_id": 639,
+        "timestamp": "2026-08-15 17:24:54.370399",
+        "event_type": "execution_success",
+        "goal": "create_file workflow_validator.py",
+        "details": {
+            "duration": 0.0,
+            "state": "completed"
+        }
     }
 ]

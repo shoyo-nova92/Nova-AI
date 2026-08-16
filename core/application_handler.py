@@ -1,11 +1,16 @@
+import os
 import subprocess
 import psutil
 import pygetwindow as gw
-import os
 import time
+
+from core.app_search_engine import AppSearchEngine
 
 
 class ApplicationHandler:
+
+    def __init__(self, app_search_engine=None):
+        self.app_search_engine = app_search_engine or AppSearchEngine(auto_index=True)
 
     def is_running(self, process_keyword):
 
@@ -29,154 +34,126 @@ class ApplicationHandler:
 
             return False
 
-    def open_app(self, app_name):
-
+    def _focus_if_running(self, focus_target):
+        """If an application is already running, focus its window instead of launching a second instance."""
+        if not focus_target:
+            return None
         try:
+            windows = gw.getAllTitles()
+            for title in windows:
+                if not title:
+                    continue
+                if focus_target.lower() in title.lower():
+                    try:
+                        window_list = gw.getWindowsWithTitle(title)
+                        if window_list:
+                            window = window_list[0]
+                            window.activate()
+                            return {"success": True, "focused": True, "window": title}
+                    except Exception:
+                        continue
+            return None
+        except Exception:
+            return None
 
-            app_name = app_name.lower()
+    def _launch_hardcoded_fallback(self, app_name: str) -> dict:
+        """Original well-known hardcoded executable fallback paths (used only if AppSearchEngine fails)."""
+        normalized = app_name.strip().lower()
 
-            if app_name == "notepad":
+        # VS Code / Visual Studio Code
+        if normalized in {"vscode", "vs code", "visual studio code"}:
+            focus_result = self._focus_if_running("Visual Studio Code")
+            if focus_result:
+                return {
+                    "success": True,
+                    "action": "open_app",
+                    "target": "vscode",
+                    "focused": True,
+                    "window": focus_result.get("window"),
+                    "fallback": True,
+                }
+            vscode_candidates = [
+                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Microsoft VS Code", "Code.exe"),
+                os.path.join(os.environ.get("PROGRAMFILES", ""), "Microsoft VS Code", "Code.exe"),
+                os.path.join(os.environ.get("PROGRAMFILES(X86)", ""), "Microsoft VS Code", "Code.exe"),
+            ]
+            for candidate in vscode_candidates:
+                if candidate and os.path.exists(candidate):
+                    subprocess.Popen([candidate])
+                    return {"success": True, "target": candidate, "fallback": True}
 
-                subprocess.Popen("notepad.exe")
+        # Google Chrome
+        if normalized in {"chrome", "google chrome", "googlechrome"}:
+            chrome_candidates = [
+                os.path.join(os.environ.get("PROGRAMFILES", ""), "Google", "Chrome", "Application", "chrome.exe"),
+                os.path.join(os.environ.get("PROGRAMFILES(X86)", ""), "Google", "Chrome", "Application", "chrome.exe"),
+                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "Application", "chrome.exe"),
+            ]
+            for candidate in chrome_candidates:
+                if candidate and os.path.exists(candidate):
+                    subprocess.Popen([candidate])
+                    return {"success": True, "target": candidate, "fallback": True}
 
-            elif app_name == "calculator":
+        # Microsoft Edge
+        if normalized in {"edge", "microsoft edge", "msedge"}:
+            edge_candidates = [
+                os.path.join(os.environ.get("PROGRAMFILES(X86)", ""), "Microsoft", "Edge", "Application", "msedge.exe"),
+                os.path.join(os.environ.get("PROGRAMFILES", ""), "Microsoft", "Edge", "Application", "msedge.exe"),
+            ]
+            for candidate in edge_candidates:
+                if candidate and os.path.exists(candidate):
+                    subprocess.Popen([candidate])
+                    return {"success": True, "target": candidate, "fallback": True}
 
+        # Notepad
+        if normalized in {"notepad"}:
+            try:
+                os.startfile("notepad.exe")
+                return {"success": True, "target": "notepad.exe", "fallback": True}
+            except Exception as e:
+                return {"success": False, "reason": str(e), "fallback": True}
+
+        # Calculator
+        if normalized in {"calculator", "calc"}:
+            try:
                 subprocess.Popen("calc.exe")
+                return {"success": True, "target": "calc.exe", "fallback": True}
+            except Exception as e:
+                return {"success": False, "reason": str(e), "fallback": True}
 
-            elif app_name == "vscode":
+        return {"success": False, "reason": f"fallback not found for app '{app_name}'"}
 
-                if self.is_running("Code"):
+    def open_app(self, app_name):
+        """AppSearchEngine primary. If lookup fails, fall back to original hardcoded behavior."""
+        try:
+            search_result = self.app_search_engine.launch_app(app_name)
+            if search_result.get("success"):
+                return search_result
 
-                    focus_result = self.focus_app("Visual Studio Code")
-
-                    if focus_result["success"]:
-
-                        return {
-
-                            "success": True,
-
-                            "action": "focus vscode"
-
-                        }
-
-                vscode_paths = [
-
-                    r"C:\Users\shour\AppData\Local\Programs\Microsoft VS Code\Code.exe",
-
-                    r"C:\Program Files\Microsoft VS Code\Code.exe"
-
-                ]
-
-                for path in vscode_paths:
-
-                    if os.path.exists(path):
-
-                        subprocess.Popen(path)
-
-                        return {
-
-                            "success": True,
-
-                            "action": "open vscode"
-
-                        }
-
-                return {
-
-                    "success": False,
-
-                    "reason": "VSCode executable not found"
-
-                }
-
-            elif app_name in {"chrome", "edge"}:
-
-                browser_executable = "chrome.exe" if app_name == "chrome" else "msedge.exe"
-                browser_paths = [
-                    browser_executable,
-                    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-                    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-                    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
-                    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-                ]
-
-                for path in browser_paths:
-                    if os.path.exists(path):
-                        subprocess.Popen(path)
-                        return {
-                            "success": True,
-                            "action": f"open {app_name}"
-                        }
-
-                try:
-                    subprocess.Popen(browser_executable)
-                    return {
-                        "success": True,
-                        "action": f"open {app_name}"
-                    }
-                except Exception as exc:
-                    return {
-                        "success": False,
-                        "reason": str(exc)
-                    }
-
-            else:
-
-                return {
-
-                    "success": False,
-
-                    "reason":
-                        f"Unknown app: {app_name}"
-
-                }
-
+            # AppSearchEngine did not find the app; fall back to original behavior
+            fallback = self._launch_hardcoded_fallback(app_name)
+            if fallback.get("success"):
+                return fallback
             return {
-
-                "success": True,
-
-                "action":
-                    f"open {app_name}"
-
+                "success": False,
+                "reason": search_result.get("reason") or fallback.get("reason") or "app not found",
+                "app_search_result": search_result,
+                "fallback_result": fallback,
             }
 
         except Exception as e:
-
             return {
-
                 "success": False,
-
                 "reason": str(e)
-
             }
 
-    def close_app(self, process_name):
-
+    def close_app(self, app_name):
+        """Use dynamic AppSearchEngine.close_app() for close."""
         try:
-
-            for proc in psutil.process_iter():
-
-                if process_name.lower() in proc.name().lower():
-
-                    proc.kill()
-
-                    return {
-
-                        "success": True,
-
-                        "action":
-                            f"close {process_name}"
-
-                    }
-
-            return {
-
-                "success": False,
-
-                "reason":
-                    "process not found"
-
-            }
+            result = self.app_search_engine.close_app(app_name)
+            if result.get("success"):
+                return result
+            return result
 
         except Exception as e:
 
@@ -271,7 +248,6 @@ class ApplicationHandler:
 
             }
 
-
     def maximize_app(self, title_keyword):
 
         try:
@@ -311,7 +287,6 @@ class ApplicationHandler:
                 "reason": str(e)
 
             }
-
 
     def restart_app(
         self,

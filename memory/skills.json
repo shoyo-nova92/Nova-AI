@@ -1,7 +1,7 @@
 {
     "open_app:vscode": {
-        "usage_count": 33,
-        "success_count": 33
+        "usage_count": 35,
+        "success_count": 35
     },
     "open_terminal": {
         "usage_count": 4,
@@ -32,8 +32,8 @@
         "success_count": 1
     },
     "create_file:workflow_validator.py": {
-        "usage_count": 18,
-        "success_count": 18
+        "usage_count": 19,
+        "success_count": 19
     },
     "read_file:core/task_translator.py": {
         "usage_count": 9,
@@ -168,8 +168,8 @@
         "success_count": 2
     },
     "build_project:python -m compileall .": {
-        "usage_count": 40,
-        "success_count": 39
+        "usage_count": 42,
+        "success_count": 41
     },
     "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py": {
         "usage_count": 1,
@@ -192,36 +192,36 @@
         "success_count": 1
     },
     "git_add:.": {
-        "usage_count": 24,
-        "success_count": 23
+        "usage_count": 26,
+        "success_count": 25
     },
     "git_commit:feat: test commit": {
-        "usage_count": 26,
+        "usage_count": 28,
         "success_count": 0
     },
     "git_checkout:-b feature-test": {
-        "usage_count": 26,
+        "usage_count": 28,
         "success_count": 0
     },
     "git_pull": {
-        "usage_count": 26,
-        "success_count": 26
+        "usage_count": 28,
+        "success_count": 28
     },
     "git_push": {
-        "usage_count": 26,
-        "success_count": 26
+        "usage_count": 28,
+        "success_count": 28
     },
     "read_file:parser.py": {
         "usage_count": 2,
         "success_count": 0
     },
     "run_pytest": {
-        "usage_count": 25,
-        "success_count": 18
+        "usage_count": 29,
+        "success_count": 22
     },
     "open_app:notepad": {
-        "usage_count": 39,
-        "success_count": 35
+        "usage_count": 43,
+        "success_count": 39
     },
     "modify_file:workflow_validator.py": {
         "usage_count": 1,
@@ -280,7 +280,7 @@
         "success_count": 0
     },
     "open_app:fakeapp": {
-        "usage_count": 13,
+        "usage_count": 14,
         "success_count": 0
     },
     "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmptk1fe43p\\parser.py": {
@@ -308,8 +308,8 @@
         "success_count": 1
     },
     "modify_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 45,
-        "success_count": 11
+        "usage_count": 53,
+        "success_count": 12
     },
     "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpzf_mel4h\\notes.txt": {
         "usage_count": 1,
@@ -584,16 +584,16 @@
         "success_count": 0
     },
     "read_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 19,
-        "success_count": 19
+        "usage_count": 23,
+        "success_count": 23
     },
     "create_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 19,
-        "success_count": 19
+        "usage_count": 23,
+        "success_count": 23
     },
     "rollback_file:C:/Users/shour/OneDrive/Desktop/Nova/tests/runtime_workspace/parser.py": {
-        "usage_count": 20,
-        "success_count": 20
+        "usage_count": 24,
+        "success_count": 24
     },
     "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpxnwg0e84\\notes.txt": {
         "usage_count": 1,
@@ -673,6 +673,34 @@
     },
     "open_app:calculator": {
         "usage_count": 2,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpb_awv_oz\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp__bj92r9\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp3ncn_5xn\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_4yeuocq\\parser.py": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "insert_at_line:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpuswr6na6\\parser.py": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmp_yfljk3e\\sample.txt": {
+        "usage_count": 1,
+        "success_count": 0
+    },
+    "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpha_ui7mz\\workflow_validator.py": {
+        "usage_count": 1,
         "success_count": 0
     }
 }

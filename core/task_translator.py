@@ -218,6 +218,21 @@ class TaskTranslator:
 
             }
 
+        generic_close_match = re.search(
+            r"\b(?:close|kill|terminate|exit|shutdown)\s+([\w\s.-]+)",
+            normalized_step,
+            re.IGNORECASE
+        )
+        if generic_close_match:
+            target = self._clean_target(generic_close_match.group(1))
+            if target:
+                return {
+                    "type": "application",
+                    "action": "close_app",
+                    "action_type": "close_app",
+                    "target": target
+                }
+
         generic_open_match = re.search(
             r"\b(?:open|launch|start|focus)\s+([\w\s.-]+)",
             normalized_step,
@@ -225,69 +240,13 @@ class TaskTranslator:
         )
         if generic_open_match:
             target = self._clean_target(generic_open_match.group(1))
-            if target in {"notepad", "calculator", "vscode", "vs code", "visual studio code", "chrome", "edge"}:
+            if target:
                 return {
                     "type": "application",
                     "action": "open_app",
                     "action_type": "open_app",
-                    "target": "vscode" if target in {"vscode", "vs code", "visual studio code"} else target
+                    "target": target
                 }
-
-        # Open Notepad phrases
-        notepad_open_phrases = [
-            "open notepad",
-            "launch notepad",
-            "start notepad",
-            "focus notepad"
-        ]
-
-        if any(
-            phrase in normalized_step
-            for phrase in notepad_open_phrases
-        ):
-            return {
-                "type": "application",
-                "action": "open_app",
-                "action_type": "open_app",
-                "target": "notepad"
-            }
-
-        # Open VS Code phrases
-        vscode_open_phrases = [
-            "open vscode",
-            "open vs code",
-            "open visual studio code",
-            "launch vscode",
-            "launch vs code",
-            "launch visual studio code",
-            "start vscode",
-            "start vs code",
-            "start visual studio code",
-            "focus vscode",
-            "focus vs code",
-            "focus visual studio code"
-        ]
-
-        if any(
-            phrase in normalized_step
-            for phrase in vscode_open_phrases
-        ):
-
-            return {
-
-                "type":
-                    "application",
-
-                "action":
-                    "open_app",
-
-                "action_type":
-                    "open_app",
-
-                "target":
-                    "vscode"
-
-            }
 
         if "git status" in normalized_step:
 

@@ -39,9 +39,11 @@ def test_runtime_integration():
             result = runtime.process_goal(goal)
             assert "success" in result, f"Missing 'success' in result: {result}"
             assert "data" in result, f"Missing 'data' in result: {result}"
-            assert "message" in result, f"Missing 'message' in result: {result}"
+            assert "status" in result, f"Missing 'status' in result: {result}"
             assert "confidence" in result, f"Missing 'confidence' in result: {result}"
-            print(f"{goal} -> {result['message']}")
+            assert "raw_plan" in result, f"Missing 'raw_plan' in result: {result}"
+            assert "executions" in result, f"Missing 'executions' in result: {result}"
+            print(f"{goal} -> status={result['status']}, success={result['success']}")
         
         print("runtime integration ok")
 
