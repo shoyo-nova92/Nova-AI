@@ -86,6 +86,14 @@ class NovaOrb(QWidget):
 
         return text
 
+
+    def set_text_command(self, text):
+
+        self.input_box.setText(text)
+        self.input_box.setFocus()
+        self.input_box.setCursorPosition(len(text))
+
+
     # ==================================================
 
     def set_state(self, text, color):

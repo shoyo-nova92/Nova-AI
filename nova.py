@@ -1,3 +1,6 @@
+from PyQt6.QtCore import QTimer
+from PyQt6.QtWidgets import QApplication
+
 import json
 import os
 import queue
@@ -8,19 +11,6 @@ import threading
 import time
 from datetime import datetime, timezone
 
-
-from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QApplication
-
-from core.context_fusion_engine import ContextFusionEngine
-from core.execution_router import ExecutionRouter
-from core.reasoning_engine import ReasoningEngine
-from core.task_translator import TaskTranslator
-from core.runtime_entrygate import RuntimeEntrygate
-from core.app_search_engine import AppSearchEngine
-from core.conversation_handler import ConversationHandler
-from core.nova_runtime import NovaRuntime
-from ui.orb import NovaOrb
 
 
 class InputNormalizer:
@@ -492,7 +482,14 @@ class NovaRuntimeSpine:
     """
 
     def __init__(self):
+
+        from core.runtime_entrygate import RuntimeEntrygate
+        from core.app_search_engine import AppSearchEngine
+        from core.conversation_handler import ConversationHandler
+        from core.nova_runtime import NovaRuntime
+
         self.input_layer = NovaInputLayer()
+
         self.entrygate = RuntimeEntrygate(
             app_search_engine=AppSearchEngine(auto_index=True),
             conversation_handler=ConversationHandler(),
@@ -777,16 +774,55 @@ def poll_voice_queue(orb, spine, command_queue):
     while True:
         try:
             command = command_queue.get_nowait()
+
+            # Show exactly what Whisper recognized in the Orb textbox.
+            if hasattr(orb, "set_text_command"):
+                orb.set_text_command(command)
+            elif hasattr(orb, "command_input"):
+                orb.command_input.setText(command)
+
+            print(f"[VOICE -> UI] {command}")
+
+            # Now send the same recognized command into Nova.
             result = spine.handle_command(command)
-            handle_runtime_result(orb, spine, result)
-        except Exception:
+
+            handle_runtime_result(
+                orb,
+                spine,
+                result
+            )
+
+        except queue.Empty:
             break
 
-    QTimer.singleShot(250, lambda: poll_voice_queue(orb, spine, command_queue))
+        except Exception as exc:
+            print(
+                f"[VOICE QUEUE ERROR] {exc}"
+            )
+            break
+
+    QTimer.singleShot(
+        250,
+        lambda: poll_voice_queue(
+            orb,
+            spine,
+            command_queue
+        )
+    )
 
 
 def main():
     app = QApplication(sys.argv)
+    from core.context_fusion_engine import ContextFusionEngine
+    from core.execution_router import ExecutionRouter
+    from core.reasoning_engine import ReasoningEngine
+    from core.task_translator import TaskTranslator
+    from core.runtime_entrygate import RuntimeEntrygate
+    from core.app_search_engine import AppSearchEngine
+    from core.conversation_handler import ConversationHandler
+    from core.nova_runtime import NovaRuntime
+    from ui.orb import NovaOrb
+
     orb = NovaOrb()
 
     # Initial state: IDLE, UI is NOT VISIBLE

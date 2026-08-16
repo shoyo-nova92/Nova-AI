@@ -395,6 +395,31 @@
       "source": "text",
       "command": "exit.",
       "received_at": "2026-08-16T17:06:22.915655+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open chrome.",
+      "received_at": "2026-08-16T17:17:51.484274+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open calculator",
+      "received_at": "2026-08-16T17:18:04.564891+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-16T17:18:09.951132+00:00"
+    },
+    {
+      "source": "text",
+      "command": "open visual studio fold.",
+      "received_at": "2026-08-16T17:18:47.137015+00:00"
+    },
+    {
+      "source": "text",
+      "command": "exit",
+      "received_at": "2026-08-16T17:18:57.317672+00:00"
     }
   ],
   "created_at": "2026-08-02T17:17:36.028503+00:00"
