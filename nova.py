@@ -737,7 +737,7 @@ def voice_wake_worker(spine, ui_queue, command_queue):
             # Branch 1: Check Wake Word detection
             wake_label = None
             if not v_key_pressed and wake_engine is not None:
-                detected = wake_engine.listen_for_nova(timeout=0.5)
+                detected = wake_engine.listen_for_nova()
                 if detected:
                     wake_label = detected
 
@@ -770,6 +770,7 @@ def voice_wake_worker(spine, ui_queue, command_queue):
         except Exception as exc:
             print(f"Voice wake worker loop error: {exc}")
             time.sleep(0.1)
+
 
 
 def poll_voice_queue(orb, spine, command_queue):
