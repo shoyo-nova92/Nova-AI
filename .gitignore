@@ -5,6 +5,8 @@ omniparser_env/
 # External dependency
 OmniParser/
 
+memory/input_layer_session.json
+
 # Logs
 logs/
 
