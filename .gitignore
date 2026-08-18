@@ -1,5 +1,11 @@
 .env
 
+# Nova local archive
+Old/
+
+# Nova runtime state
+memory/
+
 # Virtual environments
 .venv/
 omniparser_env/
