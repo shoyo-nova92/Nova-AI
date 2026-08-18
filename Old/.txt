@@ -1,3 +1,4 @@
+===== nova.py ===== 
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication
 
@@ -488,22 +489,13 @@ class NovaRuntimeSpine:
         from core.conversation_handler import ConversationHandler
         from core.nova_runtime import NovaRuntime
 
-
         self.input_layer = NovaInputLayer()
 
         self.entrygate = RuntimeEntrygate(
             app_search_engine=AppSearchEngine(auto_index=True),
             conversation_handler=ConversationHandler(),
         )
-
         self.nova_runtime = NovaRuntime()
-
-        # Nova's unified LLM interface.
-        # Primary: OpenRouter / Nemotron 3 Ultra
-        # Fallback: Ollama / Qwen3
-        from core.llm_client import LLMClient
-        self.llm_client = LLMClient()
-
         self.voice_engine = None
         self.state = "PENDING"
 
@@ -606,37 +598,15 @@ class NovaRuntimeSpine:
             "verification": verification,
             "runtime_result": runtime_result,
         }
-        
-    def ask_llm(self, prompt: str) -> str:
-        """
-        Send a reasoning request through Nova's LLM provider chain.
 
-        Primary:
-            OpenRouter / Nemotron 3 Ultra
 
-        Fallback:
-            Ollama / Qwen3
-        """
-
-        if not prompt:
-            return ""
-
-        return self.llm_client.generate(
-            prompt=prompt,
-            system_prompt=(
-                "You are Nova, a desktop AI assistant. "
-                "Be concise, direct, and useful. "
-                "Do not invent actions you did not perform. "
-                "When answering simple questions, keep the response short."
-            ),
-        )
 def handle_runtime_result(orb, spine, result):
     status = result.get("status", "unknown")
     category = result.get("category", "unknown")
     entrygate = result.get("entrygate") or {}
     branch = entrygate.get("branch", "branch_unknown")
 
-    if category in {"open", "close"}:
+    if category == "open" or category == "close":
         branch = entrygate.get("branch", "application_handler")
     elif category == "conversation":
         branch = entrygate.get("branch", "conversation")
@@ -647,100 +617,53 @@ def handle_runtime_result(orb, spine, result):
 
     if status == "handled":
         orb.set_state("Observing", (255, 170, 0))
-
         print("INPUT ACCEPTED:", result["received"]["command"])
         print("INTENT CATEGORY:", category)
         print("DISPATCHED BRANCH:", branch)
-
         if entrygate:
             print("ENTRYGATE:", entrygate)
-
         print("OBSERVATION SNAPSHOT:", result.get("snapshot"))
         print("UNDERSTANDING:", result.get("understanding"))
         print("STATE:", result["state"])
 
         if category == "conversation":
             orb.set_state("Conversation", (180, 0, 255))
-
             voice_engine = spine.get_voice_engine()
-            reply = (
-                result.get("response")
-                or "Hello! How can I help?"
-            )
-
+            reply = result.get("response") or "Hello! I am Nova. I am currently in input and observation mode. Tell me what you want me to receive or inspect."
             print("NOVA REPLY:", reply)
-
             if voice_engine is not None:
                 voice_engine.speak(reply)
-
         elif category == "understanding":
             orb.set_state("Understanding", (0, 190, 255))
-
             voice_engine = spine.get_voice_engine()
-
             if voice_engine is not None:
-                voice_engine.speak(
-                    result.get(
-                        "response",
-                        "I am checking the current situation."
-                    )
-                )
-
+                voice_engine.speak(result.get("response", "I am checking the current situation."))
         elif category == "exit":
             orb.set_state("Bye", (255, 50, 50))
-
             voice_engine = spine.get_voice_engine()
             reply = result.get("response") or "Shutting down"
-
             if voice_engine is not None:
                 voice_engine.speak(reply)
-
-            QTimer.singleShot(
-                400,
-                lambda: QApplication.instance().quit()
-            )
-
+            QTimer.singleShot(400, lambda: QApplication.instance().quit())
             return
-
         else:
             orb.set_state("Received", (0, 220, 120))
 
-        QTimer.singleShot(
-            900,
-            lambda: orb.set_state(
-                "Listening",
-                (0, 220, 120)
-            )
-        )
-
+        QTimer.singleShot(900, lambda: orb.set_state("Listening", (0, 220, 120)))
     elif status == "empty":
         orb.set_state("Idle", (0, 120, 255))
-
     else:
         orb.set_state("Error", (255, 50, 50))
-
-        QTimer.singleShot(
-            900,
-            lambda: orb.set_state(
-                "Listening",
-                (0, 220, 120)
-            )
-        )
+        QTimer.singleShot(900, lambda: orb.set_state("Listening", (0, 220, 120)))
 
 
 def handle_submit(orb, spine):
     raw_text = orb.get_text_command()
-
     if not raw_text:
         return
 
     result = spine.handle_command(raw_text)
-
-    handle_runtime_result(
-        orb,
-        spine,
-        result
-    )
+    handle_runtime_result(orb, spine, result)
 
 
 class UIEventQueue:
@@ -803,18 +726,16 @@ def voice_wake_worker(spine, ui_queue, command_queue):
 
     while True:
         try:
-            # Branch 2: Check V key press
+            # Branch 2: Check V key press / hold
             v_key_pressed = False
-
-            if key_monitor is not None and key_monitor.was_pressed():
+            if key_monitor is not None and (key_monitor.was_pressed() or key_monitor.is_held()):
                 v_key_pressed = True
                 print("[V KEY PRESSED] Activating listening state directly.")
 
             # Branch 1: Check Wake Word detection
             wake_label = None
             if not v_key_pressed and wake_engine is not None:
-                detected = wake_engine.listen_for_nova(timeout=0.1)
-
+                detected = wake_engine.listen_for_nova()
                 if detected:
                     wake_label = detected
 
@@ -931,3 +852,245 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+===== novamain.py ===== 
+import sys
+
+from PyQt6.QtWidgets import QApplication
+
+from ui.orb import NovaOrb
+from core.parser import IntentParser
+from core.executor import Executor
+from core.logger import NovaLogger
+
+
+def should_exit(command: str):
+    command = command.lower()
+
+    triggers = [
+        "bye",
+        "exit",
+        "quit",
+        "shutdown nova",
+        "terminate"
+    ]
+
+    return any(t in command for t in triggers)
+
+
+def process_command(command, orb, parser, executor, logger):
+
+    command = command.strip()
+
+    if not command:
+        return  
+
+    if should_exit(command):``
+        orb.set_state("Bye", (255, 50, 50))
+        QApplication.quit()
+        return
+
+    orb.set_state("Thinking", (255, 170, 0))
+
+    try:
+        result = parser.parse(command)
+
+        response = executor.execute(result)
+
+        logger.write(command, response)
+
+    except Exception as e:
+        response = f"Error: {e}"
+
+    orb.set_state("Speaking", (180, 0, 255))
+
+    print()
+    print("=" * 60)
+    print("USER :", command)
+    print("NOVA :", response)
+    print("=" * 60)
+
+    orb.set_state("Listening", (0, 220, 120))
+
+
+def main():
+
+    print("Starting Nova...")
+
+    app = QApplication(sys.argv)
+
+    print("Loading UI...")
+    orb = NovaOrb()
+    orb.show()
+
+    print("Loading Parser...")
+    parser = IntentParser()
+
+    print("Loading Executor...")
+    executor = Executor()
+
+    print("Loading Logger...")
+    logger = NovaLogger()
+
+    print("Nova Ready.")
+
+    orb.send_button.clicked.connect(
+        lambda: process_command(
+            orb.get_text_command(),
+            orb,
+            parser,
+            executor,
+            logger
+        )
+    )
+
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
+===== Gpu_Check.py ===== 
+# gpu_check.py
+
+import torch
+
+print("Torch:", torch.__version__)
+print("CUDA:", torch.cuda.is_available())
+
+if torch.cuda.is_available():
+    print(torch.cuda.get_device_name(0))
+===== where_browser.py ===== 
+# test_browser_location.py
+
+import core.browser_handler
+
+print(
+    core.browser_handler.__file__
+)
+===== workflow_validator.py ===== 
+logger.info('hello')
+
+===== plugins_registry.json ===== 
+{
+    "pdf_renamer": {
+        "status": "installed"
+    }
+}
+===== recorded_workflows.json ===== 
+{
+    "thumbnail workflow": [
+        "open chrome",
+        "open photoshop",
+        "search thumbnail references"
+    ]
+}
+===== memory.json ===== 
+{
+    "study workflow": [
+        "open chrome",
+        "open notion",
+        "open spotify"
+    ]
+}
+===== semantic_memory.json ===== 
+[
+    {
+        "timestamp": "2026-05-27 22:05:30.273437",
+        "project": "Nova v0.6",
+        "task": "Built context fusion engine",
+        "status": "completed",
+        "tags": [
+            "memory",
+            "reasoning",
+            "context"
+        ]
+    },
+    {
+        "timestamp": "2026-05-27 22:05:30.274235",
+        "project": "Nova v0.6",
+        "task": "Implemented adaptive executor",
+        "status": "completed",
+        "tags": [
+            "execution",
+            "autonomy"
+        ]
+    }
+]
+===== requirements.txt ===== 
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.13.0
+av==17.0.1
+certifi==2026.4.22
+cffi==2.0.0
+charset-normalizer==3.4.7
+click==8.3.3
+colorama==0.4.6
+comtypes==1.4.16
+ctranslate2==4.7.1
+easyocr==1.7.2
+faster-whisper==1.2.1
+filelock==3.29.0
+flatbuffers==25.12.19
+fsspec==2026.3.0
+h11==0.16.0
+hf-xet==1.4.3
+httpcore==1.0.9
+httpx==0.28.1
+huggingface_hub==1.12.0
+idna==3.13
+ImageIO==2.37.3
+Jinja2==3.1.6
+lazy-loader==0.5
+markdown-it-py==4.0.0
+MarkupSafe==3.0.3
+mdurl==0.1.2
+MouseInfo==0.1.3
+mpmath==1.3.0
+networkx==3.6.1
+ninja==1.13.0
+numpy==2.2.6
+ollama==0.6.2
+onnxruntime==1.20.1
+opencv-python-headless==4.10.0.84
+packaging==25.0
+pillow==11.3.0
+protobuf==5.29.5
+psutil==7.2.2
+PyAutoGUI==0.9.54
+pyclipper==1.3.0.post6
+pycparser==2.22
+pydantic==2.13.4
+pydantic_core==2.46.4
+PyGetWindow==0.0.9
+Pygments==2.20.0
+PyMsgBox==2.0.1
+pyperclip==1.11.0
+pypiwin32==223
+PyQt6==6.8.1
+PyQt6_sip==13.8.0
+PyRect==0.2.0
+PyScreeze==1.0.1
+python-bidi==0.6.6
+pyttsx3==2.99
+pytweening==1.2.0
+pywin32==311
+PyYAML==6.0.2
+requests==2.32.5
+rich==14.1.0
+scikit-image==0.25.2
+scipy==1.15.3
+setuptools>=75
+shapely==2.1.1
+shellingham==1.5.4
+sounddevice==0.5.2
+SpeechRecognition==3.14.3
+sympy==1.13.3
+tifffile==2026.3.3
+tokenizers==0.22.2
+tqdm==4.67.1
+typer==0.17.4
+typing-inspection==0.4.1
+typing_extensions==4.15.0
+urllib3==2.5.0
+webrtcvad-wheels==2.0.14

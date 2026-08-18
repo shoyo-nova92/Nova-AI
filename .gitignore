@@ -1,3 +1,5 @@
+.env
+
 # Virtual environments
 .venv/
 omniparser_env/
@@ -20,3 +22,7 @@ screenshot_*.png
 # VSCode
 .vscode/
 Insta/
+
+.env
+.env.*
+!.env.example

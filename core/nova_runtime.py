@@ -12,7 +12,7 @@ from core.execution_router import ExecutionRouter
 from core.execution_policy import ExecutionPolicy
 from core.context_fusion_engine import ContextFusionEngine
 from core.memory_retriever import MemoryRetriever
-from core.llm_planner import LLMPlanner
+from core.llm_client import LLMClient
 from core.planner_pipeline import PlannerPipeline
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class NovaRuntime:
         self.reasoner = ReasoningEngine()
         self.fusion = ContextFusionEngine()
         self.memory = MemoryRetriever()
-        self.planner = LLMPlanner()
+        self.llm_client = LLMClient()
         self.pipeline = PlannerPipeline()
         self.router = ExecutionRouter()
         self.policy = ExecutionPolicy()
@@ -154,8 +154,78 @@ class NovaRuntime:
             return ctx
 
         # Module 4 — Planner Path for complex goals
-        self._log("PLAN", "Creating plan via LLMPlanner and PlannerPipeline")
-        raw_plan = self.planner.create_plan(ctx.goal, ctx.context, ctx.memories)
+        self._log(
+            "PLAN",
+            "Creating plan via unified LLMClient and PlannerPipeline"
+        )
+
+        planning_prompt = f"""
+        Create an executable plan for the following user goal.
+
+        USER GOAL:
+        {ctx.goal}
+
+        CURRENT CONTEXT:
+        {ctx.context}
+
+        RELEVANT MEMORIES:
+        {ctx.memories}
+
+        Return only the plan. Do not explain your reasoning.
+        """
+
+        raw_plan = self.llm_client.generate(
+            prompt=planning_prompt,
+            system_prompt = """
+            You are Nova's execution planning engine.
+
+            Your job is NOT to answer the user directly.
+
+            Your job is to convert the user's goal into a concise sequence of
+            executable actions that Nova can process.
+
+            Return ONLY the numbered action list.
+
+            Do not include:
+            - explanations
+            - introductions
+            - conclusions
+            - markdown headings
+            - bullet-point explanations
+            - alternative answers
+            - platform comparisons
+            - conversational text
+
+            Each step must describe ONE concrete action Nova should perform.
+
+            Example:
+
+            1. Open Visual Studio Code.
+            2. Press Ctrl+S.
+
+            For informational requests where Nova does not need to control
+            the computer, return:
+
+            1. Provide the requested information to the user.
+
+            For desktop tasks, describe actions such as:
+            - open an application
+            - close an application
+            - press a keyboard key
+            - click something
+            - type text
+            - read information
+            - create a file
+            - modify a file
+
+            Never answer the user's question directly.
+            Only produce the execution plan.
+
+            fix to windows, no mac or option A or B, simple, for windows only. research and answer correctly to the latest version of apps too.
+
+            """
+            ),
+
         planner_result = self.pipeline.process(raw_plan)
 
         ctx.raw_plan = raw_plan

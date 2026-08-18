@@ -224,16 +224,14 @@ class LocalWake:
 
 
 class WakeKeyMonitor:
-    """Keyboard activation key monitor."""
+    """Keyboard activation key monitor using a one-shot press event."""
 
     def __init__(self, key_name="v"):
-
         self.key_name = key_name.lower()
 
-        self._pressed = False
-        self._was_pressed_flag = False
-
+        self._press_event = threading.Event()
         self._lock = threading.Lock()
+        self._pressed = False
 
         try:
             from pynput import keyboard
@@ -249,194 +247,86 @@ class WakeKeyMonitor:
 
             print(
                 f"Wake activation key armed: "
-                f"press or hold '{self.key_name}'"
+                f"press '{self.key_name}'"
             )
 
         except Exception as exc:
-
             print(
-                f"Keyboard wake-key listener unavailable: "
-                f"{exc}"
+                f"Keyboard wake-key listener unavailable: {exc}"
             )
 
             self._listener = None
 
     def _normalize_key(self, key):
-
         try:
-
             if hasattr(key, "char") and key.char:
                 return str(key.char).lower()
 
-            if hasattr(key, "name"):
+            if hasattr(key, "name") and key.name:
                 return str(key.name).lower()
 
             return str(key).lower()
 
         except Exception:
-
             return str(key).lower()
 
     def _on_press(self, key):
-
         if self._listener is None:
             return
 
         key_name = self._normalize_key(key)
 
-        if key_name == self.key_name:
-
-            with self._lock:
-
-                if not self._pressed:
-                    self._was_pressed_flag = True
-
-                self._pressed = True
-
-            print(
-                f"Wake activation key pressed: "
-                f"'{self.key_name}'"
-            )
-
-    def _on_release(self, key):
-
-        if self._listener is None:
+        if key_name != self.key_name:
             return
 
-        key_name = self._normalize_key(key)
-
-        if key_name == self.key_name:
-
-            with self._lock:
-                self._pressed = False
-
-    def was_pressed(self):
-
         with self._lock:
+            # Ignore keyboard auto-repeat.
+            if self._pressed:
+                return
 
-            value = self._was_pressed_flag
+            self._pressed = True
+            self._press_event.set()
 
-            self._was_pressed_flag = False
-
-            return value
-
-    def is_held(self):
-
-        with self._lock:
-            return bool(self._pressed)
-
-    def should_listen_for_wakeword(self):
-
-        return (
-            self.is_held()
-            or self.was_pressed()
+        print(
+            f"Wake activation key pressed: "
+            f"'{self.key_name}'"
         )
 
-class WakeKeyMonitor:
-    """Keyboard activation key monitor."""
-
-    def __init__(self, key_name="v"):
-
-        self.key_name = key_name.lower()
-
-        self._pressed = False
-        self._was_pressed_flag = False
-
-        self._lock = threading.Lock()
-
-        try:
-            from pynput import keyboard
-
-            self._keyboard = keyboard
-
-            self._listener = keyboard.Listener(
-                on_press=self._on_press,
-                on_release=self._on_release,
-            )
-
-            self._listener.start()
-
-            print(
-                f"Wake activation key armed: "
-                f"press or hold '{self.key_name}'"
-            )
-
-        except Exception as exc:
-
-            print(
-                f"Keyboard wake-key listener unavailable: "
-                f"{exc}"
-            )
-
-            self._listener = None
-
-    def _normalize_key(self, key):
-
-        try:
-
-            if hasattr(key, "char") and key.char:
-                return str(key.char).lower()
-
-            if hasattr(key, "name"):
-                return str(key.name).lower()
-
-            return str(key).lower()
-
-        except Exception:
-
-            return str(key).lower()
-
-    def _on_press(self, key):
-
-        if self._listener is None:
-            return
-
-        key_name = self._normalize_key(key)
-
-        if key_name == self.key_name:
-
-            with self._lock:
-
-                if not self._pressed:
-                    self._was_pressed_flag = True
-
-                self._pressed = True
-
-            print(
-                f"Wake activation key pressed: "
-                f"'{self.key_name}'"
-            )
-
     def _on_release(self, key):
-
         if self._listener is None:
             return
 
         key_name = self._normalize_key(key)
 
-        if key_name == self.key_name:
+        if key_name != self.key_name:
+            return
 
-            with self._lock:
-                self._pressed = False
+        with self._lock:
+            self._pressed = False
 
     def was_pressed(self):
+        """
+        Consume exactly one V press.
 
-        with self._lock:
+        Returns True once for each physical press.
+        Holding V does not generate repeated activations.
+        """
+        if self._press_event.is_set():
+            self._press_event.clear()
+            return True
 
-            value = self._was_pressed_flag
-
-            self._was_pressed_flag = False
-
-            return value
+        return False
 
     def is_held(self):
-
+        """
+        Kept for compatibility with older code.
+        Not used for activation.
+        """
         with self._lock:
-            return bool(self._pressed)
+            return self._pressed
 
     def should_listen_for_wakeword(self):
-
-        return (
-            self.is_held()
-            or self.was_pressed()
-        )
+        """
+        Compatibility helper.
+        """
+        return self.was_pressed()

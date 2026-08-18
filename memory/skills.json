@@ -168,8 +168,8 @@
         "success_count": 2
     },
     "build_project:python -m compileall .": {
-        "usage_count": 42,
-        "success_count": 41
+        "usage_count": 44,
+        "success_count": 43
     },
     "run_pytest:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpz1ynay10\\test_sample.py": {
         "usage_count": 1,
@@ -668,8 +668,8 @@
         "success_count": 0
     },
     "open_app:chrome": {
-        "usage_count": 8,
-        "success_count": 8
+        "usage_count": 9,
+        "success_count": 9
     },
     "open_app:calculator": {
         "usage_count": 2,
@@ -701,6 +701,26 @@
     },
     "modify_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpha_ui7mz\\workflow_validator.py": {
         "usage_count": 1,
+        "success_count": 0
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpx_2bi2u4\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "append_file:C:\\Users\\shour\\AppData\\Local\\Temp\\tmpwgs3jzmb\\notes.txt": {
+        "usage_count": 1,
+        "success_count": 1
+    },
+    "open_app:terminal and also tell me how to open terminal without the shortcut key": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "open_app:change": {
+        "usage_count": 2,
+        "success_count": 0
+    },
+    "open_app:visual studio code": {
+        "usage_count": 2,
         "success_count": 0
     }
 }
