@@ -487,6 +487,8 @@ class NovaRuntimeSpine:
         from core.app_search_engine import AppSearchEngine
         from core.conversation_handler import ConversationHandler
         from core.nova_runtime import NovaRuntime
+        from core.input_router import InputRouter
+        from core.conversational_runtime import ConversationalRuntime
 
 
         self.input_layer = NovaInputLayer()
@@ -503,6 +505,12 @@ class NovaRuntimeSpine:
         # Fallback: Ollama / Qwen3
         from core.llm_client import LLMClient
         self.llm_client = LLMClient()
+
+        # InputRouter: classifies non-trivial commands into 3 branches
+        self.input_router = InputRouter(llm_client=self.llm_client)
+
+        # ConversationalRuntime: Branch 2 — informational / conversational
+        self.conversational_runtime = ConversationalRuntime(llm_client=self.llm_client)
 
         self.voice_engine = None
         self.state = "PENDING"
@@ -562,11 +570,90 @@ class NovaRuntimeSpine:
                 "response": entrygate_result.get("response"),
             }
 
-        # Complex goal -> ONE canonical NovaRuntime.process_goal
+        # ── InputRouter: classify into Branch 1/2/3 ──────────────
         goal = entrygate_result.get("goal") or command or raw_text
+        self.state = "ROUTING"
+        router_result = self.input_router.classify(goal)
+        branch = router_result.get("branch", "conversational")
+        confidence = router_result.get("confidence", 0.0)
+        reasoning_text = router_result.get("reasoning", "")
+
+        print(f"[ROUTER] Branch: {branch} | Confidence: {confidence} | Reasoning: {reasoning_text}")
+
+        # ── BRANCH 1: fast_action ────────────────────────────────
+        if branch == "fast_action":
+            self.state = "FAST_ACTION"
+            print(f"[BRANCH 1] Fast action for: {goal}")
+
+            # Re-run through entrygate to attempt the action
+            fast_result = self.entrygate.process(goal)
+            fast_success = fast_result.get("success", False)
+
+            if fast_success:
+                self.state = "COMPLETED"
+                execution = {
+                    "state": "completed",
+                    "execution": {
+                        "success": True,
+                        "action": fast_result.get("action", "fast_action"),
+                        "result": fast_result.get("result"),
+                    },
+                    "verification": {
+                        "success": True,
+                        "reason": "fast_action branch succeeded",
+                    },
+                }
+                return {
+                    "status": "handled",
+                    "state": "COMPLETED",
+                    "received": received,
+                    "entrygate": fast_result,
+                    "category": "fast_action",
+                    "plan": [goal],
+                    "translated": None,
+                    "execution": execution,
+                    "verification": execution.get("verification"),
+                    "response": fast_result.get("response"),
+                    "router": router_result,
+                }
+            else:
+                # Escalate to Branch 3
+                print("[BRANCH 1] Simple action failed, proceeding with complex planning.")
+                branch = "complex_task"
+
+        # ── BRANCH 2: conversational ─────────────────────────────
+        if branch == "conversational":
+            self.state = "CONVERSATIONAL"
+            print(f"[BRANCH 2] Conversational response for: {goal}")
+
+            convo_result = self.conversational_runtime.respond(goal)
+            response_text = convo_result.get("response", "")
+
+            print(f"[BRANCH 2] Nova says: {response_text[:200]}..." if len(response_text) > 200 else f"[BRANCH 2] Nova says: {response_text}")
+
+            self.state = "COMPLETED"
+            return {
+                "status": "handled",
+                "state": "COMPLETED",
+                "received": received,
+                "entrygate": entrygate_result,
+                "category": "conversational",
+                "plan": None,
+                "translated": None,
+                "execution": None,
+                "verification": {"success": True, "reason": "conversational branch"},
+                "response": response_text,
+                "router": router_result,
+                "snapshot": None,
+                "understanding": None,
+            }
+
+        # ── BRANCH 3: complex_task ───────────────────────────────
+        self.state = "COMPLEX_TASK"
+        print(f"[BRANCH 3] Complex task planning for: {goal}")
+
         runtime_result = self.nova_runtime.process_goal(goal)
         runtime_status = runtime_result.get("status")
-        runtime_category = entrygate_action  # "runtime" from EntryGate
         self.state = str(runtime_status) if runtime_status else "COMPLETED"
 
         # Bridge canonical NovaRuntime schema to the UI-layer schema handle_runtime_result expects
@@ -590,6 +677,9 @@ class NovaRuntimeSpine:
             "workflow_stage": context.get("workflow_stage") if isinstance(context, dict) else None,
             "environment_summary": context.get("environment_summary") if isinstance(context, dict) else None,
         }
+
+        print(f"[BRANCH 3] Plan steps: {plan}")
+
         return {
             "status": "handled",
             "state": runtime_result.get("status", "COMPLETED"),
@@ -598,13 +688,14 @@ class NovaRuntimeSpine:
             "reasoning": reasoning,
             "context": context,
             "understanding": understanding,
-            "category": runtime_category,
+            "category": "complex_task",
             "entrygate": entrygate_result,
             "plan": plan,
             "translated": translated,
             "execution": execution,
             "verification": verification,
             "runtime_result": runtime_result,
+            "router": router_result,
         }
         
     def ask_llm(self, prompt: str) -> str:
@@ -634,12 +725,19 @@ def handle_runtime_result(orb, spine, result):
     status = result.get("status", "unknown")
     category = result.get("category", "unknown")
     entrygate = result.get("entrygate") or {}
+    router = result.get("router") or {}
     branch = entrygate.get("branch", "branch_unknown")
 
     if category in {"open", "close"}:
         branch = entrygate.get("branch", "application_handler")
     elif category == "conversation":
         branch = entrygate.get("branch", "conversation")
+    elif category == "conversational":
+        branch = "input_router_conversational"
+    elif category == "fast_action":
+        branch = "input_router_fast_action"
+    elif category == "complex_task":
+        branch = "input_router_complex_task"
     elif category == "understanding":
         branch = "understanding"
     elif category == "exit":
@@ -651,6 +749,9 @@ def handle_runtime_result(orb, spine, result):
         print("INPUT ACCEPTED:", result["received"]["command"])
         print("INTENT CATEGORY:", category)
         print("DISPATCHED BRANCH:", branch)
+
+        if router:
+            print("ROUTER:", router)
 
         if entrygate:
             print("ENTRYGATE:", entrygate)
@@ -672,6 +773,29 @@ def handle_runtime_result(orb, spine, result):
 
             if voice_engine is not None:
                 voice_engine.speak(reply)
+
+        elif category == "conversational":
+            # Branch 2: Informational / conversational via InputRouter
+            orb.set_state("Thinking", (0, 190, 255))
+
+            voice_engine = spine.get_voice_engine()
+            reply = result.get("response") or "Hmm, I'm not sure about that."
+
+            print("NOVA REPLY (BRANCH 2):", reply)
+
+            if voice_engine is not None:
+                voice_engine.speak(reply)
+
+        elif category == "fast_action":
+            # Branch 1: No-BS fast action via InputRouter
+            orb.set_state("Executing", (0, 220, 120))
+            print("FAST ACTION COMPLETED")
+
+        elif category == "complex_task":
+            # Branch 3: Complex step-wise task via InputRouter -> NovaRuntime
+            orb.set_state("Planning", (255, 140, 0))
+            plan = result.get("plan")
+            print("COMPLEX TASK PLAN:", plan)
 
         elif category == "understanding":
             orb.set_state("Understanding", (0, 190, 255))

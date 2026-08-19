@@ -18,7 +18,7 @@ from core.planner_pipeline import PlannerPipeline
 logger = logging.getLogger(__name__)
 
 
-FAST_PATH_ACTIONS = {
+FAST_PATH_ACTIONS = {   
     "open_app",
     "close_app",
     "read_file",
@@ -224,7 +224,7 @@ class NovaRuntime:
             fix to windows, no mac or option A or B, simple, for windows only. research and answer correctly to the latest version of apps too.
 
             """
-            ),
+            )
 
         planner_result = self.pipeline.process(raw_plan)
 
