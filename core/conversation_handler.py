@@ -14,7 +14,7 @@ class ConversationHandler:
         "hello there", "how are you", "how you doing", "how are u",
         "how are you doing", "how are things", "good morning",
         "good afternoon", "good evening", "hey nova", "hi nova",
-        "hello nova", "hey x", "hi x", "hello x",
+        "hello nova", "hey x", "hi x", "hello x", 
     )
 
     EXIT_KEYWORDS: tuple = (
@@ -67,33 +67,49 @@ class ConversationHandler:
 
     @classmethod
     def is_conversational(cls, command: str) -> bool:
-        """Detect if the command is a conversational greeting or salutation."""
+        """Detect only short, explicit conversational greetings/small-talk."""
+
         if not command:
             return False
-        normalized = command.strip().lower()
+
+        normalized = " ".join(command.strip().lower().split())
+
         if not normalized:
             return False
-        return any(keyword in normalized for keyword in cls.SALUTATION_KEYWORDS)
+
+        # Exact short conversational phrases.
+        if normalized in cls.SALUTATION_KEYWORDS:
+            return True
+
+        return False
 
     @classmethod
     def is_exit(cls, command: str) -> bool:
-        """Detect if the command is an exit/shutdown command."""
+        """Detect only explicit exit/shutdown commands."""
+
         if not command:
             return False
-        normalized = command.strip().lower()
+
+        normalized = " ".join(command.strip().lower().split())
+
         if not normalized:
             return False
-        return any(keyword in normalized for keyword in cls.EXIT_KEYWORDS)
+
+        return normalized in cls.EXIT_KEYWORDS
 
     @classmethod
     def is_thank_you(cls, command: str) -> bool:
-        """Detect if the command is a thank-you."""
+        """Detect only explicit thank-you phrases."""
+
         if not command:
             return False
-        normalized = command.strip().lower()
+
+        normalized = " ".join(command.strip().lower().split())
+
         if not normalized:
             return False
-        return any(keyword in normalized for keyword in cls.THANK_YOU_KEYWORDS)
+
+        return normalized in cls.THANK_YOU_KEYWORDS
 
     @classmethod
     def respond(cls, command: str) -> Dict:

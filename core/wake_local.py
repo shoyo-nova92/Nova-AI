@@ -280,17 +280,11 @@ class WakeKeyMonitor:
             return
 
         with self._lock:
-            # Ignore keyboard auto-repeat.
             if self._pressed:
                 return
 
             self._pressed = True
             self._press_event.set()
-
-        print(
-            f"Wake activation key pressed: "
-            f"'{self.key_name}'"
-        )
 
     def _on_release(self, key):
         if self._listener is None:
