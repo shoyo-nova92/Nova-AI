@@ -2,7 +2,7 @@
 
 ### Personal AI Assistant for Voice, Automation, and System Control
 
-> **Current project status: 21 August 2026**
+> **Current project status:**
 >
 > Nova currently has a working voice/text assistant pipeline, deterministic system automation, LLM-powered conversational intelligence, complex-task planning, execution verification, recovery infrastructure, and runtime context/memory systems.
 >
@@ -46,8 +46,6 @@ Nova is being built as a modular local-first assistant with:
 ---
 
 # Current Status
-
-## 21 August 2026
 
 ### Core assistant foundation
 
@@ -179,5 +177,24 @@ The first is already implemented:
                                            │
                                            ▼
                                      USER RESPONSE
+
+## Status
+
+### Nova — 21 August 2026
+
+Cognitive pipeline + deterministic execution foundation: substantially implemented and operational.
+Hybrid visual execution: next major development phase.
+The project is currently transitioning from a planner + deterministic automation system into a hybrid computer-use architecture.
+
+## Author
+
+### Shourya Bhardwaj
+
+Project:
+
+## _NOVA — Personal AI Assistant_
+
+Built with Python, PyQt6, Whisper, openWakeWord, OpenRouter, Ollama, and a modular execution architecture.
+
 
 ```
