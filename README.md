@@ -177,23 +177,12 @@ The first is already implemented:
                                            │
                                            ▼
                                      USER RESPONSE
-
-## Status
-
-### Nova — 21 August 2026
-
-Cognitive pipeline + deterministic execution foundation: substantially implemented and operational.
-Hybrid visual execution: next major development phase.
-The project is currently transitioning from a planner + deterministic automation system into a hybrid computer-use architecture.
+```
 
 ## Author
 
 ### Shourya Bhardwaj
 
-Project:
+**NOVA — Personal AI Assistant**
 
-## _NOVA — Personal AI Assistant_
-
-Built with Python, PyQt6, Whisper, openWakeWord, OpenRouter, Ollama, and a modular execution architecture.
-
-```
+Built with Python, PyQt6, Faster-Whisper, openWakeWord, OpenRouter, Ollama, and a modular execution architecture.
