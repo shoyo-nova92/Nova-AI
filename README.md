@@ -196,5 +196,4 @@ Project:
 
 Built with Python, PyQt6, Whisper, openWakeWord, OpenRouter, Ollama, and a modular execution architecture.
 
-
 ```
