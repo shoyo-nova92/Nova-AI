@@ -12,7 +12,6 @@ from core.execution_router import ExecutionRouter
 from core.execution_policy import ExecutionPolicy
 from core.context_fusion_engine import ContextFusionEngine
 from core.memory_retriever import MemoryRetriever
-from core.llm_client import LLMClient
 from core.planner_pipeline import PlannerPipeline
 
 logger = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ FAST_PATH_ACTIONS = {
 
 class NovaRuntime:
 
-    def __init__(self):
+    def __init__(self, llm_client):
         self.state = RuntimeState.IDLE
         self.current_goal = None
         self.ctx = None
@@ -56,7 +55,7 @@ class NovaRuntime:
         self.reasoner = ReasoningEngine()
         self.fusion = ContextFusionEngine()
         self.memory = MemoryRetriever()
-        self.llm_client = LLMClient()
+        self.llm_client = llm_client
         self.pipeline = PlannerPipeline()
         self.router = ExecutionRouter()
         self.policy = ExecutionPolicy()

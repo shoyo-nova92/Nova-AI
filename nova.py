@@ -482,35 +482,47 @@ class NovaRuntimeSpine:
     """
 
     def __init__(self):
-
         from core.runtime_entrygate import RuntimeEntrygate
         from core.app_search_engine import AppSearchEngine
         from core.conversation_handler import ConversationHandler
-        from core.nova_runtime import NovaRuntime
         from core.input_router import InputRouter
         from core.conversational_runtime import ConversationalRuntime
-
+        from core.nova_runtime import NovaRuntime
+        from core.llm_client import LLMClient
 
         self.input_layer = NovaInputLayer()
+
+        # --------------------------------------------------
+        # ONE SHARED LLM CLIENT
+        # --------------------------------------------------
+
+        self.llm_client = LLMClient()
+
+        # --------------------------------------------------
+        # ENTRYGATE
+        # --------------------------------------------------
 
         self.entrygate = RuntimeEntrygate(
             app_search_engine=AppSearchEngine(auto_index=True),
             conversation_handler=ConversationHandler(),
         )
 
-        self.nova_runtime = NovaRuntime()
+        # --------------------------------------------------
+        # ROUTING / CONVERSATION / RUNTIME
+        # ALL SHARE THE SAME LLM CLIENT
+        # --------------------------------------------------
 
-        # Nova's unified LLM interface.
-        # Primary: OpenRouter / Nemotron 3 Ultra
-        # Fallback: Ollama / Qwen3
-        from core.llm_client import LLMClient
-        self.llm_client = LLMClient()
+        self.input_router = InputRouter(
+            llm_client=self.llm_client
+        )
 
-        # InputRouter: classifies non-trivial commands into 3 branches
-        self.input_router = InputRouter(llm_client=self.llm_client)
+        self.conversational_runtime = ConversationalRuntime(
+            llm_client=self.llm_client
+        )
 
-        # ConversationalRuntime: Branch 2 — informational / conversational
-        self.conversational_runtime = ConversationalRuntime(llm_client=self.llm_client)
+        self.nova_runtime = NovaRuntime(
+            llm_client=self.llm_client
+        )
 
         self.voice_engine = None
         self.state = "PENDING"
