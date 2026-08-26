@@ -3,16 +3,22 @@ import tempfile
 
 import numpy as np
 import pyttsx3
-import sounddevice as sd
+import scipy.io.wavfile as wavfile
+
 from faster_whisper import WhisperModel
 
 from core.error_handler import NovaErrorHandler
-
+from core.audio_recorder import AudioRecorder
 
 class VoiceEngine:
 
     def __init__(self):
+
         self.sample_rate = 16000
+
+        self.recorder = AudioRecorder(
+        self.sample_rate
+        )
 
         try:
             self.model = WhisperModel(
@@ -43,21 +49,16 @@ class VoiceEngine:
                 return
 
     def listen(self, duration=5):
+        print("[VOICE ENGINE] LISTEN STARTED")
         temp_path = None
 
         try:
             print("Listening for command...")
 
-            audio = sd.rec(
-                int(duration * self.sample_rate),
-                samplerate=self.sample_rate,
-                channels=1,
-                dtype="float32",
-            )
+            audio = self.recorder.record_command()
 
-            sd.wait()
-
-            audio = audio.flatten()
+            if audio is None:
+                return ""
 
             if audio.size == 0:
                 return ""
@@ -86,7 +87,6 @@ class VoiceEngine:
                 print("[VOICE] No meaningful audio detected.")
                 return ""
 
-            import scipy.io.wavfile as wavfile
 
             with tempfile.NamedTemporaryFile(
                 delete=False,
@@ -103,8 +103,10 @@ class VoiceEngine:
 
             segments, info = self.model.transcribe(
                 temp_path,
-                beam_size=1,
+                beam_size=5,
                 vad_filter=True,
+                condition_on_previous_text=False,
+                temperature=0.0,
             )
 
             segments = list(segments)
@@ -122,19 +124,40 @@ class VoiceEngine:
                 if not text:
                     continue
 
+
                 print(
                     "[VOICE] Segment:",
                     repr(text),
                     "| no_speech_prob=",
-                    f"{segment.no_speech_prob:.3f}"
+                    f"{segment.no_speech_prob:.3f}",
+                    "| avg_logprob=",
+                    f"{segment.avg_logprob:.3f}"
                 )
 
+
                 if segment.no_speech_prob > 0.60:
+
                     print(
-                        "[VOICE] Ignoring low-confidence "
-                        "speech segment."
+                        "[VOICE] Rejected: high no_speech probability"
+                    )
+
+                    continue
+
+
+                if segment.avg_logprob < -1.0:
+
+                    print(
+                        "[VOICE] Rejected: low transcription confidence"
+                    )
+
+                    continue
+
+                if segment.compression_ratio > 2.4:
+                    print(
+                        "[VOICE] Rejected: repetition hallucination"
                     )
                     continue
+
 
                 accepted_segments.append(text)
 

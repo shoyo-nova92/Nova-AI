@@ -14,16 +14,40 @@ from datetime import datetime, timezone
 
 
 class InputNormalizer:
-    """Normalize incoming user commands for consistent intake."""
 
     @staticmethod
     def normalize(command: str) -> str:
+
         if not command:
             return ""
 
-        cleaned = " ".join(str(command).strip().split())
-        return cleaned.lower()
+        text = str(command).strip().lower()
 
+        words = text.split()
+
+
+        # remove repeated phrases
+        for size in range(len(words)//2, 0, -1):
+
+            first = words[:size]
+
+            repeats = 1
+
+            while (
+                len(words) >= size * (repeats + 1)
+                and
+                words[size*repeats:size*(repeats+1)] == first
+            ):
+                repeats += 1
+
+
+            if repeats > 1:
+
+                words = first + words[size*repeats:]
+                break
+
+
+        return " ".join(words)
 
 class SessionManager:
     """Persistent per-session command intake recorder."""
@@ -775,7 +799,7 @@ def handle_runtime_result(orb, spine, result):
         if category == "conversation":
             orb.set_state("Conversation", (180, 0, 255))
 
-            voice_engine = spine.get_voice_engine()
+            voice_engine = none
             reply = (
                 result.get("response")
                 or "Hello! How can I help?"
@@ -955,13 +979,26 @@ def voice_wake_worker(spine, ui_queue, command_queue):
                     wake_label = detected
 
             if v_key_pressed or wake_label:
+                if voice_engine is None:
+                    voice_engine = spine.get_voice_engine()
+
+                if wake_engine is not None:
+                    wake_engine.stop()
+                    time.sleep(0.5)
+
                 # Wakeword TTS reply (Branch 1)
+                
                 if wake_label:
                     print(f"Wake word detected: {wake_label}")
                     if voice_engine is not None:
-                        voice_engine.speak("hey there, how do i help?")
+                        voice_engine.speak(
+                            "hey there, how do i help?"
+                        )
+                        time.sleep(1)
                     else:
                         print("Nova (TTS): hey there, how do i help?")
+
+                    
 
                 # Pop up UI & set state to Listening!
                 ui_queue.show_ui()
@@ -969,14 +1006,33 @@ def voice_wake_worker(spine, ui_queue, command_queue):
 
                 # Now in Listening state, listen for actual input command!
                 spoken_command = ""
+
                 if voice_engine is not None:
+                    if wake_engine is not None:
+                        wake_engine.stop()
+                    print("[DEBUG] CALLING VOICE ENGINE")
+                    
                     spoken_command = voice_engine.listen()
+
+                    print(
+                        "[DEBUG] VOICE RETURNED:",
+                        repr(spoken_command)
+                    )
+
+                else:
+
+                    print("[DEBUG] VOICE ENGINE MISSING")
+                    spoken_command = ""
 
                 cleaned = InputNormalizer.normalize(spoken_command)
                 if cleaned:
                     command_queue.put(cleaned)
 
-                time.sleep(0.1)
+                time.sleep(0.5)
+
+                if wake_engine is not None:
+                    wake_engine.start()
+                    
             else:
                 time.sleep(0.05)
 

@@ -175,55 +175,80 @@ class NovaRuntime:
 
         raw_plan = self.llm_client.generate(
             prompt=planning_prompt,
-            system_prompt = """
-            You are Nova's execution planning engine.
+            system_prompt="""
 
-            Your job is NOT to answer the user directly.
+            You are Nova's internal planning module.
 
-            Your job is to convert the user's goal into a concise sequence of
-            executable actions that Nova can process.
+            Your ONLY responsibility is creating an execution plan.
 
-            Return ONLY the numbered action list.
+            You are NOT the assistant.
+            You are NOT responding to the user.
 
-            Do not include:
-            - explanations
-            - introductions
-            - conclusions
-            - markdown headings
-            - bullet-point explanations
-            - alternative answers
-            - platform comparisons
-            - conversational text
+            Never:
+            - answer questions
+            - explain concepts
+            - provide tutorials
+            - give instructions for humans
+            - mention shortcuts
+            - mention menus
+            - mention Windows settings
+            - provide alternatives
+            - provide options
 
-            Each step must describe ONE concrete action Nova should perform.
+            Your output will be consumed by Nova's execution pipeline.
 
-            Example:
+            Return ONLY atomic execution steps.
 
-            1. Open Visual Studio Code.
-            2. Press Ctrl+S.
+            Format:
 
-            For informational requests where Nova does not need to control
-            the computer, return:
+            1. action
+            2. action
+            3. action
 
-            1. Provide the requested information to the user.
 
-            For desktop tasks, describe actions such as:
-            - open an application
-            - close an application
-            - press a keyboard key
-            - click something
-            - type text
-            - read information
-            - create a file
-            - modify a file
+            GOOD:
 
-            Never answer the user's question directly.
-            Only produce the execution plan.
+            User:
+            "Create a python file called test.py and write hello world"
 
-            fix to windows, no mac or option A or B, simple, for windows only. research and answer correctly to the latest version of apps too.
+            Output:
 
-            """
-            )
+            1. Create a file named test.py.
+            2. Write "hello world" into test.py.
+            3. Save the file.
+
+
+            BAD:
+
+            - Open Notepad by pressing Windows key.
+            - Use File menu.
+            - Option A / Option B.
+            - Here is how you can do it manually.
+
+
+            Rules:
+
+            Each step must describe what Nova must perform.
+
+            Not what the user should do.
+
+            If the task requires unavailable visual interaction:
+
+            Return:
+
+            1. Perform visual interaction: <description>
+
+
+            For information requests:
+
+            Return:
+
+            1. Provide information response to user.
+
+
+            Return nothing except the numbered plan.
+
+            """)
 
         planner_result = self.pipeline.process(raw_plan)
 
