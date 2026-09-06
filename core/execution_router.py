@@ -50,6 +50,8 @@ from core.memory_auto_logger import (
     MemoryAutoLogger
 )
 
+from core.self_logger import SelfLogger
+
 import time
 
 
@@ -57,6 +59,7 @@ class ExecutionRouter:
 
     def __init__(self):
         self.state = RuntimeState.IDLE
+        self.self_logger = SelfLogger()
 
         self.apps = (
             ApplicationHandler()
@@ -627,6 +630,57 @@ class ExecutionRouter:
         confidence = self.confidence.estimate(
             skill_name
         )
+
+        if hasattr(self, "self_logger") and self.self_logger:
+            try:
+                flowchart_steps = [
+                    {
+                        "stage": "Category Dispatch",
+                        "component": "ExecutionRouter",
+                        "detail": f"Category: {action_category}, Action: {action_name}",
+                        "status": "OK",
+                    },
+                    {
+                        "stage": "Execution Handler",
+                        "component": action_category or "handler",
+                        "detail": f"Target: {target}",
+                        "status": "OK" if result and result.get("success") else "FAILED",
+                    },
+                    {
+                        "stage": "Verification",
+                        "component": "ExecutionVerifier",
+                        "detail": verification.get("reason", "Verification evaluated"),
+                        "status": "OK" if verification.get("success") else "FAILED",
+                    },
+                ]
+                if recovery:
+                    flowchart_steps.append(
+                        {
+                            "stage": "Recovery Engine",
+                            "component": "AdaptiveRetryEngine",
+                            "detail": "Recovery attempted",
+                            "status": "OK" if success else "FAILED",
+                        }
+                    )
+                crux = (
+                    f"Execution for '{action_label}' completed successfully."
+                    if success
+                    else f"Execution for '{action_label}' failed: {verification.get('reason', 'Verification failed')}"
+                )
+                self.self_logger.log_task(
+                    raw_input=action_label,
+                    intent_category=action_name or "action",
+                    dispatched_branch="execution_router",
+                    status="SUCCESS" if success else "FAILED",
+                    duration_seconds=duration,
+                    flowchart_steps=flowchart_steps,
+                    what_went_right=[f"Dispatched {action_name} to {action_category} handler"] if result and result.get("success") else [],
+                    what_went_wrong=[] if success else [verification.get("reason", "Action failed verification")],
+                    crux=crux,
+                    self_building_data={"action_category": action_category, "target": target, "confidence": confidence},
+                )
+            except Exception:
+                pass
 
         return {
 

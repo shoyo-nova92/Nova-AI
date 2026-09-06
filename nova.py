@@ -46,8 +46,13 @@ class InputNormalizer:
                 words = first + words[size*repeats:]
                 break
 
+        normalized = " ".join(words)
+        for prefix in ("hey jarvis ", "hey nova ", "jarvis ", "nova ", "ok jarvis ", "ok nova "):
+            if normalized.startswith(prefix):
+                normalized = normalized[len(prefix):].strip()
+                break
 
-        return " ".join(words)
+        return normalized
 
 class SessionManager:
     """Persistent per-session command intake recorder."""
@@ -78,9 +83,13 @@ class SessionManager:
             }
 
     def record_turn(self, source: str, command: str):
+        now_local = datetime.now()
         turn = {
             "source": source,
             "command": command,
+            "day": now_local.strftime("%A"),
+            "date": now_local.strftime("%Y-%m-%d"),
+            "time": now_local.strftime("%H:%M:%S"),
             "received_at": datetime.now(timezone.utc).isoformat(),
         }
         self.session.setdefault("turns", []).append(turn)
@@ -89,7 +98,7 @@ class SessionManager:
 
     def _save_session(self):
         with open(self.session_file, "w", encoding="utf-8") as file:
-            json.dump(self.session, file, indent=2)
+            json.dump(self.session, file, indent=4)
 
 
 class NovaInputLayer:
@@ -513,6 +522,7 @@ class NovaRuntimeSpine:
         from core.conversational_runtime import ConversationalRuntime
         from core.nova_runtime import NovaRuntime
         from core.llm_client import LLMClient
+        from core.self_logger import SelfLogger
 
         self.input_layer = NovaInputLayer()
 
@@ -548,6 +558,7 @@ class NovaRuntimeSpine:
             llm_client=self.llm_client
         )
 
+        self.self_logger = SelfLogger()
         self.voice_engine = None
         self.state = "PENDING"
 
@@ -564,6 +575,7 @@ class NovaRuntimeSpine:
         if not raw_text:
             return {"status": "empty", "state": "PENDING"}
 
+        start_time = time.time()
         self.state = "PENDING"
         received = self.input_layer.receive_text(raw_text)
         if received.get("status") != "received":
@@ -593,6 +605,17 @@ class NovaRuntimeSpine:
             self.state = "VERIFYING"
             verification = execution.get("verification")
             self.state = "LEARNING"
+
+            duration = round(time.time() - start_time, 3)
+            log_entry = self.self_logger.log_entrygate_execution(
+                raw_command=command,
+                entrygate_result=entrygate_result,
+                duration_seconds=duration,
+            )
+
+            print("\n" + log_entry["flowchart_ascii"])
+            print(f"[CRUX] {log_entry['crux']}\n")
+
             return {
                 "status": "handled",
                 "state": "COMPLETED",
@@ -604,6 +627,7 @@ class NovaRuntimeSpine:
                 "execution": execution,
                 "verification": verification,
                 "response": entrygate_result.get("response"),
+                "self_log": log_entry,
             }
 
         # ── InputRouter: classify into Branch 1/2/3 ──────────────
@@ -639,6 +663,17 @@ class NovaRuntimeSpine:
                         "reason": "fast_action branch succeeded",
                     },
                 }
+
+                duration = round(time.time() - start_time, 3)
+                log_entry = self.self_logger.log_entrygate_execution(
+                    raw_command=goal,
+                    entrygate_result=fast_result,
+                    duration_seconds=duration,
+                )
+
+                print("\n" + log_entry["flowchart_ascii"])
+                print(f"[CRUX] {log_entry['crux']}\n")
+
                 return {
                     "status": "handled",
                     "state": "COMPLETED",
@@ -651,6 +686,7 @@ class NovaRuntimeSpine:
                     "verification": execution.get("verification"),
                     "response": fast_result.get("response"),
                     "router": router_result,
+                    "self_log": log_entry,
                 }
             else:
                 # Escalate to Branch 3
@@ -668,6 +704,18 @@ class NovaRuntimeSpine:
             print(f"[BRANCH 2] Nova says: {response_text[:200]}..." if len(response_text) > 200 else f"[BRANCH 2] Nova says: {response_text}")
 
             self.state = "COMPLETED"
+
+            duration = round(time.time() - start_time, 3)
+            log_entry = self.self_logger.log_conversational_task(
+                raw_command=goal,
+                response_text=response_text,
+                duration_seconds=duration,
+                router_result=router_result,
+            )
+
+            print("\n" + log_entry["flowchart_ascii"])
+            print(f"[CRUX] {log_entry['crux']}\n")
+
             return {
                 "status": "handled",
                 "state": "COMPLETED",
@@ -682,6 +730,7 @@ class NovaRuntimeSpine:
                 "router": router_result,
                 "snapshot": None,
                 "understanding": None,
+                "self_log": log_entry,
             }
 
         # ── BRANCH 3: complex_task ───────────────────────────────
@@ -716,6 +765,12 @@ class NovaRuntimeSpine:
 
         print(f"[BRANCH 3] Plan steps: {plan}")
 
+        recent = self.self_logger.get_recent_logs(limit=1)
+        log_entry = recent[0] if recent else None
+        if log_entry:
+            print("\n" + log_entry.get("flowchart_ascii", ""))
+            print(f"[CRUX] {log_entry.get('crux', '')}\n")
+
         return {
             "status": "handled",
             "state": runtime_result.get("status", "COMPLETED"),
@@ -732,6 +787,7 @@ class NovaRuntimeSpine:
             "verification": verification,
             "runtime_result": runtime_result,
             "router": router_result,
+            "self_log": log_entry,
         }
         
     def ask_llm(self, prompt: str) -> str:
@@ -757,7 +813,16 @@ class NovaRuntimeSpine:
                 "When answering simple questions, keep the response short."
             ),
         )
-def handle_runtime_result(orb, spine, result):
+def handle_runtime_result(target, spine, result, voice_engine=None):
+    """
+    Expose execution results to UI and trigger spoken responses.
+    target can be UIEventQueue (recommended for background thread) or NovaOrb widget.
+    Returns True if an exit/bye action was handled.
+    """
+    def update_state(text, color):
+        if hasattr(target, "set_state"):
+            target.set_state(text, color)
+
     status = result.get("status", "unknown")
     category = result.get("category", "unknown")
     entrygate = result.get("entrygate") or {}
@@ -779,10 +844,16 @@ def handle_runtime_result(orb, spine, result):
     elif category == "exit":
         branch = entrygate.get("branch", "runtime_command")
 
-    if status == "handled":
-        orb.set_state("Observing", (255, 170, 0))
+    if voice_engine is None and hasattr(spine, "get_voice_engine"):
+        voice_engine = spine.get_voice_engine()
 
-        print("INPUT ACCEPTED:", result["received"]["command"])
+    is_exit = (category == "exit")
+
+    if status == "handled":
+        update_state("Observing", (255, 170, 0))
+
+        received = result.get("received") or {}
+        print("INPUT ACCEPTED:", received.get("command", ""))
         print("INTENT CATEGORY:", category)
         print("DISPATCHED BRANCH:", branch)
 
@@ -794,117 +865,82 @@ def handle_runtime_result(orb, spine, result):
 
         print("OBSERVATION SNAPSHOT:", result.get("snapshot"))
         print("UNDERSTANDING:", result.get("understanding"))
-        print("STATE:", result["state"])
+        print("STATE:", result.get("state", "COMPLETED"))
 
         if category == "conversation":
-            orb.set_state("Conversation", (180, 0, 255))
-
-            voice_engine = none
+            update_state("Conversation", (180, 0, 255))
             reply = (
                 result.get("response")
                 or "Hello! How can I help?"
             )
-
             print("NOVA REPLY:", reply)
-
             if voice_engine is not None:
                 voice_engine.speak(reply)
 
         elif category == "conversational":
             # Branch 2: Informational / conversational via InputRouter
-            orb.set_state("Thinking", (0, 190, 255))
-
-            voice_engine = spine.get_voice_engine()
+            update_state("Thinking", (0, 190, 255))
             reply = result.get("response") or "Hmm, I'm not sure about that."
-
             print("NOVA REPLY (BRANCH 2):", reply)
-
             if voice_engine is not None:
                 voice_engine.speak(reply)
 
         elif category == "fast_action":
             # Branch 1: No-BS fast action via InputRouter
-            orb.set_state("Executing", (0, 220, 120))
+            update_state("Executing", (0, 220, 120))
             print("FAST ACTION COMPLETED")
+            time.sleep(0.4)
+
+        elif category in {"open", "close"}:
+            update_state("Executing", (0, 220, 120))
+            time.sleep(0.4)
 
         elif category == "complex_task":
             # Branch 3: Complex step-wise task via InputRouter -> NovaRuntime
-            orb.set_state("Planning", (255, 140, 0))
+            update_state("Planning", (255, 140, 0))
             plan = result.get("plan")
             print("COMPLEX TASK PLAN:", plan)
+            time.sleep(0.5)
 
         elif category == "understanding":
-            orb.set_state("Understanding", (0, 190, 255))
-
-            voice_engine = spine.get_voice_engine()
-
-            if voice_engine is not None:
-                voice_engine.speak(
-                    result.get(
-                        "response",
-                        "I am checking the current situation."
-                    )
-                )
-
-        elif category == "exit":
-            orb.set_state("Bye", (255, 50, 50))
-
-            voice_engine = spine.get_voice_engine()
-            reply = result.get("response") or "Shutting down"
-
+            update_state("Understanding", (0, 190, 255))
+            reply = result.get("response", "I am checking the current situation.")
             if voice_engine is not None:
                 voice_engine.speak(reply)
 
-            QTimer.singleShot(
-                400,
-                lambda: QApplication.instance().quit()
-            )
-
-            return
+        elif category == "exit":
+            update_state("Bye", (255, 50, 50))
+            reply = result.get("response") or "Shutting down"
+            if voice_engine is not None:
+                voice_engine.speak(reply)
+            is_exit = True
 
         else:
-            orb.set_state("Received", (0, 220, 120))
-
-        QTimer.singleShot(
-            900,
-            lambda: orb.set_state(
-                "Listening",
-                (0, 220, 120)
-            )
-        )
+            update_state("Received", (0, 220, 120))
+            time.sleep(0.3)
 
     elif status == "empty":
-        orb.set_state("Idle", (0, 120, 255))
+        update_state("Idle", (0, 120, 255))
 
     else:
-        orb.set_state("Error", (255, 50, 50))
+        update_state("Error", (255, 50, 50))
+        time.sleep(0.5)
 
-        QTimer.singleShot(
-            900,
-            lambda: orb.set_state(
-                "Listening",
-                (0, 220, 120)
-            )
-        )
+    return is_exit
 
 
-def handle_submit(orb, spine):
+def handle_submit(orb, command_queue):
+    """Handles text commands submitted via the Orb input box."""
     raw_text = orb.get_text_command()
-
     if not raw_text:
         return
-
-    result = spine.handle_command(raw_text)
-
-    handle_runtime_result(
-        orb,
-        spine,
-        result
-    )
+    cleaned = InputNormalizer.normalize(raw_text)
+    if cleaned:
+        command_queue.put(cleaned)
 
 
 class UIEventQueue:
-    """Thread-safe queue for UI actions (show, hide, set_state)."""
+    """Thread-safe queue for UI actions (show, hide, set_state, set_text, quit)."""
 
     def __init__(self):
         self.q = queue.Queue()
@@ -917,6 +953,12 @@ class UIEventQueue:
 
     def set_state(self, text, color):
         self.q.put(("set_state", (text, color)))
+
+    def set_text(self, text):
+        self.q.put(("set_text", text))
+
+    def quit_app(self):
+        self.q.put(("quit", None))
 
 
 def poll_ui_queue(orb, ui_queue):
@@ -932,10 +974,17 @@ def poll_ui_queue(orb, ui_queue):
             elif action == "set_state":
                 text, color = data
                 orb.set_state(text, color)
+            elif action == "set_text":
+                if hasattr(orb, "set_text_command"):
+                    orb.set_text_command(data)
+                elif hasattr(orb, "input_box"):
+                    orb.input_box.setText(data)
+            elif action == "quit":
+                QApplication.instance().quit()
         except Exception:
             break
 
-    QTimer.singleShot(100, lambda: poll_ui_queue(orb, ui_queue))
+    QTimer.singleShot(50, lambda: poll_ui_queue(orb, ui_queue))
 
 
 def voice_wake_worker(spine, ui_queue, command_queue):
@@ -949,150 +998,181 @@ def voice_wake_worker(spine, ui_queue, command_queue):
         from core.wake_local import LocalWake, WakeKeyMonitor
         if wake_cls is not None:
             wake_engine = LocalWake(
-            wakeword_models=["hey_jarvis"],
-            inference_framework="onnx",
-            threshold=0.35,
-        )
+                wakeword_models=["hey_jarvis"],
+                inference_framework="onnx",
+                threshold=0.35,
+            )
         else:
             wake_engine = None
         key_monitor = WakeKeyMonitor(key_name="v")
     except Exception as exc:
         print(f"Wake listener setup warning: {exc}")
 
-    print("[NOVA IDLE] Waiting for wake word ('hey jarvis') or activation key ('V'). UI is currently hidden.")
-
     while True:
         try:
-            # Branch 2: Check V key press
-            v_key_pressed = False
+            print("[NOVA IDLE] Waiting for wake word ('hey jarvis') or activation key ('V'). UI is currently hidden.")
 
-            if key_monitor is not None and key_monitor.was_pressed():
-                v_key_pressed = True
-                print("[V KEY PRESSED] Activating listening state directly.")
-
-            # Branch 1: Check Wake Word detection
+            # ── 1. IDLE STAGE: Wait for Wake Word, V key, or typed command ───
+            session_active = False
             wake_label = None
-            if not v_key_pressed and wake_engine is not None:
-                detected = wake_engine.listen_for_nova(timeout=0.1)
 
-                if detected:
-                    wake_label = detected
+            while not session_active:
+                v_key_pressed = False
+                if key_monitor is not None and key_monitor.was_pressed():
+                    v_key_pressed = True
+                    print("[V KEY PRESSED] Activating listening state directly.")
 
-            if v_key_pressed or wake_label:
-                if voice_engine is None:
-                    voice_engine = spine.get_voice_engine()
+                if not v_key_pressed and wake_engine is not None:
+                    detected = wake_engine.listen_for_nova(timeout=0.1)
+                    if detected:
+                        wake_label = detected
 
-                if wake_engine is not None:
-                    wake_engine.stop()
-                    time.sleep(0.5)
+                typed_pending = not command_queue.empty()
 
-                # Wakeword TTS reply (Branch 1)
-                
-                if wake_label:
-                    print(f"Wake word detected: {wake_label}")
-                    if voice_engine is not None:
-                        voice_engine.speak(
-                            "hey there, how do i help?"
-                        )
-                        time.sleep(1)
-                    else:
-                        print("Nova (TTS): hey there, how do i help?")
+                if v_key_pressed or wake_label or typed_pending:
+                    session_active = True
+                    break
 
-                    
+                time.sleep(0.05)
 
-                # Pop up UI & set state to Listening!
-                ui_queue.show_ui()
+            # ── 2. WAKE UP TRANSITION ───────────────────────────────────────
+            if voice_engine is None:
+                voice_engine = spine.get_voice_engine()
+
+            if wake_engine is not None:
+                wake_engine.stop()
+                time.sleep(0.3)
+
+            # Pop up UI & set state to Listening!
+            ui_queue.show_ui()
+            ui_queue.set_state("Listening", (0, 220, 120))
+
+            if wake_label:
+                print(f"Wake word detected: {wake_label}")
+                ui_queue.set_state("Responding", (0, 190, 255))
+                if voice_engine is not None:
+                    voice_engine.speak("hey there, how do i help?")
+                    time.sleep(0.2)
+                else:
+                    print("Nova (TTS): hey there, how do i help?")
+
+            # ── 3. CONTINUOUS LISTENING SESSION ─────────────────────────────
+            # Once awakened, Nova remains in this active listening session.
+            # After each command execution or reply, it ALWAYS falls back to listening!
+            # It will NEVER ask for wakeword again until explicitly exited or "bye"!
+            print("[NOVA ACTIVE] Continuous listening session active. Say 'bye' or 'exit' to end.")
+
+            while session_active:
+                # Ensure UI is in Listening state (green pulse)
                 ui_queue.set_state("Listening", (0, 220, 120))
 
-                # Now in Listening state, listen for actual input command!
-                spoken_command = ""
+                command = None
 
-                if voice_engine is not None:
-                    if wake_engine is not None:
-                        wake_engine.stop()
-                    print("[DEBUG] CALLING VOICE ENGINE")
-                    
-                    spoken_command = voice_engine.listen()
+                # Check if typed command was entered
+                try:
+                    command = command_queue.get_nowait()
+                except queue.Empty:
+                    pass
 
-                    print(
-                        "[DEBUG] VOICE RETURNED:",
-                        repr(spoken_command)
-                    )
+                # If no typed command, listen to microphone
+                if not command:
+                    if voice_engine is not None:
+                        spoken = voice_engine.listen(
+                            timeout=None,
+                            interrupt_check=lambda: not command_queue.empty()
+                        )
+                        if spoken:
+                            command = spoken
+                    else:
+                        time.sleep(0.1)
 
-                else:
+                # Check queue again in case typed input arrived during listening
+                if not command:
+                    try:
+                        command = command_queue.get_nowait()
+                    except queue.Empty:
+                        pass
 
-                    print("[DEBUG] VOICE ENGINE MISSING")
-                    spoken_command = ""
+                # If silence during this window, loop back and keep listening!
+                if not command:
+                    continue
 
-                cleaned = InputNormalizer.normalize(spoken_command)
-                if cleaned:
-                    command_queue.put(cleaned)
+                cleaned = InputNormalizer.normalize(command)
+                if not cleaned:
+                    continue
 
-                time.sleep(0.5)
+                # Show command in UI and transition to Thinking state
+                ui_queue.set_text(cleaned)
+                ui_queue.set_state("Thinking", (0, 190, 255))
 
-                if wake_engine is not None:
-                    wake_engine.start()
-                    
-            else:
-                time.sleep(0.05)
+                # Check for explicit session exit words ("bye", "goodbye", "exit", etc.)
+                is_exit_cmd = False
+                try:
+                    from core.conversation_handler import ConversationHandler
+                    is_exit_cmd = ConversationHandler.is_exit(cleaned)
+                except Exception:
+                    pass
+
+                if not is_exit_cmd and cleaned in {
+                    "bye", "goodbye", "good bye", "see you", "see ya",
+                    "later", "cya", "close nova", "exit", "quit", "shutdown"
+                }:
+                    is_exit_cmd = True
+
+                if is_exit_cmd:
+                    print(f"[SESSION EXIT] Exit command received: '{cleaned}'")
+                    ui_queue.set_state("Bye", (255, 50, 50))
+                    if voice_engine is not None:
+                        voice_engine.speak("Goodbye! Call me if you need me.")
+                    ui_queue.hide_ui()
+                    ui_queue.set_state("Idle", (0, 120, 255))
+                    session_active = False
+
+                    # If user explicitly said exit/quit/shutdown, terminate application
+                    if cleaned in {"exit", "quit", "shutdown", "terminate", "close nova"}:
+                        ui_queue.quit_app()
+                    break
+
+                # Execute command via Nova spine
+                try:
+                    result = spine.handle_command(cleaned)
+                except Exception as exc:
+                    print(f"[EXECUTION ERROR] {exc}")
+                    result = {
+                        "status": "error",
+                        "category": "error",
+                        "response": "An error occurred while processing your command."
+                    }
+
+                # Display result in UI and speak responses
+                is_exit = handle_runtime_result(ui_queue, spine, result, voice_engine)
+
+                if is_exit:
+                    print("[SESSION EXIT] Completed exit action.")
+                    ui_queue.hide_ui()
+                    ui_queue.set_state("Idle", (0, 120, 255))
+                    session_active = False
+                    break
+
+                # FALL BACK TO LISTENING MODE IMMEDIATELY!
+                print("[NOVA READY] Falling back to listening mode...")
+                ui_queue.set_state("Listening", (0, 220, 120))
+                # Next turn of while session_active immediately calls voice_engine.listen()!
+
+            # ── 4. POST-SESSION RE-ARMING ────────────────────────────────────
+            # Only reached when user says bye or exit:
+            # Re-arm continuous wake word engine
+            if wake_engine is not None:
+                wake_engine.start()
+            time.sleep(0.5)
 
         except Exception as exc:
             print(f"Voice wake worker loop error: {exc}")
-            time.sleep(0.1)
-
-
-
-def poll_voice_queue(orb, spine, command_queue):
-    while True:
-        try:
-            command = command_queue.get_nowait()
-
-            # Show exactly what Whisper recognized in the Orb textbox.
-            if hasattr(orb, "set_text_command"):
-                orb.set_text_command(command)
-            elif hasattr(orb, "command_input"):
-                orb.command_input.setText(command)
-
-            print(f"[VOICE -> UI] {command}")
-
-            # Now send the same recognized command into Nova.
-            result = spine.handle_command(command)
-
-            handle_runtime_result(
-                orb,
-                spine,
-                result
-            )
-
-        except queue.Empty:
-            break
-
-        except Exception as exc:
-            print(
-                f"[VOICE QUEUE ERROR] {exc}"
-            )
-            break
-
-    QTimer.singleShot(
-        250,
-        lambda: poll_voice_queue(
-            orb,
-            spine,
-            command_queue
-        )
-    )
+            time.sleep(0.5)
 
 
 def main():
     app = QApplication(sys.argv)
-    from core.context_fusion_engine import ContextFusionEngine
-    from core.execution_router import ExecutionRouter
-    from core.reasoning_engine import ReasoningEngine
-    from core.task_translator import TaskTranslator
-    from core.runtime_entrygate import RuntimeEntrygate
-    from core.app_search_engine import AppSearchEngine
-    from core.conversation_handler import ConversationHandler
-    from core.nova_runtime import NovaRuntime
     from ui.orb import NovaOrb
 
     orb = NovaOrb()
@@ -1112,14 +1192,14 @@ def main():
     )
     worker.start()
 
-    orb.send_button.clicked.connect(lambda: handle_submit(orb, spine))
+    orb.send_button.clicked.connect(lambda: handle_submit(orb, command_queue))
 
-    QTimer.singleShot(100, lambda: poll_ui_queue(orb, ui_queue))
-    QTimer.singleShot(250, lambda: poll_voice_queue(orb, spine, command_queue))
+    QTimer.singleShot(50, lambda: poll_ui_queue(orb, ui_queue))
 
     sys.exit(app.exec())
 
 
 if __name__ == "__main__":
     main()
+
 

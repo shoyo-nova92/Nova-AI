@@ -56,10 +56,20 @@ class ExecutionMemory:
 
             data = json.load(f)
 
+        now = datetime.now()
         data.append({
 
+            "day":
+                now.strftime("%A"),
+
+            "date":
+                now.strftime("%Y-%m-%d"),
+
+            "time":
+                now.strftime("%H:%M:%S"),
+
             "timestamp":
-                str(datetime.now()),
+                str(now),
 
             "action":
                 action,

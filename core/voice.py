@@ -48,14 +48,14 @@ class VoiceEngine:
             except Exception:
                 return
 
-    def listen(self, duration=5):
+    def listen(self, duration=5, timeout=None, interrupt_check=None):
         print("[VOICE ENGINE] LISTEN STARTED")
         temp_path = None
 
         try:
             print("Listening for command...")
 
-            audio = self.recorder.record_command()
+            audio = self.recorder.record_command(timeout=timeout, interrupt_check=interrupt_check)
 
             if audio is None:
                 return ""

@@ -13,14 +13,24 @@ class RuntimeTrace:
         goal
     ):
 
+        now = datetime.now()
         self.trace = {
+
+            "day":
+                now.strftime("%A"),
+
+            "date":
+                now.strftime("%Y-%m-%d"),
+
+            "time":
+                now.strftime("%H:%M:%S"),
 
             "goal": goal,
 
             "events": [],
 
             "timestamp":
-                str(datetime.now())
+                str(now)
 
         }
 
