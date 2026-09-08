@@ -41,8 +41,11 @@ class VisionEngine:
 
         image_path = screenshot_result["filename"]
 
-        # OCR
+        # OCR text remains the compact context consumed by existing callers.
         ocr_result = self.ocr.read_text(image_path)
+
+        # Positional OCR is retained for the approval-gated visual executor.
+        positioned_ocr = self.ocr.read_text_with_positions(image_path)
 
         return {
 
@@ -50,6 +53,8 @@ class VisionEngine:
 
             "running_apps": running_apps,
 
-            "visible_text": ocr_result
+            "visible_text": ocr_result,
+
+            "ui_elements": positioned_ocr.get("elements", [])
 
         }

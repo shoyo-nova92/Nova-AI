@@ -20,6 +20,10 @@ class PlanValidator:
             "search"
         },
 
+        "gui": {
+            "visual_interaction"
+        },
+
         "engineering": {
             "cleanup",
             "document",

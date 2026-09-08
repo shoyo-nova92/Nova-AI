@@ -562,6 +562,14 @@ class NovaRuntimeSpine:
         self.voice_engine = None
         self.state = "PENDING"
 
+    def set_ui_callbacks(self, hide_ui_callback=None, show_ui_callback=None):
+        """Wire the thread-safe UIEventQueue into screen-aware core services."""
+        self.nova_runtime.set_ui_callbacks(hide_ui_callback, show_ui_callback)
+        self.conversational_runtime.perception.set_ui_callbacks(
+            hide_ui_callback,
+            show_ui_callback,
+        )
+
     def get_voice_engine(self):
         if self.voice_engine is None:
             try:
@@ -648,6 +656,25 @@ class NovaRuntimeSpine:
             # Re-run through entrygate to attempt the action
             fast_result = self.entrygate.process(goal)
             fast_success = fast_result.get("success", False)
+
+            if not fast_success:
+                # Check if TaskTranslator or LearnedRules matches this fast action directly
+                translated = self.nova_runtime.task_translator.translate(goal)
+                if isinstance(translated, dict) and translated.get("action"):
+                    policy = self.nova_runtime.policy.classify(translated)
+                    if policy.get("allowed"):
+                        route_res = self.nova_runtime.router.route(translated)
+                        is_route_ok = route_res.get("success", False) or route_res.get("state") == "completed"
+                        if is_route_ok:
+                            fast_result = {
+                                "success": True,
+                                "action": translated.get("action"),
+                                "target": translated.get("target"),
+                                "branch": "translated_fast_action",
+                                "result": route_res,
+                                "command": goal,
+                            }
+                            fast_success = True
 
             if fast_success:
                 self.state = "COMPLETED"
@@ -1183,6 +1210,7 @@ def main():
 
     spine = NovaRuntimeSpine()
     ui_queue = UIEventQueue()
+    spine.set_ui_callbacks(ui_queue.hide_ui, ui_queue.show_ui)
     command_queue = queue.Queue()
 
     worker = threading.Thread(

@@ -191,6 +191,16 @@ class ExecutionPolicy:
             (
                 "application",
                 "install_app"
+            ),
+
+            (
+                "gui",
+                "click"
+            ),
+
+            (
+                "gui",
+                "key"
             )
 
         }

@@ -13,6 +13,7 @@ Hardcoded system prompt locked for this branch's specific purpose.
 import logging
 
 from core.llm_client import LLMClient
+from core.perception_service import PerceptionService
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +52,9 @@ You are Nova — a desktop AI assistant with personality.
 class ConversationalRuntime:
     """Branch 2 runtime — handles informational and conversational queries."""
 
-    def __init__(self, llm_client: LLMClient = None):
+    def __init__(self, llm_client: LLMClient = None, perception_service=None):
         self.llm_client = llm_client or LLMClient()
+        self.perception = perception_service or PerceptionService()
 
     def respond(self, command: str) -> dict:
         """Generate a conversational response for the user's query.
@@ -76,8 +78,14 @@ class ConversationalRuntime:
         try:
             print(f"[CONVERSATIONAL] Processing: \"{command}\"")
 
+            prompt = command
+            if self.perception.should_perceive(command):
+                vision_data = self.perception.capture()
+                summary = self.perception.build_context_summary(vision_data)
+                prompt = f"Screen context: {summary}\n\nUser: {command}"
+
             response = self.llm_client.generate(
-                prompt=command,
+                prompt=prompt,
                 system_prompt=CONVERSATIONAL_SYSTEM_PROMPT,
             )
 

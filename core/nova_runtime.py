@@ -16,6 +16,9 @@ from core.memory_retriever import MemoryRetriever
 from core.planner_pipeline import PlannerPipeline
 from core.llm_planner import LLMPlanner
 from core.self_logger import SelfLogger
+from core.perception_service import PerceptionService
+from core.step_router import StepRouter
+from core.visual_executor import VisualExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +45,20 @@ FAST_PATH_ACTIONS = {
     "pip_install",
     "build_project",
     "open_terminal",
+    "search",
 }
 
 
 class NovaRuntime:
 
-    def __init__(self, llm_client=None):
+    def __init__(
+        self,
+        llm_client=None,
+        perception_service=None,
+        visual_executor=None,
+        hide_ui_callback=None,
+        show_ui_callback=None,
+    ):
         self.state = RuntimeState.IDLE
         self.current_goal = None
         self.ctx = None
@@ -65,12 +76,27 @@ class NovaRuntime:
             except Exception:
                 llm_client = None
         self.llm_client = llm_client
+        self.perception = perception_service or PerceptionService(
+            vision_engine=self.vision,
+            hide_ui_callback=hide_ui_callback,
+            show_ui_callback=show_ui_callback,
+        )
         self.pipeline = PlannerPipeline()
         self.router = ExecutionRouter()
         self.policy = ExecutionPolicy()
+        self.step_router = StepRouter()
+        self.visual_executor = visual_executor or VisualExecutor(
+            perception_service=self.perception,
+            llm_client=self.llm_client,
+            policy=self.policy,
+        )
         self.recovery_engine = RecoveryEngine()
         self.learning_engine = None
         self.self_logger = SelfLogger()
+
+    def set_ui_callbacks(self, hide_ui_callback=None, show_ui_callback=None):
+        """Inject thread-safe UIEventQueue callbacks when the Qt app is running."""
+        self.perception.set_ui_callbacks(hide_ui_callback, show_ui_callback)
 
     def process_goal(self, goal):
         self.current_goal = goal
@@ -132,7 +158,7 @@ class NovaRuntime:
         self.state = RuntimeState.OBSERVING
         ctx.status = "OBSERVING"
         self._log("OBSERVE", "Collecting environment context")
-        ctx.vision = self.vision.analyze_screen()
+        ctx.vision = self.perception.capture()
         self.trace.log_event(RuntimeEvents.OBSERVE_COMPLETE, ctx.vision)
         return ctx
 
@@ -196,6 +222,7 @@ class NovaRuntime:
         if mocked_plan is not None:
             raw_plan = mocked_plan
         elif self.llm_client:
+            perception_summary = self.perception.build_context_summary(ctx.vision)
             planning_prompt = f"""
         Create an executable plan for the following user goal.
 
@@ -204,6 +231,9 @@ class NovaRuntime:
 
         CURRENT CONTEXT:
         {ctx.context}
+
+        SCREEN CONTEXT:
+        {perception_summary}
 
         RELEVANT MEMORIES:
         {ctx.memories}
@@ -308,6 +338,7 @@ class NovaRuntime:
 
         plan_to_execute = ctx.repaired_plan or ctx.raw_plan
         ctx.executions = []
+        remaining_visual_attempts = self.visual_executor.MAX_ATTEMPTS
 
         for action in plan_to_execute:
             normalized_action = action
@@ -317,21 +348,47 @@ class NovaRuntime:
                     normalized_action = translated_action
 
             self._log("EXECUTE", f"Executing action: {normalized_action}")
-            policy = self.policy.classify(normalized_action)
-
-            if policy.get("allowed"):
-                execution_result = self.router.route(normalized_action)
-            else:
+            route = self.step_router.route_step(normalized_action)
+            if route == "visual":
+                if remaining_visual_attempts <= 0:
+                    visual_result = {
+                        "success": False,
+                        "reason": "visual attempt limit reached for this goal",
+                        "attempts": 0,
+                        "executed_via": "visual",
+                    }
+                else:
+                    visual_result = self.visual_executor.execute_step(
+                        normalized_action,
+                        max_attempts=remaining_visual_attempts,
+                    )
+                    remaining_visual_attempts -= visual_result.get("attempts", 0)
+                policy = self.policy.classify({"type": "gui", "action": "visual_interaction"})
                 execution_result = {
-                    "success": False,
-                    "reason": policy.get("reason", "policy blocked action"),
-                    "action": normalized_action.get("action") if isinstance(normalized_action, dict) else str(normalized_action),
+                    "state": "completed" if visual_result.get("success") else "failed",
+                    "execution": visual_result,
+                    "verification": {
+                        "success": visual_result.get("success", False),
+                        "reason": visual_result.get("reason", "visual execution failed"),
+                    },
+                    "executed_via": "visual",
                 }
+            else:
+                policy = self.policy.classify(normalized_action)
+                if policy.get("allowed"):
+                    execution_result = self.router.route(normalized_action)
+                else:
+                    execution_result = {
+                        "success": False,
+                        "reason": policy.get("reason", "policy blocked action"),
+                        "action": normalized_action.get("action") if isinstance(normalized_action, dict) else str(normalized_action),
+                    }
 
             execution_entry = {
                 "action": normalized_action,
                 "policy": policy,
                 "result": execution_result,
+                "executed_via": route,
             }
             ctx.executions.append(execution_entry)
             self.trace.log_event(RuntimeEvents.ACTION_EXECUTED, execution_entry)

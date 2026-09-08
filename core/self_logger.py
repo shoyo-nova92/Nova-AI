@@ -796,6 +796,8 @@ class SelfLogger:
             "recovered": bool(recovery and recovery.get("recovered")),
             "error_category": "VERIFICATION_ERROR" if not v_ok else None,
         }
+        if any(entry.get("executed_via") == "visual" for entry in executions):
+            self_building_data["executed_via"] = "visual"
 
         return self.log_task(
             raw_input=goal,

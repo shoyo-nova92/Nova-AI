@@ -50,6 +50,15 @@ class RuntimeEntrygate:
             else:
                 target = command[6:].strip()
 
+            target_lower = target.lower()
+            if any(conj in target_lower for conj in [" and ", " then ", " & ", " also "]):
+                return {
+                    "action": self.ACTION_RUNTIME,
+                    "target": None,
+                    "command": command,
+                    "normalized": normalized,
+                }
+
             return {
                 "action": self.ACTION_OPEN,
                 "target": target,
@@ -64,6 +73,15 @@ class RuntimeEntrygate:
                 target = command[5:].strip()
             else:
                 target = command[5:].strip()
+
+            target_lower = target.lower()
+            if any(conj in target_lower for conj in [" and ", " then ", " & ", " also "]):
+                return {
+                    "action": self.ACTION_RUNTIME,
+                    "target": None,
+                    "command": command,
+                    "normalized": normalized,
+                }
 
             if target and not self.conversation_handler.is_exit(target):
                 return {

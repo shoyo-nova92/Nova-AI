@@ -8,6 +8,16 @@ class TaskTranslator:
         step
     ):
 
+        from core.learned_rules import match as learned_rules_match
+
+        learned = learned_rules_match(step)
+        if learned:
+            return learned
+
+        visual_action = self._extract_visual_action(step)
+        if visual_action:
+            return visual_action
+
         normalized_step = (
             step
             or
@@ -519,6 +529,30 @@ class TaskTranslator:
             )
 
         return None
+
+    def _extract_visual_action(self, step):
+        """Keep GUI-only planner steps structured for StepRouter/VisualExecutor."""
+        if not step:
+            return None
+
+        normalized_step = step.strip().lower()
+        visual_prefixes = (
+            "perform visual interaction",
+            "click ",
+            "press ",
+            "select ",
+            "choose ",
+            "type into ",
+        )
+        if not any(normalized_step.startswith(prefix) for prefix in visual_prefixes):
+            return None
+
+        return {
+            "type": "gui",
+            "action": "visual_interaction",
+            "action_type": "visual_interaction",
+            "target": step.strip(),
+        }
 
     def _extract_create_folder_target(
         self,
