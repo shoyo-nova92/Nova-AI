@@ -1,0 +1,18 @@
+# Python
+.venv/
+.venv-win/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# VS Code
+.vscode/
+
+# Build artifacts
+build/
+
+# Runtime/generated files
+logs/
+audio_output/
