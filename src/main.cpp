@@ -1,6 +1,8 @@
 #include "input_normalizer.hpp"
 #include "logger.hpp"
 #include "input_coordinator.hpp"
+#include "request_classifier.hpp"
+#include "conversation_handler.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -155,20 +157,107 @@ int main()
     );
 
     // --------------------------------------------------------
-    // PART B ENDPOINT
+    // PART B — REQUEST CLASSIFICATION
     // --------------------------------------------------------
 
     logger.log(
         "INFO",
-        "PART_B_INPUT_NORMALIZATION_COMPLETE",
-        "Input normalization completed. "
-        "Ready for Planner.",
-        "SUCCESS"
+        "REQUEST_CLASSIFICATION",
+        "Starting request classification.",
+        "STARTED"
     );
 
-    cout << endl;
-    cout << "[PIPELINE COMPLETE]" << endl;
-    cout << "Input Source -> Input Normalization" << endl;
+    RequestClassifier classifier;
 
-    return 0;
+    ClassificationResult classification =
+        classifier.classify(
+            normalized.normalizedText
+        );
+
+    if (!classification.success)
+    {
+        logger.log(
+            "ERROR",
+            "REQUEST_CLASSIFICATION",
+            classification.message,
+            "FAILURE"
+        );
+
+        cerr
+            << "[CLASSIFICATION FAILURE] "
+            << classification.message
+            << endl;
+
+        return 1;
+    }
+
+    if (
+        classification.type ==
+        RequestType::CONVERSATION
+    )
+    {
+        cout << endl;
+        cout << "[REQUEST TYPE]" << endl;
+        cout << "CONVERSATION" << endl;
+    }
+
+    logger.log(
+        "INFO",
+        "REQUEST_CLASSIFIED",
+        classification.message,
+        "SUCCESS"
+    );
+    // --------------------------------------------------------
+    // BRANCH 1 — CONVERSATION
+    // --------------------------------------------------------
+
+    if (
+        classification.type ==
+        RequestType::CONVERSATION
+    )
+    {
+        logger.log(
+            "INFO",
+            "CONVERSATION_HANDLER",
+            "Routing request to Conversation Handler.",
+            "STARTED"
+        );
+
+        ConversationHandler conversationHandler;
+
+        LLMResponse llmResponse =
+    conversationHandler.handle(
+        normalized.normalizedText
+    );
+
+    if (!llmResponse.success)
+    {
+        logger.log(
+            "ERROR",
+            "CONVERSATION_HANDLER",
+            llmResponse.message,
+            "FAILURE"
+        );
+
+        cerr
+            << "[CONVERSATION FAILURE] "
+            << llmResponse.message
+            << endl;
+
+        return 1;
+    }
+
+    cout << endl;
+    cout << "[LLM RESPONSE]" << endl;
+    cout << llmResponse.content << endl;
+
+    logger.log(
+        "INFO",
+        "CONVERSATION_COMPLETE",
+        "Conversation response received from LLM.",
+        "SUCCESS"
+    );
+    }
+
+return 0;
 }
