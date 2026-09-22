@@ -3,6 +3,7 @@
 #include "input_coordinator.hpp"
 #include "request_classifier.hpp"
 #include "conversation_handler.hpp"
+#include "single_action_pipeline.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -207,6 +208,7 @@ int main()
         classification.message,
         "SUCCESS"
     );
+
     // --------------------------------------------------------
     // BRANCH 1 — CONVERSATION
     // --------------------------------------------------------
@@ -259,5 +261,195 @@ int main()
     );
     }
 
-return 0;
+    // --------------------------------------------------------
+    // BRANCH 2 — SINGLE ACTION
+    // --------------------------------------------------------
+
+    if (
+        classification.type ==
+        RequestType::SINGLE_ACTION
+    )
+    {
+        cout << endl;
+        cout << "[REQUEST TYPE]" << endl;
+        cout << "SINGLE_ACTION" << endl;
+
+        logger.log(
+            "INFO",
+            "SINGLE_ACTION_PIPELINE",
+            "Routing request to Single Action Pipeline.",
+            "STARTED"
+        );
+
+        SingleActionPipeline singleActionPipeline;
+
+        SingleActionResult actionResult =
+            singleActionPipeline.process(
+                normalized.normalizedText
+            );
+
+        // ----------------------------------------------------
+        // ACTION PARSER
+        // ----------------------------------------------------
+
+        cout << endl;
+        cout << "[ACTION PARSER]" << endl;
+        cout << "Action: "
+            << actionResult.action.name
+            << endl;
+
+        logger.log(
+            "INFO",
+            "ACTION_PARSER",
+            "Action identified: "
+                + actionResult.action.name,
+            "SUCCESS"
+        );
+
+        // ----------------------------------------------------
+        // CAPABILITY RESOLVER
+        // ----------------------------------------------------
+
+        cout << endl;
+        cout << "[CAPABILITY RESOLVER]" << endl;
+        cout << "Capability: "
+            << actionResult.capability.name
+            << endl;
+
+        logger.log(
+            "INFO",
+            "CAPABILITY_RESOLVER",
+            "Capability resolved: "
+                + actionResult.capability.name,
+            "SUCCESS"
+        );
+
+        // ----------------------------------------------------
+        // PARAMETER RESOLVER
+        // ----------------------------------------------------
+
+        cout << endl;
+        cout << "[PARAMETER RESOLVER]" << endl;
+
+        cout << "Name: "
+            << (
+                    actionResult.parameters.name.empty()
+                    ? "[none]"
+                    : actionResult.parameters.name
+                )
+            << endl;
+
+        cout << "Location: "
+            << (
+                    actionResult.parameters.location.empty()
+                    ? "[none]"
+                    : actionResult.parameters.location
+                )
+            << endl;
+
+        cout << "Application: "
+            << (
+                    actionResult.parameters.application.empty()
+                    ? "[none]"
+                    : actionResult.parameters.application
+                )
+            << endl;
+
+        logger.log(
+            "INFO",
+            "PARAMETER_RESOLVER",
+            "Action parameters resolved.",
+            "SUCCESS"
+        );
+
+        // ----------------------------------------------------
+        // ACTION VALIDATOR
+        // ----------------------------------------------------
+
+        cout << endl;
+        cout << "[ACTION VALIDATOR]" << endl;
+
+        cout << "Valid: "
+            << (
+                    actionResult.validation.valid
+                    ? "true"
+                    : "false"
+                )
+            << endl;
+
+        logger.log(
+            "INFO",
+            "ACTION_VALIDATOR",
+            actionResult.validation.message,
+            actionResult.validation.valid
+                ? "SUCCESS"
+                : "FAILURE"
+        );
+
+        // ----------------------------------------------------
+        // EXECUTION PLAN
+        // ----------------------------------------------------
+
+        cout << endl;
+        cout << "[EXECUTION PLAN]" << endl;
+
+        cout << "Valid: "
+            << (
+                    actionResult.executionPlan.valid
+                    ? "true"
+                    : "false"
+                )
+            << endl;
+
+        cout << "Type: "
+            << actionResult.executionPlan.type
+            << endl;
+
+        cout << "Action: "
+            << actionResult.executionPlan.action.name
+            << endl;
+
+        cout << "Capability: "
+            << actionResult.executionPlan.capability.name
+            << endl;
+
+        logger.log(
+            "INFO",
+            "EXECUTION_PLAN",
+            "Single action execution plan created.",
+            actionResult.executionPlan.valid
+                ? "SUCCESS"
+                : "FAILURE"
+        );
+
+        if (!actionResult.success)
+        {
+            logger.log(
+                "ERROR",
+                "SINGLE_ACTION_PIPELINE",
+                actionResult.message,
+                "FAILURE"
+            );
+
+            cerr
+                << "[SINGLE ACTION FAILURE] "
+                << actionResult.message
+                << endl;
+
+            return 1;
+        }
+
+        cout << endl;
+        cout << "[SINGLE ACTION PIPELINE COMPLETE]"
+            << endl;
+
+        logger.log(
+            "INFO",
+            "SINGLE_ACTION_PIPELINE",
+            "Single action planning completed successfully.",
+            "SUCCESS"
+        );
+    }
+
+    return 0;
 }

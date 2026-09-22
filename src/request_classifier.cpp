@@ -22,6 +22,33 @@ ClassificationResult RequestClassifier::classify(
     }
 
     // --------------------------------------------------------
+    // BRANCH 2 — SINGLE ACTION
+    // --------------------------------------------------------
+
+    if (
+        input.find("create a folder") != string::npos ||
+        input.find("make a folder") != string::npos ||
+        input == "open" ||
+        input.find("open ") == 0 ||
+        input == "launch" ||
+        input.find("launch ") == 0 ||
+
+        input == "close" ||
+        input.find("close ") == 0
+    )
+    {
+        result.type =
+            RequestType::SINGLE_ACTION;
+
+        result.success = true;
+
+        result.message =
+            "Request classified as single action.";
+
+        return result;
+    }
+
+    // --------------------------------------------------------
     // BRANCH 1 — CONVERSATION
     // --------------------------------------------------------
 
