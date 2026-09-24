@@ -5,6 +5,7 @@
 #include "action_parameters.hpp"
 #include "action_validator.hpp"
 #include "execution_plan.hpp"
+#include "execution_result.hpp"
 
 #include <string>
 
@@ -23,6 +24,8 @@ struct SingleActionResult
     ActionValidationResult validation;
 
     ExecutionPlan executionPlan;
+
+    ExecutionResult executionResult;
 
     string message;
 };

@@ -100,6 +100,37 @@ void runTest(
                 : result.executionPlan.capability.name
             )
         << endl;
+        cout << "Execution Status: "
+            << static_cast<int>(
+                result.executionResult.status
+            )
+            << endl;
+
+        cout << "Execution Reason: "
+            << static_cast<int>(
+                result.executionResult.reason
+            )
+            << endl;
+
+        cout << "Execution Action: "
+            << (
+                result.executionResult.action.empty()
+                ? "[none]"
+                : result.executionResult.action
+            )
+            << endl;
+
+        cout << "Execution Confidence: "
+            << result.executionResult.confidence
+            << endl;
+
+        cout << "Execution Message: "
+            << (
+                result.executionResult.message.empty()
+                ? "[none]"
+                : result.executionResult.message
+            )
+            << endl;
 
     cout << "Message: "
         << result.message

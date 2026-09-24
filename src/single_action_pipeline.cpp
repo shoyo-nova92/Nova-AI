@@ -1,4 +1,5 @@
 #include "single_action_pipeline.hpp"
+#include "execution_engine.hpp"
 
 #include "capability_resolver.hpp"
 #include "parameter_resolver.hpp"
@@ -14,6 +15,18 @@ SingleActionResult SingleActionPipeline::process(
     SingleActionResult result;
 
     result.success = false;
+    result.executionResult.status =
+        ExecutionStatus::NOT_EXECUTED;
+
+    result.executionResult.reason =
+        ExecutionFailureReason::INVALID_PLAN;
+
+    result.executionResult.action = "";
+
+    result.executionResult.message =
+        "Execution has not started.";
+
+    result.executionResult.confidence = 0.0;
 
     result.action.name = "";
 
@@ -154,8 +167,32 @@ SingleActionResult SingleActionPipeline::process(
             executionPlan.message;
 
         return result;
-    }
+        }
+    // --------------------------------------------------------
+    // STAGE 6 — CONFIDENCE & EXECUTION
+    // --------------------------------------------------------
 
+    ExecutionEngine executionEngine;
+
+    ExecutionResult executionResult =
+        executionEngine.execute(
+            result.executionPlan
+        );
+
+    result.executionResult =
+        executionResult;
+
+    if (
+        executionResult.status
+        !=
+        ExecutionStatus::SUCCESS
+    )
+    {
+        result.message =
+            executionResult.message;
+
+        return result;
+    }
     // --------------------------------------------------------
     // PIPELINE SUCCESS
     // --------------------------------------------------------
@@ -163,7 +200,6 @@ SingleActionResult SingleActionPipeline::process(
     result.success = true;
 
     result.message =
-        "Single action execution plan created successfully.";
-
+        "Single action executed successfully.";
     return result;
 }

@@ -1,9 +1,12 @@
 #include "input_normalizer.hpp"
+#include "llm_client.hpp"
 
-#include <algorithm>
-#include <cctype>
+#include <nlohmann/json.hpp>
+
+#include <string>
 
 using namespace std;
+using json = nlohmann::json;
 
 NormalizedInput InputNormalizer::normalize(
     const string& input
@@ -12,215 +15,134 @@ NormalizedInput InputNormalizer::normalize(
     NormalizedInput result;
 
     result.originalText = input;
+    result.normalizedText = "";
+    result.success = false;
+    result.message = "";
 
     if (input.empty())
     {
-        result.success = false;
-        result.normalizedText = "";
-        result.message = "Input is empty.";
-
+        result.message = "Cannot normalize empty input.";
         return result;
     }
 
-    string text = input;
+    const string systemPrompt = R"(
+You are Nova's Input Normalizer.
 
-    // --------------------------------------------------------
-    // Convert to lowercase
-    // --------------------------------------------------------
+Your ONLY responsibility is to clean and normalize the user's input.
 
-    transform(
-        text.begin(),
-        text.end(),
-        text.begin(),
-        [](unsigned char character)
-        {
-            return static_cast<char>(
-                tolower(character)
-            );
-        }
-    );
+Do NOT:
+- classify the request
+- determine the user's intent
+- select an action
+- determine capabilities
+- resolve parameters
+- create an execution plan
+- execute anything
+- add information that was not present
+- answer the user
 
-    // --------------------------------------------------------
-    // Remove common conversational fillers
-    // --------------------------------------------------------
+You MUST:
+- remove filler words and speech disfluencies
+- remove unnecessary politeness and conversational padding
+- remove "Nova" when it is only being used to address the assistant
+- preserve the user's actual meaning
+- preserve names
+- preserve application names
+- preserve file paths
+- preserve numbers
+- preserve quoted strings
+- preserve requested operations
+- preserve meaningful capitalization
+- preserve all information required by later processing
 
-    const string fillers[] =
-    {
-        "uhh ",
-        "uh ",
-        "umm ",
-        "um ",
-        "like "
-    };
+Example:
 
-    for (const string& filler : fillers)
-    {
-        size_t position = 0;
+Input:
+"uhh Nova, can you like create a folder called Nova on my desktop"
 
-        while (
-            (position = text.find(filler, position))
-            != string::npos
-        )
-        {
-            text.erase(
-                position,
-                filler.length()
-            );
-        }
-    }
+Normalized:
+"create a folder called Nova on my desktop"
 
-    // --------------------------------------------------------
-    // Collapse repeated whitespace
-    // --------------------------------------------------------
+If the input is already clean, return it without unnecessary changes.
 
-    string cleaned;
+Return ONLY valid JSON.
 
-    bool previousWasSpace = false;
+The JSON format MUST be exactly:
 
-    for (unsigned char character : text)
-    {
-        if (isspace(character))
-        {
-            if (!previousWasSpace)
-            {
-                cleaned += ' ';
-                previousWasSpace = true;
-            }
-        }
-        else
-        {
-            cleaned += static_cast<char>(
-                character
-            );
+{
+  "normalized_text": "..."
+}
 
-            previousWasSpace = false;
-        }
-    }
+Do not return markdown.
+Do not return code fences.
+Do not return explanations.
+Do not return any text outside the JSON object.
+)";
 
-    // --------------------------------------------------------
-    // Trim leading/trailing whitespace
-    // --------------------------------------------------------
+    const string userPrompt =
+        "Normalize this input:\n" + input;
 
-    if (!cleaned.empty() &&
-        cleaned.front() == ' ')
-    {
-        cleaned.erase(
-            cleaned.begin()
+    LLMClient llmClient;
+
+    LLMResponse response =
+        llmClient.generate(
+            systemPrompt,
+            userPrompt
         );
-    }
 
-    if (!cleaned.empty() &&
-        cleaned.back() == ' ')
+    if (!response.success)
     {
-        cleaned.pop_back();
-    }
-
-    // --------------------------------------------------------
-    // Remove conversational "you know" prefix
-    // --------------------------------------------------------
-
-    const string conversationalPrefixes[] =
-    {
-        "you know, ",
-        "you know "
-    };
-
-    for (const string& prefix : conversationalPrefixes)
-    {
-        if (
-            cleaned.rfind(prefix, 0) == 0
-        )
-        {
-            cleaned.erase(
-                0,
-                prefix.length()
-            );
-
-            break;
-        }
-    }
-
-    // --------------------------------------------------------
-    // Remove assistant wake-name when used as an address
-    // --------------------------------------------------------
-
-    const string assistantPrefix = "nova";
-
-    if (
-        cleaned == assistantPrefix
-        ||
-        cleaned.rfind(
-            assistantPrefix + ", ",
-            0
-        ) == 0
-        ||
-        cleaned.rfind(
-            assistantPrefix + " ",
-            0
-        ) == 0
-    )
-    {
-        if (cleaned == assistantPrefix)
-        {
-            cleaned = "";
-        }
-        else if (
-            cleaned.rfind(
-                assistantPrefix + ", ",
-                0
-            ) == 0
-        )
-        {
-            cleaned.erase(
-                0,
-                assistantPrefix.length() + 2
-            );
-        }
-        else
-        {
-            cleaned.erase(
-                0,
-                assistantPrefix.length() + 1
-            );
-        }
-    }
-
-    // --------------------------------------------------------
-    // Trim again after prefix removal
-    // --------------------------------------------------------
-
-    if (!cleaned.empty() &&
-        cleaned.front() == ' ')
-    {
-        cleaned.erase(
-            cleaned.begin()
-        );
-    }
-
-    if (!cleaned.empty() &&
-        cleaned.back() == ' ')
-    {
-        cleaned.pop_back();
-    }
-
-    // --------------------------------------------------------
-    // Validate normalized input
-    // --------------------------------------------------------
-
-    if (cleaned.empty())
-    {
-        result.success = false;
-        result.normalizedText = "";
         result.message =
-            "Normalized input is empty.";
+            "Input normalization LLM failed: "
+            + response.message;
 
         return result;
     }
 
-    result.success = true;
-    result.normalizedText = cleaned;
-    result.message =
-        "Input normalized successfully.";
+    try
+    {
+        json parsed =
+            json::parse(response.content);
 
-    return result;
+        if (!parsed.contains("normalized_text"))
+        {
+            result.message =
+                "LLM response missing normalized_text.";
+
+            return result;
+        }
+
+        if (!parsed["normalized_text"].is_string())
+        {
+            result.message =
+                "LLM normalized_text is not a string.";
+
+            return result;
+        }
+
+        result.normalizedText =
+            parsed["normalized_text"].get<string>();
+
+        if (result.normalizedText.empty())
+        {
+            result.message =
+                "LLM returned empty normalized text.";
+
+            return result;
+        }
+
+        result.success = true;
+        result.message =
+            "Input normalized successfully.";
+
+        return result;
+    }
+    catch (const exception& exception)
+    {
+        result.message =
+            "Failed to parse LLM normalization response: "
+            + string(exception.what());
+
+        return result;
+    }
 }

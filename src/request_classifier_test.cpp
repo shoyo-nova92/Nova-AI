@@ -1,116 +1,77 @@
 #include "request_classifier.hpp"
 
 #include <iostream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-void runTest(
-    RequestClassifier& classifier,
-    const string& input
-)
+string requestTypeToString(RequestType type)
 {
-    ClassificationResult result =
-        classifier.classify(input);
-
-    cout << endl;
-    cout << "Input: "
-         << input
-         << endl;
-
-    cout << "Success: "
-         << (result.success ? "true" : "false")
-         << endl;
-
-    cout << "Type: ";
-
-    switch (result.type)
+    switch (type)
     {
         case RequestType::CONVERSATION:
-            cout << "CONVERSATION";
-            break;
+            return "CONVERSATION";
 
         case RequestType::SINGLE_ACTION:
-            cout << "SINGLE_ACTION";
-            break;
+            return "SINGLE_ACTION";
 
         case RequestType::MULTI_STEP_GOAL:
-            cout << "MULTI_STEP_GOAL";
-            break;
+            return "MULTI_STEP_GOAL";
 
         case RequestType::EXISTING_WORKFLOW:
-            cout << "EXISTING_WORKFLOW";
-            break;
+            return "EXISTING_WORKFLOW";
 
         case RequestType::CLARIFICATION_REQUIRED:
-            cout << "CLARIFICATION_REQUIRED";
-            break;
+            return "CLARIFICATION_REQUIRED";
 
         case RequestType::UNSUPPORTED:
-            cout << "UNSUPPORTED";
-            break;
+            return "UNSUPPORTED";
     }
 
-    cout << endl;
-
-    cout << "Message: "
-         << result.message
-         << endl;
+    return "UNKNOWN";
 }
 
 int main()
 {
     RequestClassifier classifier;
 
-    cout << "============================================================"
-         << endl;
+    vector<string> testInputs =
+    {
+        "What is inheritance in Java?",
+        "Create a folder called Nova on my desktop.",
+        "Open Chrome and search for Python tutorials.",
+        "Start my morning routine.",
+        "Open that file.",
+        "Control an application Nova has no integration for."
+    };
 
-    cout << "ROOT ROUTER TEST"
-         << endl;
+    cout << "========================================" << endl;
+    cout << "LLM ROOT ROUTER TEST" << endl;
+    cout << "========================================" << endl;
 
-    cout << "============================================================"
-         << endl;
+    for (const string& input : testInputs)
+    {
+        cout << endl;
+        cout << "[INPUT]" << endl;
+        cout << input << endl;
 
-    // --------------------------------------------------------
-    // CONVERSATION
-    // --------------------------------------------------------
+        ClassificationResult result =
+            classifier.classify(input);
 
-    runTest(
-        classifier,
-        "what is inheritance in java?"
-    );
+        if (!result.success)
+        {
+            cout << "[FAILURE]" << endl;
+            cout << result.message << endl;
+            continue;
+        }
 
-    runTest(
-        classifier,
-        "explain dynamic method dispatch"
-    );
+        cout << "[CLASSIFICATION]" << endl;
+        cout << requestTypeToString(result.type) << endl;
+    }
 
-    // --------------------------------------------------------
-    // SINGLE ACTION
-    // --------------------------------------------------------
-
-    runTest(
-        classifier,
-        "open chrome"
-    );
-
-    runTest(
-        classifier,
-        "create a folder called nova on my desktop"
-    );
-
-    runTest(
-        classifier,
-        "close spotify"
-    );
-
-    // --------------------------------------------------------
-    // EMPTY INPUT
-    // --------------------------------------------------------
-
-    runTest(
-        classifier,
-        ""
-    );
+    cout << endl;
+    cout << "========================================" << endl;
 
     return 0;
 }

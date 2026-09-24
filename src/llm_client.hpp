@@ -14,7 +14,13 @@ struct LLMResponse
 class LLMClient
 {
 public:
+
     LLMResponse generate(
         const string& prompt
+    );
+
+    LLMResponse generate(
+        const string& systemPrompt,
+        const string& userPrompt
     );
 };

@@ -7,8 +7,38 @@
 
 #include <filesystem>
 #include <iostream>
+#include <string>
 
 using namespace std;
+
+namespace
+{
+    string requestTypeToString(RequestType type)
+    {
+        switch (type)
+        {
+            case RequestType::CONVERSATION:
+                return "CONVERSATION";
+
+            case RequestType::SINGLE_ACTION:
+                return "SINGLE_ACTION";
+
+            case RequestType::MULTI_STEP_GOAL:
+                return "MULTI_STEP_GOAL";
+
+            case RequestType::EXISTING_WORKFLOW:
+                return "EXISTING_WORKFLOW";
+
+            case RequestType::CLARIFICATION_REQUIRED:
+                return "CLARIFICATION_REQUIRED";
+
+            case RequestType::UNSUPPORTED:
+                return "UNSUPPORTED";
+        }
+
+        return "UNKNOWN";
+    }
+}
 
 int main()
 {
@@ -111,13 +141,13 @@ int main()
     );
 
     // --------------------------------------------------------
-    // PART B — INPUT NORMALIZATION
+    // PART B — LLM INPUT NORMALIZATION
     // --------------------------------------------------------
 
     logger.log(
         "INFO",
         "INPUT_NORMALIZATION",
-        "Starting input normalization.",
+        "Starting LLM input normalization.",
         "STARTED"
     );
 
@@ -152,19 +182,19 @@ int main()
     logger.log(
         "INFO",
         "INPUT_NORMALIZED",
-        "Normalized text: "
+        "LLM normalized input: "
             + normalized.normalizedText,
         "SUCCESS"
     );
 
     // --------------------------------------------------------
-    // PART B — REQUEST CLASSIFICATION
+    // PART B — LLM ROOT ROUTER
     // --------------------------------------------------------
 
     logger.log(
         "INFO",
-        "REQUEST_CLASSIFICATION",
-        "Starting request classification.",
+        "ROOT_ROUTER",
+        "Starting LLM root routing.",
         "STARTED"
     );
 
@@ -179,33 +209,33 @@ int main()
     {
         logger.log(
             "ERROR",
-            "REQUEST_CLASSIFICATION",
+            "ROOT_ROUTER",
             classification.message,
             "FAILURE"
         );
 
         cerr
-            << "[CLASSIFICATION FAILURE] "
+            << "[ROOT ROUTER FAILURE] "
             << classification.message
             << endl;
 
         return 1;
     }
 
-    if (
-        classification.type ==
-        RequestType::CONVERSATION
-    )
-    {
-        cout << endl;
-        cout << "[REQUEST TYPE]" << endl;
-        cout << "CONVERSATION" << endl;
-    }
+    string requestType =
+        requestTypeToString(
+            classification.type
+        );
+
+    cout << endl;
+    cout << "[REQUEST TYPE]" << endl;
+    cout << requestType << endl;
 
     logger.log(
         "INFO",
-        "REQUEST_CLASSIFIED",
-        classification.message,
+        "ROOT_ROUTER",
+        "Request classified as: "
+            + requestType,
         "SUCCESS"
     );
 
@@ -228,37 +258,37 @@ int main()
         ConversationHandler conversationHandler;
 
         LLMResponse llmResponse =
-    conversationHandler.handle(
-        normalized.normalizedText
-    );
+            conversationHandler.handle(
+                normalized.normalizedText
+            );
 
-    if (!llmResponse.success)
-    {
+        if (!llmResponse.success)
+        {
+            logger.log(
+                "ERROR",
+                "CONVERSATION_HANDLER",
+                llmResponse.message,
+                "FAILURE"
+            );
+
+            cerr
+                << "[CONVERSATION FAILURE] "
+                << llmResponse.message
+                << endl;
+
+            return 1;
+        }
+
+        cout << endl;
+        cout << "[LLM RESPONSE]" << endl;
+        cout << llmResponse.content << endl;
+
         logger.log(
-            "ERROR",
-            "CONVERSATION_HANDLER",
-            llmResponse.message,
-            "FAILURE"
+            "INFO",
+            "CONVERSATION_COMPLETE",
+            "Conversation response received from LLM.",
+            "SUCCESS"
         );
-
-        cerr
-            << "[CONVERSATION FAILURE] "
-            << llmResponse.message
-            << endl;
-
-        return 1;
-    }
-
-    cout << endl;
-    cout << "[LLM RESPONSE]" << endl;
-    cout << llmResponse.content << endl;
-
-    logger.log(
-        "INFO",
-        "CONVERSATION_COMPLETE",
-        "Conversation response received from LLM.",
-        "SUCCESS"
-    );
     }
 
     // --------------------------------------------------------
@@ -270,10 +300,6 @@ int main()
         RequestType::SINGLE_ACTION
     )
     {
-        cout << endl;
-        cout << "[REQUEST TYPE]" << endl;
-        cout << "SINGLE_ACTION" << endl;
-
         logger.log(
             "INFO",
             "SINGLE_ACTION_PIPELINE",
@@ -287,6 +313,27 @@ int main()
             singleActionPipeline.process(
                 normalized.normalizedText
             );
+
+        // ----------------------------------------------------
+        // PIPELINE FAILURE
+        // ----------------------------------------------------
+
+        if (!actionResult.success)
+        {
+            logger.log(
+                "ERROR",
+                "SINGLE_ACTION_PIPELINE",
+                actionResult.message,
+                "FAILURE"
+            );
+
+            cerr
+                << "[SINGLE ACTION FAILURE] "
+                << actionResult.message
+                << endl;
+
+            return 1;
+        }
 
         // ----------------------------------------------------
         // ACTION PARSER
@@ -421,23 +468,62 @@ int main()
                 ? "SUCCESS"
                 : "FAILURE"
         );
+        // ----------------------------------------------------
+        // EXECUTION RESULT
+        // ----------------------------------------------------
 
-        if (!actionResult.success)
-        {
-            logger.log(
-                "ERROR",
-                "SINGLE_ACTION_PIPELINE",
-                actionResult.message,
-                "FAILURE"
-            );
+        cout << endl;
+        cout << "[EXECUTION RESULT]" << endl;
 
-            cerr
-                << "[SINGLE ACTION FAILURE] "
-                << actionResult.message
-                << endl;
+        cout << "Status: "
+            << static_cast<int>(
+                actionResult.executionResult.status
+            )
+            << endl;
 
-            return 1;
-        }
+        cout << "Reason: "
+            << static_cast<int>(
+                actionResult.executionResult.reason
+            )
+            << endl;
+
+        cout << "Action: "
+            << actionResult.executionResult.action
+            << endl;
+
+        cout << "Confidence: "
+            << actionResult.executionResult.confidence
+            << endl;
+
+        cout << "Target Resolved: "
+            << (
+                actionResult.executionResult.targetResolved
+                ? "true"
+                : "false"
+            )
+            << endl;
+
+        cout << "Execution Mechanism Resolved: "
+            << (
+                actionResult.executionResult.executionMechanismResolved
+                ? "true"
+                : "false"
+            )
+            << endl;
+
+        cout << "Message: "
+            << actionResult.executionResult.message
+            << endl;
+
+        logger.log(
+            "INFO",
+            "EXECUTION_RESULT",
+            actionResult.executionResult.message,
+            actionResult.executionResult.status
+                == ExecutionStatus::SUCCESS
+                ? "SUCCESS"
+                : "FAILURE"
+        );
 
         cout << endl;
         cout << "[SINGLE ACTION PIPELINE COMPLETE]"
@@ -446,7 +532,91 @@ int main()
         logger.log(
             "INFO",
             "SINGLE_ACTION_PIPELINE",
-            "Single action planning completed successfully.",
+            "Single action execution completed successfully.",
+            "SUCCESS"
+        );
+    }
+
+    // --------------------------------------------------------
+    // BRANCH 3 — MULTI-STEP GOAL
+    // --------------------------------------------------------
+
+    if (
+        classification.type ==
+        RequestType::MULTI_STEP_GOAL
+    )
+    {
+        cout << endl;
+        cout << "[BRANCH 3]" << endl;
+        cout << "MULTI_STEP_GOAL" << endl;
+
+        logger.log(
+            "INFO",
+            "MULTI_STEP_GOAL",
+            "Multi-step goal branch selected.",
+            "SUCCESS"
+        );
+    }
+
+    // --------------------------------------------------------
+    // BRANCH 4 — EXISTING WORKFLOW
+    // --------------------------------------------------------
+
+    if (
+        classification.type ==
+        RequestType::EXISTING_WORKFLOW
+    )
+    {
+        cout << endl;
+        cout << "[BRANCH 4]" << endl;
+        cout << "EXISTING_WORKFLOW" << endl;
+
+        logger.log(
+            "INFO",
+            "EXISTING_WORKFLOW",
+            "Existing workflow branch selected.",
+            "SUCCESS"
+        );
+    }
+
+    // --------------------------------------------------------
+    // BRANCH 5 — CLARIFICATION REQUIRED
+    // --------------------------------------------------------
+
+    if (
+        classification.type ==
+        RequestType::CLARIFICATION_REQUIRED
+    )
+    {
+        cout << endl;
+        cout << "[BRANCH 5]" << endl;
+        cout << "CLARIFICATION_REQUIRED" << endl;
+
+        logger.log(
+            "INFO",
+            "CLARIFICATION_REQUIRED",
+            "Clarification branch selected.",
+            "SUCCESS"
+        );
+    }
+
+    // --------------------------------------------------------
+    // BRANCH 6 — UNSUPPORTED
+    // --------------------------------------------------------
+
+    if (
+        classification.type ==
+        RequestType::UNSUPPORTED
+    )
+    {
+        cout << endl;
+        cout << "[BRANCH 6]" << endl;
+        cout << "UNSUPPORTED" << endl;
+
+        logger.log(
+            "INFO",
+            "UNSUPPORTED",
+            "Unsupported request branch selected.",
             "SUCCESS"
         );
     }

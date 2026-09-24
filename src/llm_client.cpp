@@ -11,18 +11,18 @@ using json = nlohmann::json;
 
 namespace
 {
-    std::size_t writeCallback(
+    size_t writeCallback(
         void* contents,
-        std::size_t size,
-        std::size_t count,
+        size_t size,
+        size_t count,
         void* userPointer
     )
     {
-        std::size_t totalSize =
+        size_t totalSize =
             size * count;
 
-        std::string* response =
-            static_cast<std::string*>(userPointer);
+        string* response =
+            static_cast<string*>(userPointer);
 
         response->append(
             static_cast<char*>(contents),
@@ -34,7 +34,18 @@ namespace
 }
 
 LLMResponse LLMClient::generate(
-    const std::string& prompt
+    const string& prompt
+)
+{
+    return generate(
+        "You are Nova, a helpful AI assistant.",
+        prompt
+    );
+}
+
+LLMResponse LLMClient::generate(
+    const string& systemPrompt,
+    const string& userPrompt
 )
 {
     LLMResponse result;
@@ -48,11 +59,11 @@ LLMResponse LLMClient::generate(
     // --------------------------------------------------------
 
     const char* apiKey =
-        std::getenv("OPENROUTER_API_KEY");
+        getenv("OPENROUTER_API_KEY");
 
     if (
         apiKey == nullptr ||
-        std::string(apiKey).empty()
+        string(apiKey).empty()
     )
     {
         result.message =
@@ -76,7 +87,7 @@ LLMResponse LLMClient::generate(
         return result;
     }
 
-    std::string responseBody;
+    string responseBody;
 
     // --------------------------------------------------------
     // REQUEST BODY
@@ -95,18 +106,28 @@ LLMResponse LLMClient::generate(
                 {
                     {
                         "role",
+                        "system"
+                    },
+                    {
+                        "content",
+                        systemPrompt
+                    }
+                },
+                {
+                    {
+                        "role",
                         "user"
                     },
                     {
                         "content",
-                        prompt
+                        userPrompt
                     }
                 }
             })
         }
     };
 
-    std::string requestBodyString =
+    string requestBodyString =
         requestBody.dump();
 
     // --------------------------------------------------------
@@ -116,9 +137,9 @@ LLMResponse LLMClient::generate(
     struct curl_slist* headers =
         nullptr;
 
-    std::string authorization =
+    string authorization =
         "Authorization: Bearer "
-        + std::string(apiKey);
+        + string(apiKey);
 
     headers =
         curl_slist_append(
@@ -185,7 +206,7 @@ LLMResponse LLMClient::generate(
     {
         result.message =
             "OpenRouter request failed: "
-            + std::string(
+            + string(
                 curl_easy_strerror(
                     curlResult
                 )
@@ -216,18 +237,18 @@ LLMResponse LLMClient::generate(
     {
         result.message =
             "OpenRouter returned HTTP status "
-            + std::to_string(httpStatus)
+            + to_string(httpStatus)
             + ".";
 
-        std::cout
+        cout
             << "[LLM] HTTP status: "
             << httpStatus
-            << std::endl;
+            << endl;
 
-        std::cout
+        cout
             << "[LLM] Response: "
             << responseBody
-            << std::endl;
+            << endl;
 
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
@@ -252,7 +273,7 @@ LLMResponse LLMClient::generate(
             [0]
             ["message"]
             ["content"]
-            .get<std::string>();
+            .get<string>();
 
         result.success = true;
 
@@ -260,12 +281,12 @@ LLMResponse LLMClient::generate(
             "LLM response received.";
     }
     catch (
-        const std::exception& exception
+        const exception& exception
     )
     {
         result.message =
             "Failed to parse OpenRouter response: "
-            + std::string(
+            + string(
                 exception.what()
             );
     }

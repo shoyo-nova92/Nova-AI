@@ -28,7 +28,8 @@ add_executable(Nova
     src/parameter_resolver.cpp
     src/action_validator.cpp
     src/execution_plan_builder.cpp
-    
+    src/execution_engine.cpp
+    src/application_resolver.cpp
 )
 
 target_link_libraries(Nova
@@ -36,15 +37,49 @@ target_link_libraries(Nova
         CURL::libcurl
         nlohmann_json::nlohmann_json
 )
+add_executable(ExecutionEngineTest
+    src/execution_engine_test.cpp
+    src/execution_engine.cpp
+    src/application_resolver.cpp
+)
+
+target_link_libraries(ExecutionEngineTest PRIVATE)
 
 add_executable(ActionParserTest
     src/action_parser_test.cpp
     src/action_parser.cpp
 )
 
+add_executable(InputNormalizerTest
+    src/input_normalizer_test.cpp
+    src/input_normalizer.cpp
+    src/llm_client.cpp
+)
+
+target_link_libraries(InputNormalizerTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+
 add_executable(RequestClassifierTest
+
     src/request_classifier_test.cpp
+
     src/request_classifier.cpp
+
+    src/llm_client.cpp
+
+)
+
+target_link_libraries(RequestClassifierTest
+
+    PRIVATE
+
+        CURL::libcurl
+
+        nlohmann_json::nlohmann_json
+
 )
 
 add_executable(CapabilityResolverTest
@@ -60,6 +95,12 @@ add_executable(SingleActionPipelineTest
     src/parameter_resolver.cpp
     src/action_validator.cpp
     src/execution_plan_builder.cpp
+    src/execution_engine.cpp
+    src/application_resolver.cpp
+)
+add_executable(ApplicationResolverTest
+    src/application_resolver_test.cpp
+    src/application_resolver.cpp
 )
 
 add_executable(ParameterResolverTest

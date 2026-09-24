@@ -141,7 +141,8 @@ PartAResult PartABridge::waitForText()
                 << "[BRIDGE] TEXT_READY received."
                 << endl;
 
-            break;
+            // Continue reading until Python exits cleanly.
+            continue;
         }
     }
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -12,33 +13,38 @@ int main()
     vector<string> testInputs =
     {
         "uhh Nova, can you like create a folder called Nova on my desktop",
-        "   UMM   open   Chrome   ",
-        "you know, launch VS Code",
-        "hello Nova",
-        "     "
+        "Nova, open Chrome",
+        "please close Spotify",
+        "create a folder called Test on my desktop",
+        "What is inheritance in Java?"
     };
+
+    cout << "========================================" << endl;
+    cout << "LLM INPUT NORMALIZER TEST" << endl;
+    cout << "========================================" << endl;
 
     for (const string& input : testInputs)
     {
-        cout << "========================================" << endl;
-        cout << "Original:    [" << input << "]" << endl;
+        cout << endl;
+        cout << "[RAW]" << endl;
+        cout << input << endl;
 
         NormalizedInput result =
             normalizer.normalize(input);
 
-        cout << "Success:     "
-             << (result.success ? "true" : "false")
-             << endl;
+        if (!result.success)
+        {
+            cout << "[FAILURE]" << endl;
+            cout << result.message << endl;
+            continue;
+        }
 
-        cout << "Normalized:  ["
-             << result.normalizedText
-             << "]"
-             << endl;
-
-        cout << "Message:     "
-             << result.message
-             << endl;
+        cout << "[NORMALIZED]" << endl;
+        cout << result.normalizedText << endl;
     }
+
+    cout << endl;
+    cout << "========================================" << endl;
 
     return 0;
 }

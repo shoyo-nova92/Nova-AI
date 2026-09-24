@@ -2,6 +2,33 @@
 
 using namespace std;
 
+namespace
+{
+    string stripWrappingQuotes(
+        const string& value
+    )
+    {
+        if (value.size() >= 2)
+        {
+            char first = value.front();
+            char last = value.back();
+
+            if (
+                (first == '"' && last == '"') ||
+                (first == '\'' && last == '\'')
+            )
+            {
+                return value.substr(
+                    1,
+                    value.size() - 2
+                );
+            }
+        }
+
+        return value;
+    }
+}
+
 ParameterResolverResult ParameterResolver::resolve(
     const string& input,
     const Action& action,
@@ -65,13 +92,25 @@ ParameterResolverResult ParameterResolver::resolve(
             )
             {
                 result.parameters.name =
-                    input.substr(
-                        nameStart,
-                        nameEnd - nameStart
+                    stripWrappingQuotes(
+                        input.substr(
+                            nameStart,
+                            nameEnd - nameStart
+                        )
                     );
 
                 result.parameters.location =
                     "desktop";
+
+                if (
+                    result.parameters.name.empty()
+                )
+                {
+                    result.message =
+                        "Folder name cannot be empty.";
+
+                    return result;
+                }
 
                 result.success = true;
 
@@ -144,6 +183,11 @@ ParameterResolverResult ParameterResolver::resolve(
                     closePrefix.length()
                 );
         }
+
+        result.parameters.application =
+            stripWrappingQuotes(
+                result.parameters.application
+            );
 
         if (
             result.parameters.application.empty()
