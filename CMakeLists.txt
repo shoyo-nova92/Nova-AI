@@ -30,6 +30,9 @@ add_executable(Nova
     src/execution_plan_builder.cpp
     src/execution_engine.cpp
     src/application_resolver.cpp
+    src/action_primitive_resolver.cpp
+    src/primitive_registry.cpp
+    src/content_resolver.cpp
 )
 
 target_link_libraries(Nova
@@ -97,6 +100,13 @@ add_executable(SingleActionPipelineTest
     src/execution_plan_builder.cpp
     src/execution_engine.cpp
     src/application_resolver.cpp
+    src/content_resolver.cpp
+    src/llm_client.cpp
+)
+target_link_libraries(SingleActionPipelineTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
 )
 add_executable(ApplicationResolverTest
     src/application_resolver_test.cpp
@@ -106,6 +116,13 @@ add_executable(ApplicationResolverTest
 add_executable(ParameterResolverTest
     src/parameter_resolver_test.cpp
     src/parameter_resolver.cpp
+    src/content_resolver.cpp
+    src/llm_client.cpp
+)
+target_link_libraries(ParameterResolverTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
 )
 
 add_executable(ActionValidatorTest
@@ -116,4 +133,83 @@ add_executable(ActionValidatorTest
 add_executable(ExecutionPlanBuilderTest
     src/execution_plan_builder_test.cpp
     src/execution_plan_builder.cpp
+)
+
+add_executable(Branch2Benchmark
+    src/branch2_benchmark.cpp
+    src/single_action_pipeline.cpp
+    src/action_parser.cpp
+    src/capability_resolver.cpp
+    src/parameter_resolver.cpp
+    src/action_validator.cpp
+    src/execution_plan_builder.cpp
+    src/execution_engine.cpp
+    src/application_resolver.cpp
+    src/content_resolver.cpp
+    src/llm_client.cpp
+)
+target_link_libraries(Branch2Benchmark
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(GoalDecomposerTest
+    src/goal_decomposer_test.cpp
+    src/goal_decomposer.cpp
+    src/llm_client.cpp
+    src/dependency_resolver.cpp
+)
+
+target_link_libraries(GoalDecomposerTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(DependencyResolverTest
+    src/dependency_resolver_test.cpp
+    src/dependency_resolver.cpp
+)
+
+add_executable(ActionPrimitiveResolverTest
+    src/action_primitive_resolver_test.cpp
+    src/action_primitive_resolver.cpp
+    src/primitive_registry.cpp
+    src/llm_client.cpp
+)
+target_link_libraries(ActionPrimitiveResolverTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(PrimitiveRegistryTest
+    src/primitive_registry_test.cpp
+    src/primitive_registry.cpp
+)
+
+add_executable(ContextResolverTest
+    src/context_resolver_test.cpp
+    src/context_resolver.cpp
+)
+
+add_executable(MultiStepPipelineTest
+    src/multistep_pipeline_test.cpp
+    src/multistep_pipeline.cpp
+    src/goal_decomposer.cpp
+    src/dependency_resolver.cpp
+    src/action_primitive_resolver.cpp
+    src/primitive_registry.cpp
+    src/capability_resolver.cpp
+    src/parameter_resolver.cpp
+    src/context_resolver.cpp
+    src/llm_client.cpp
+    src/content_resolver.cpp
+)
+
+target_link_libraries(MultiStepPipelineTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
 )

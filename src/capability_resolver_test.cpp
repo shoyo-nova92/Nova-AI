@@ -1,31 +1,31 @@
 #include "capability_resolver.hpp"
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-void runTest(
+bool testAction(
     CapabilityResolver& resolver,
-    const string& actionName
+    const string& actionName,
+    const string& expectedCapability
 )
 {
     Action action;
-
     action.name = actionName;
 
     Capability result =
         resolver.resolve(action);
 
-    cout << endl;
-    cout << "Action: "
-         << action.name
-         << endl;
+    bool passed =
+        result.supported &&
+        result.name == expectedCapability;
 
-    cout << "Supported: "
-         << (result.supported ? "true" : "false")
-         << endl;
-
-    cout << "Capability: "
+    cout << "["
+         << (passed ? "PASS" : "FAIL")
+         << "] Action: "
+         << actionName
+         << " -> "
          << (
                 result.name.empty()
                 ? "[none]"
@@ -33,14 +33,48 @@ void runTest(
             )
          << endl;
 
-    cout << "Message: "
-         << result.message
+    return passed;
+}
+
+bool testPrimitive(
+    CapabilityResolver& resolver,
+    const string& primitiveName,
+    const string& expectedCapability
+)
+{
+    PrimitiveOperation operation;
+
+    operation.name = primitiveName;
+    operation.resolved = true;
+
+    Capability result =
+        resolver.resolve(operation);
+
+    bool passed =
+        result.supported &&
+        result.name == expectedCapability;
+
+    cout << "["
+         << (passed ? "PASS" : "FAIL")
+         << "] Primitive: "
+         << primitiveName
+         << " -> "
+         << (
+                result.name.empty()
+                ? "[none]"
+                : result.name
+            )
          << endl;
+
+    return passed;
 }
 
 int main()
 {
     CapabilityResolver resolver;
+
+    int passed = 0;
+    int total = 0;
 
     cout << "============================================================"
          << endl;
@@ -51,35 +85,229 @@ int main()
     cout << "============================================================"
          << endl;
 
-    // TEST 1
-    runTest(
-        resolver,
-        "create_folder"
-    );
+    // ========================================================
+    // BRANCH 2 — EXISTING ACTION RESOLUTION
+    // ========================================================
 
-    // TEST 2
-    runTest(
-        resolver,
-        "open_app"
-    );
+    cout << endl;
+    cout << "BRANCH 2 ACTION TESTS"
+         << endl;
 
-    // TEST 3
-    runTest(
-        resolver,
-        "close_app"
-    );
+    total++;
+    if (
+        testAction(
+            resolver,
+            "create_folder",
+            "filesystem"
+        )
+    )
+    {
+        passed++;
+    }
 
-    // TEST 4 — UNSUPPORTED
-    runTest(
-        resolver,
-        "delete_everything"
-    );
+    total++;
+    if (
+        testAction(
+            resolver,
+            "open_app",
+            "application_control"
+        )
+    )
+    {
+        passed++;
+    }
 
-    // TEST 5 — EMPTY ACTION
-    runTest(
-        resolver,
-        ""
-    );
+    total++;
+    if (
+        testAction(
+            resolver,
+            "close_app",
+            "application_control"
+        )
+    )
+    {
+        passed++;
+    }
 
-    return 0;
+    // ========================================================
+    // B3 — PRIMITIVE RESOLUTION
+    // ========================================================
+
+    cout << endl;
+    cout << "B3 PRIMITIVE TESTS"
+         << endl;
+
+    vector<pair<string, string>> primitives =
+    {
+        {
+            "filesystem.create",
+            "filesystem"
+        },
+        {
+            "filesystem.create_file",
+            "filesystem"
+        },
+        {
+            "filesystem.delete",
+            "filesystem"
+        },
+        {
+            "filesystem.move",
+            "filesystem"
+        },
+        {
+            "filesystem.copy",
+            "filesystem"
+        },
+        {
+            "filesystem.rename",
+            "filesystem"
+        },
+        {
+            "application.launch",
+            "application_control"
+        },
+        {
+            "application.close",
+            "application_control"
+        },
+        {
+            "application.focus",
+            "application_control"
+        },
+        {
+            "text.write",
+            "text_input"
+        },
+        {
+            "keyboard.press",
+            "keyboard_control"
+        },
+        {
+            "keyboard.type",
+            "keyboard_control"
+        },
+        {
+            "mouse.click",
+            "mouse_control"
+        },
+        {
+            "mouse.move",
+            "mouse_control"
+        }
+    };
+
+    for (
+        const auto& primitive :
+        primitives
+    )
+    {
+        total++;
+
+        if (
+            testPrimitive(
+                resolver,
+                primitive.first,
+                primitive.second
+            )
+        )
+        {
+            passed++;
+        }
+    }
+
+    // ========================================================
+    // NEGATIVE TESTS
+    // ========================================================
+
+    cout << endl;
+    cout << "NEGATIVE TESTS"
+         << endl;
+
+    total++;
+
+    Action unsupportedAction;
+    unsupportedAction.name =
+        "delete_everything";
+
+    Capability actionResult =
+        resolver.resolve(
+            unsupportedAction
+        );
+
+    bool unsupportedActionPassed =
+        !actionResult.supported;
+
+    cout << "["
+         << (
+                unsupportedActionPassed
+                ? "PASS"
+                : "FAIL"
+            )
+         << "] Unsupported action"
+         << endl;
+
+    if (unsupportedActionPassed)
+    {
+        passed++;
+    }
+
+    total++;
+
+    PrimitiveOperation unsupportedPrimitive;
+    unsupportedPrimitive.name =
+        "unknown.primitive";
+
+    Capability primitiveResult =
+        resolver.resolve(
+            unsupportedPrimitive
+        );
+
+    bool unsupportedPrimitivePassed =
+        !primitiveResult.supported;
+
+    cout << "["
+         << (
+                unsupportedPrimitivePassed
+                ? "PASS"
+                : "FAIL"
+            )
+         << "] Unsupported primitive"
+         << endl;
+
+    if (unsupportedPrimitivePassed)
+    {
+        passed++;
+    }
+
+    // ========================================================
+    // FINAL RESULT
+    // ========================================================
+
+    cout << endl;
+    cout << "============================================================"
+         << endl;
+
+    cout << "Passed: "
+         << passed
+         << " / "
+         << total
+         << endl;
+
+    cout << "RESULT: "
+         << (
+                passed == total
+                ? "PASS"
+                : "FAIL"
+            )
+         << endl;
+
+    cout << "============================================================"
+         << endl;
+
+    return (
+        passed == total
+        ? 0
+        : 1
+    );
 }

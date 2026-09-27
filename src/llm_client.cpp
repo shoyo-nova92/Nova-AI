@@ -193,6 +193,18 @@ LLMResponse LLMClient::generate(
         &responseBody
     );
 
+    curl_easy_setopt(
+        curl,
+        CURLOPT_CONNECTTIMEOUT,
+        10L
+    );
+
+    curl_easy_setopt(
+        curl,
+        CURLOPT_TIMEOUT,
+        60L
+    );
+
     // --------------------------------------------------------
     // EXECUTE REQUEST
     // --------------------------------------------------------

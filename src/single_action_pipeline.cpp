@@ -27,6 +27,8 @@ SingleActionResult SingleActionPipeline::process(
         "Execution has not started.";
 
     result.executionResult.confidence = 0.0;
+    result.executionResult.targetResolved = false;
+    result.executionResult.executionMechanismResolved = false;
 
     result.action.name = "";
 
