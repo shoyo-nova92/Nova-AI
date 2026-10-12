@@ -1,11 +1,229 @@
 #include "context_resolver.hpp"
 #include <iostream>
 
+namespace
+{
+    bool resolveOutput(
+        const MultiStepAction& sourceStep,
+        const string& outputName,
+        string& value
+    )
+    {
+        for (const PrimitiveOperation& operation : sourceStep.operations)
+        {
+            const PrimitiveParameters& parameters = operation.parameters;
+
+            if (outputName == "name" && !parameters.name.empty())
+            {
+                value = parameters.name;
+                return true;
+            }
+            if (outputName == "location" && !parameters.location.empty())
+            {
+                value = parameters.location;
+                return true;
+            }
+            if (outputName == "application" && !parameters.application.empty())
+            {
+                value = parameters.application;
+                return true;
+            }
+            if (outputName == "target" && !parameters.target.empty())
+            {
+                value = parameters.target;
+                return true;
+            }
+            if (outputName == "content" && !parameters.content.empty())
+            {
+                value = parameters.content;
+                return true;
+            }
+            if (outputName == "path")
+            {
+                if (!parameters.location.empty() &&
+                    !parameters.name.empty())
+                {
+                    value = parameters.location + "/" + parameters.name;
+                    return true;
+                }
+                if (!parameters.target.empty())
+                {
+                    value = parameters.target;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    ParameterValue makeLiteral(const string& value)
+    {
+        return ParameterValue{
+            ParameterValueType::LITERAL,
+            value,
+            ContextParameterReference{}
+        };
+    }
+
+    bool convertToPrimitiveParameters(
+        const ActionParameters& parameters,
+        PrimitiveParameters& primitiveParameters,
+        string& errorMessage
+    )
+    {
+        const auto convert = [&errorMessage](
+            const ParameterValue& source,
+            string& destination,
+            const string& name)
+        {
+            if (source.type == ParameterValueType::NONE)
+            {
+                destination.clear();
+                return true;
+            }
+
+            if (source.type != ParameterValueType::LITERAL ||
+                source.value.empty())
+            {
+                errorMessage =
+                    "Parameter is not a concrete execution value: " + name;
+                return false;
+            }
+
+            destination = source.value;
+            return true;
+        };
+
+        return
+            convert(parameters.name, primitiveParameters.name, "name") &&
+            convert(parameters.location, primitiveParameters.location, "location") &&
+            convert(parameters.application, primitiveParameters.application, "application") &&
+            convert(parameters.target, primitiveParameters.target, "target") &&
+            convert(parameters.content, primitiveParameters.content, "content");
+    }
+}
+
 ContextResolutionResult ContextResolver::resolve(
     const MultiStepAction& action,
     const MultiStepPlan& plan
 )
 {
+    if (!action.semanticParameters.empty())
+    {
+        ContextResolutionResult semanticResult;
+        semanticResult.action = action;
+
+        if (action.semanticParameters.size() != action.operations.size())
+        {
+            semanticResult.status = ContextResolutionStatus::FAILED;
+            semanticResult.message =
+                "Semantic parameter count does not match primitive count.";
+            return semanticResult;
+        }
+
+        size_t currentIndex = plan.steps.size();
+        for (size_t index = 0; index < plan.steps.size(); ++index)
+        {
+            if (plan.steps[index].id == action.id)
+            {
+                currentIndex = index;
+                break;
+            }
+        }
+
+        MultiStepAction resolvedAction = action;
+        for (size_t operationIndex = 0;
+             operationIndex < resolvedAction.operations.size();
+             ++operationIndex)
+        {
+            ActionParameters& parameters =
+                resolvedAction.semanticParameters[operationIndex];
+
+            const auto resolveParameter = [&](ParameterValue& parameter)
+            {
+                if (parameter.type != ParameterValueType::CONTEXT_REFERENCE)
+                {
+                    return true;
+                }
+
+                size_t sourceIndex = plan.steps.size();
+                const MultiStepAction* sourceStep = nullptr;
+                for (size_t index = 0; index < plan.steps.size(); ++index)
+                {
+                    if (plan.steps[index].id == parameter.reference.stepId)
+                    {
+                        sourceIndex = index;
+                        sourceStep = &plan.steps[index];
+                        break;
+                    }
+                }
+
+                string resolvedValue;
+                if (currentIndex == plan.steps.size() ||
+                    sourceIndex >= currentIndex ||
+                    sourceStep == nullptr ||
+                    !resolveOutput(
+                        *sourceStep,
+                        parameter.reference.output,
+                        resolvedValue))
+                {
+                    return false;
+                }
+
+                const string referenceName =
+                    parameter.reference.stepId + "." +
+                    parameter.reference.output;
+                resolvedAction.contextReferences.push_back(
+                    ContextReference{
+                        ContextReferenceType::PREVIOUS_STEP_OUTPUT,
+                        referenceName,
+                        parameter.reference.stepId,
+                        true,
+                        resolvedValue
+                    });
+                semanticResult.resolvedContext[referenceName] = resolvedValue;
+                parameter = makeLiteral(resolvedValue);
+                return true;
+            };
+
+            if (!resolveParameter(parameters.name) ||
+                !resolveParameter(parameters.location) ||
+                !resolveParameter(parameters.application) ||
+                !resolveParameter(parameters.target) ||
+                !resolveParameter(parameters.content))
+            {
+                semanticResult.status =
+                    ContextResolutionStatus::CLARIFICATION_REQUIRED;
+                semanticResult.clarificationQuestion =
+                    "A referenced previous-step output could not be resolved.";
+                semanticResult.message =
+                    "Semantic context reference could not be resolved.";
+                return semanticResult;
+            }
+
+            PrimitiveParameters primitiveParameters;
+            string conversionError;
+                if (!convertToPrimitiveParameters(
+                    parameters,
+                    primitiveParameters,
+                    conversionError))
+            {
+                semanticResult.status = ContextResolutionStatus::FAILED;
+                semanticResult.message = conversionError;
+                return semanticResult;
+            }
+
+            resolvedAction.operations[operationIndex].parameters =
+                primitiveParameters;
+        }
+
+        semanticResult.status = ContextResolutionStatus::RESOLVED;
+        semanticResult.action = resolvedAction;
+        semanticResult.message = "Semantic parameters resolved successfully.";
+        return semanticResult;
+    }
+
     ContextResolutionResult result;
 
     result.action =
@@ -58,6 +276,9 @@ ContextResolutionResult ContextResolver::resolve(
                     reference.reference
                 ] =
                     reference.resolvedValue;
+
+                result.resolvedContext[action.description] =
+                    reference.resolvedValue;
             }
         }
 
@@ -96,6 +317,7 @@ bool ContextResolver::containsContextReference(
         text.find("the file") != string::npos ||
         text.find("inside the ") != string::npos ||
         text.find("within the ") != string::npos ||
+        text.find("in the project directory") != string::npos ||
         text.find("project directory in ") != string::npos ||
         text.find(" project in ") != string::npos;
 }
@@ -105,7 +327,10 @@ bool ContextResolver::resolvePreviousStepContext(
     const MultiStepPlan& plan
 )
 {
-    if (!containsContextReference(action.description))
+    if (
+        action.dependencies.empty() &&
+        !containsContextReference(action.description)
+    )
     {
         return true;
     }
@@ -337,14 +562,37 @@ bool ContextResolver::resolvePreviousStepContext(
                     continue;
                 }
 
-                // The resource must be explicitly named
-                // in the current action description.
-                if (
-                    action.description.find(name) ==
-                    string::npos
-                )
+                const bool explicitlyNamed =
+                    action.description.find(name) != string::npos;
+
+                if (!explicitlyNamed)
                 {
-                    continue;
+                    size_t availableFolders = 0;
+                    for (const MultiStepAction& candidateStep : plan.steps)
+                    {
+                        if (candidateStep.id == action.id)
+                        {
+                            break;
+                        }
+
+                        for (const PrimitiveOperation& candidateOperation :
+                             candidateStep.operations)
+                        {
+                            if (candidateOperation.name == "filesystem.create" &&
+                                candidateOperation.resolved &&
+                                !candidateOperation.parameters.name.empty() &&
+                                !candidateOperation.parameters.location.empty())
+                            {
+                                ++availableFolders;
+                            }
+                        }
+                    }
+
+                    if (!containsContextReference(action.description) ||
+                        availableFolders != 1)
+                    {
+                        continue;
+                    }
                 }
 
                 string resolvedPath =

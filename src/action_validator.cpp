@@ -42,9 +42,8 @@ ActionValidationResult ActionValidator::validate(
         "create_folder"
     )
     {
-        if (
-            parameters.name.empty()
-        )
+        if (parameters.name.type != ParameterValueType::LITERAL ||
+            parameters.name.value.empty())
         {
             result.message =
                 "Folder name is required.";
@@ -52,9 +51,8 @@ ActionValidationResult ActionValidator::validate(
             return result;
         }
 
-        if (
-            parameters.location.empty()
-        )
+        if (parameters.location.type != ParameterValueType::LITERAL ||
+            parameters.location.value.empty())
         {
             result.message =
                 "Folder location is required.";
@@ -81,9 +79,8 @@ ActionValidationResult ActionValidator::validate(
         "close_app"
     )
     {
-        if (
-            parameters.application.empty()
-        )
+        if (parameters.application.type != ParameterValueType::LITERAL ||
+            parameters.application.value.empty())
         {
             result.message =
                 "Application parameter is required.";

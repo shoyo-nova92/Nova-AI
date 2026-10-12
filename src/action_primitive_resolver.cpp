@@ -166,6 +166,11 @@ ActionPrimitiveResolver::resolve(
                 " directory",
                 createPosition
             );
+        size_t projectPosition =
+            text.find(
+                " project",
+                createPosition
+            );
 
         size_t folderPosition =
             text.find(
@@ -206,7 +211,6 @@ ActionPrimitiveResolver::resolve(
         // --------------------------------------------------
         // Determine which object appears first after "create"
         // --------------------------------------------------
-
         size_t directoryObjectPosition =
             string::npos;
 
@@ -217,14 +221,26 @@ ActionPrimitiveResolver::resolve(
         }
 
         if (
+            projectPosition != string::npos
+            &&
+            (
+                directoryObjectPosition == string::npos
+                ||
+                projectPosition < directoryObjectPosition
+            )
+        )
+        {
+            directoryObjectPosition =
+                projectPosition;
+        }
+
+        if (
             folderPosition != string::npos
             &&
             (
-                directoryObjectPosition ==
-                string::npos
+                directoryObjectPosition == string::npos
                 ||
-                folderPosition <
-                directoryObjectPosition
+                folderPosition < directoryObjectPosition
             )
         )
         {
@@ -255,11 +271,9 @@ ActionPrimitiveResolver::resolve(
                 position != string::npos
                 &&
                 (
-                    fileObjectPosition ==
-                    string::npos
+                    fileObjectPosition == string::npos
                     ||
-                    position <
-                    fileObjectPosition
+                    position < fileObjectPosition
                 )
             )
             {

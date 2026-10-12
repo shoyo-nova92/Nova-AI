@@ -36,9 +36,9 @@ SingleActionResult SingleActionPipeline::process(
     result.capability.name = "";
     result.capability.message = "";
 
-    result.parameters.name = "";
-    result.parameters.location = "";
-    result.parameters.application = "";
+    result.parameters.name = ParameterValue{};
+    result.parameters.location = ParameterValue{};
+    result.parameters.application = ParameterValue{};
 
     result.validation.valid = false;
     result.validation.message = "";
@@ -49,9 +49,7 @@ SingleActionResult SingleActionPipeline::process(
     result.executionPlan.capability.supported = false;
     result.executionPlan.capability.name = "";
     result.executionPlan.capability.message = "";
-    result.executionPlan.parameters.name = "";
-    result.executionPlan.parameters.location = "";
-    result.executionPlan.parameters.application = "";
+    result.executionPlan.parameters = PrimitiveParameters{};
     result.executionPlan.message = "";
 
     result.message = "";

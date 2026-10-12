@@ -70,21 +70,55 @@ Rules:
 - Do not return markdown.
 - Do not return explanations outside the JSON.
 
-IMPORTANT PRESERVATION RULES:
+IMPORTANT DECOMPOSITION AND PRESERVATION RULES:
 
-- Every concrete user-provided name, filename, folder name, application name,
-    path, location, or other explicit resource identifier MUST be preserved
-    verbatim in the relevant step description.
+- Decompose ONLY what the user explicitly requested or what is
+  logically unavoidable to fulfill that request.
+
+- NEVER invent intermediate steps, resources, files, folders,
+  directories, project structures, configurations, dependencies,
+  or implementation conventions that the user did not request.
+
+- Do not introduce standard project structures merely because they
+  are conventional for a language, framework, IDE, or application.
+
+- For example, if the user asks to create a Java project named
+  "NovaJava" and add "Main.java", do NOT invent "src", "main",
+  "java", Maven structure, Gradle structure, package directories,
+  configuration files, or other project files unless the user
+  explicitly requests them.
+
+- Do not expand one requested action into additional implementation
+  steps merely because those steps would commonly be used in practice.
+
+- Every concrete user-provided name, filename, folder name,
+  application name, path, location, or other explicit resource
+  identifier MUST be preserved verbatim in the relevant step description.
+
 - Do not replace concrete names with generic descriptions.
-- Do not remove names such as "NovaJava", "Main.java", "Chrome", etc.
-- Do not generalize a named resource into phrases such as "the project directory"
-    when the concrete name is available.
-- Decompose the request without losing information from the original request.
 
-The step descriptions must contain enough information for deterministic
-downstream parameter resolution. Do not rely on another component to infer
-information that was explicitly present in the user's request.
-)";
+- Do not remove names such as "NovaJava", "Main.java", "Chrome", etc.
+
+- Do not generalize a named resource into phrases such as
+  "the project directory" when the concrete name is available.
+
+- Preserve the user's requested level of abstraction.
+
+- If the user requests one logical action, keep it as one logical
+  step unless fulfilling it necessarily requires another explicitly
+  requested logical action.
+
+- Dependencies must represent actual logical prerequisites, not
+  conventional workflow ordering.
+
+- Step descriptions must contain enough information for deterministic
+  downstream resolution of the information explicitly provided by
+  the user.
+
+- Do not infer additional user intent from domain conventions.
+
+- The decomposer may restructure wording for clarity, but it must not
+  add new user intent.)";
 
     const string userPrompt =
         "Decompose this user goal into logical steps:\n\n" + goal;

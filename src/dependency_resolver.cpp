@@ -3,6 +3,97 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <algorithm>
+#include <cctype>
+
+namespace
+{
+    string toLower(string text)
+    {
+        transform(
+            text.begin(),
+            text.end(),
+            text.begin(),
+            [](unsigned char character)
+            {
+                return static_cast<char>(
+                    tolower(character)
+                );
+            }
+        );
+
+        return text;
+    }
+
+    bool contains(
+        const string& text,
+        const string& value
+    )
+    {
+        return text.find(value) != string::npos;
+    }
+
+    bool referencesStepResource(
+        const MultiStepAction& currentStep,
+        const MultiStepAction& previousStep
+    )
+    {
+        const string current =
+            toLower(currentStep.description);
+
+        const string resource =
+            toLower(previousStep.description);
+
+        /*
+         * Resource names are inferred from the already-resolved
+         * primitive parameters when available.
+         */
+
+        for (const auto& operation :
+             previousStep.operations)
+        {
+            const string name =
+                toLower(operation.parameters.name);
+
+            if (
+                !name.empty()
+                &&
+                contains(current, name)
+            )
+            {
+                return true;
+            }
+        }
+
+        /*
+         * Explicit contextual language can also indicate
+         * dependency on the previous step's resource.
+         */
+
+        if (
+            contains(current, "inside the")
+            ||
+            contains(current, "inside ")
+            ||
+            contains(current, "within the")
+            ||
+            contains(current, "in the")
+            ||
+            contains(current, "open the")
+            ||
+            contains(current, "that folder")
+            ||
+            contains(current, "that directory")
+            ||
+            contains(current, "that file")
+        )
+        {
+            return true;
+        }
+
+        return false;
+    }
+}
 
 DependencyResolutionResult DependencyResolver::resolve(
     const MultiStepPlan& plan
@@ -13,6 +104,8 @@ DependencyResolutionResult DependencyResolver::resolve(
     result.valid = false;
     result.executionOrder.clear();
     result.message = "";
+
+    MultiStepPlan resolvedPlan = plan;
 
     if (!plan.valid)
     {
@@ -53,16 +146,59 @@ DependencyResolutionResult DependencyResolver::resolve(
         stepMap[step.id] = &step;
     }
 
+    // --------------------------------------------------
+    // INFER MISSING RESOURCE DEPENDENCIES
+    // --------------------------------------------------
+
+    for (size_t currentIndex = 0;
+        currentIndex < resolvedPlan.steps.size();
+        ++currentIndex)
+    {
+        auto& currentStep =
+            resolvedPlan.steps[currentIndex];
+
+        for (size_t previousIndex = 0;
+            previousIndex < currentIndex;
+            ++previousIndex)
+        {
+            const auto& previousStep =
+                resolvedPlan.steps[previousIndex];
+
+            if (
+                referencesStepResource(
+                    currentStep,
+                    previousStep
+                )
+            )
+            {
+                if (
+                    find(
+                        currentStep.dependencies.begin(),
+                        currentStep.dependencies.end(),
+                        previousStep.id
+                    )
+                    ==
+                    currentStep.dependencies.end()
+                )
+                {
+                    currentStep.dependencies.push_back(
+                        previousStep.id
+                    );
+                }
+            }
+        }
+    }
+
     unordered_map<string, int> inDegree;
 
     unordered_map<string, vector<string>> dependents;
 
-    for (const auto& step : plan.steps)
+    for (const auto& step : resolvedPlan.steps)
     {
         inDegree[step.id] = 0;
     }
 
-    for (const auto& step : plan.steps)
+    for (const auto& step : resolvedPlan.steps)
     {
         for (const auto& dependency : step.dependencies)
         {
@@ -96,7 +232,7 @@ DependencyResolutionResult DependencyResolver::resolve(
 
     queue<string> readySteps;
 
-    for (const auto& step : plan.steps)
+    for (const auto& step : resolvedPlan.steps)
     {
         if (inDegree[step.id] == 0)
         {
@@ -125,7 +261,10 @@ DependencyResolutionResult DependencyResolver::resolve(
         }
     }
 
-    if (result.executionOrder.size() != plan.steps.size())
+    if (
+        result.executionOrder.size() !=
+        resolvedPlan.steps.size()
+    )
     {
         result.executionOrder.clear();
 
@@ -134,6 +273,9 @@ DependencyResolutionResult DependencyResolver::resolve(
 
         return result;
     }
+
+    result.plan =
+        resolvedPlan;
 
     result.valid = true;
 

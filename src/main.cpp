@@ -4,6 +4,8 @@
 #include "request_classifier.hpp"
 #include "conversation_handler.hpp"
 #include "single_action_pipeline.hpp"
+#include "multistep_pipeline.hpp"
+#include "multi_step_executor.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -379,27 +381,21 @@ int main()
         cout << "[PARAMETER RESOLVER]" << endl;
 
         cout << "Name: "
-            << (
-                    actionResult.parameters.name.empty()
+            << (actionResult.parameters.name.type == ParameterValueType::NONE
                     ? "[none]"
-                    : actionResult.parameters.name
-                )
+                    : actionResult.parameters.name.value)
             << endl;
 
         cout << "Location: "
-            << (
-                    actionResult.parameters.location.empty()
+            << (actionResult.parameters.location.type == ParameterValueType::NONE
                     ? "[none]"
-                    : actionResult.parameters.location
-                )
+                    : actionResult.parameters.location.value)
             << endl;
 
         cout << "Application: "
-            << (
-                    actionResult.parameters.application.empty()
+            << (actionResult.parameters.application.type == ParameterValueType::NONE
                     ? "[none]"
-                    : actionResult.parameters.application
-                )
+                    : actionResult.parameters.application.value)
             << endl;
 
         logger.log(
@@ -554,8 +550,183 @@ int main()
             "INFO",
             "MULTI_STEP_GOAL",
             "Multi-step goal branch selected.",
+            "STARTED"
+        );
+
+        MultiStepPipeline multiStepPipeline;
+
+        MultiStepPipelineResult multiStepResult =
+            multiStepPipeline.run(
+                normalized.normalizedText
+            );
+
+        if (
+            multiStepResult.status ==
+            MultiStepPipelineStatus::CLARIFICATION_REQUIRED
+        )
+        {
+            cout << endl;
+            cout << "[MULTI-STEP CLARIFICATION]" << endl;
+            cout << multiStepResult.clarificationQuestion
+                << endl;
+
+            logger.log(
+                "INFO",
+                "MULTI_STEP_GOAL",
+                multiStepResult.clarificationQuestion,
+                "CLARIFICATION_REQUIRED"
+            );
+
+            return 0;
+        }
+
+        if (
+            multiStepResult.status ==
+            MultiStepPipelineStatus::FAILED
+        )
+        {
+            logger.log(
+                "ERROR",
+                "MULTI_STEP_GOAL",
+                multiStepResult.message,
+                "FAILURE"
+            );
+
+            cerr
+                << "[MULTI-STEP FAILURE] "
+                << multiStepResult.message
+                << endl;
+
+            return 1;
+        }
+
+        cout << endl;
+        cout << "[MULTI-STEP EXECUTION PLAN]" << endl;
+
+        cout << "Valid: "
+            << (
+                    multiStepResult.executionPlan.valid
+                    ? "true"
+                    : "false"
+                )
+            << endl;
+
+        cout << "Type: "
+            << multiStepResult.executionPlan.type
+            << endl;
+
+        cout << "Steps: "
+            << multiStepResult.executionPlan.steps.size()
+            << endl;
+
+        for (
+            const ExecutionPlanStep& step
+            : multiStepResult.executionPlan.steps
+        )
+        {
+            cout << endl;
+
+            cout << "Step: "
+                << step.id
+                << endl;
+
+            cout << "Primitive: "
+                << step.operation.name
+                << endl;
+
+            cout << "Valid: "
+                << (
+                        step.valid
+                        ? "true"
+                        : "false"
+                    )
+                << endl;
+        }
+
+        logger.log(
+            "INFO",
+            "EXECUTION_PLAN",
+            "Multi-step execution plan created.",
+            multiStepResult.executionPlan.valid
+                ? "SUCCESS"
+                : "FAILURE"
+        );
+
+        cout << endl;
+        cout << "[MULTI-STEP PIPELINE COMPLETE]"
+            << endl;
+
+        logger.log(
+            "INFO",
+            "MULTI_STEP_GOAL",
+            "Multi-step planning completed successfully.",
             "SUCCESS"
         );
+
+        MultiStepExecutor multiStepExecutor;
+
+        MultiStepExecutionResult executionResult =
+            multiStepExecutor.execute(
+                multiStepResult.executionPlan
+            );
+
+        cout << "[MULTI-STEP EXECUTION]" << endl;
+
+        for (
+            size_t i = 0;
+            i < executionResult.stepResults.size();
+            ++i
+        )
+        {
+            const ExecutionResult& stepResult =
+                executionResult.stepResults[i];
+
+            cout
+                << "Step "
+                << (i + 1)
+                << ": "
+                << stepResult.action
+                << endl;
+
+            cout
+                << "Status: "
+                << static_cast<int>(stepResult.status)
+                << endl;
+
+            cout
+                << "Message: "
+                << stepResult.message
+                << endl;
+        }
+
+        if (executionResult.success)
+        {
+            cout
+                << "[MULTI-STEP EXECUTION COMPLETE]"
+                << endl;
+
+            logger.log(
+                "INFO",
+                "MULTI_STEP_EXECUTION",
+                executionResult.message,
+                "SUCCESS"
+            );
+        }
+        else
+        {
+            cout
+                << "[MULTI-STEP EXECUTION FAILED]"
+                << endl;
+
+            logger.log(
+                "ERROR",
+                "MULTI_STEP_EXECUTION",
+                executionResult.message,
+                "FAILED"
+            );
+
+            return 1;
+        }
     }
 
     // --------------------------------------------------------

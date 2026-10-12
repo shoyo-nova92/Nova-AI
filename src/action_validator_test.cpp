@@ -22,9 +22,15 @@ void runTest(
     capability.name = capabilityName;
 
     ActionParameters parameters;
-    parameters.name = name;
-    parameters.location = location;
-    parameters.application = application;
+    parameters.name = name.empty()
+        ? ParameterValue{}
+        : ParameterValue{ParameterValueType::LITERAL, name, {}};
+    parameters.location = location.empty()
+        ? ParameterValue{}
+        : ParameterValue{ParameterValueType::LITERAL, location, {}};
+    parameters.application = application.empty()
+        ? ParameterValue{}
+        : ParameterValue{ParameterValueType::LITERAL, application, {}};
 
     ActionValidationResult result =
         validator.validate(

@@ -11,6 +11,8 @@ struct DependencyResolutionResult
 {
     bool valid;
 
+    MultiStepPlan plan;
+
     vector<string> executionOrder;
 
     string message;

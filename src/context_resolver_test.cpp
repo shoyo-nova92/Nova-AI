@@ -37,6 +37,77 @@ int main()
     }
 
     // ============================================================
+    // TEST 12 — TYPED CONTEXT REFERENCE TO PRIMITIVE PARAMETERS
+    // ============================================================
+
+    {
+        total++;
+
+        MultiStepAction sourceStep;
+        sourceStep.id = "step_1";
+
+        PrimitiveOperation createFolder;
+        createFolder.type = PrimitiveOperationType::FILESYSTEM_CREATE;
+        createFolder.name = "filesystem.create";
+        createFolder.resolved = true;
+        createFolder.parameters.name = "NovaProject";
+        createFolder.parameters.location = "desktop";
+        sourceStep.operations.push_back(createFolder);
+
+        MultiStepAction dependentStep;
+        dependentStep.id = "step_2";
+        dependentStep.description = "Create Main.java inside that folder";
+
+        PrimitiveOperation createFile;
+        createFile.type = PrimitiveOperationType::FILESYSTEM_CREATE_FILE;
+        createFile.name = "filesystem.create_file";
+        createFile.resolved = true;
+        dependentStep.operations.push_back(createFile);
+
+        ActionParameters semanticParameters;
+        semanticParameters.name = ParameterValue{
+            ParameterValueType::LITERAL,
+            "Main.java",
+            ContextParameterReference{}
+        };
+        semanticParameters.location = ParameterValue{
+            ParameterValueType::CONTEXT_REFERENCE,
+            "",
+            ContextParameterReference{"step_1", "path"}
+        };
+        dependentStep.semanticParameters.push_back(semanticParameters);
+
+        MultiStepPlan plan;
+        plan.valid = true;
+        plan.steps = {sourceStep, dependentStep};
+
+        ContextResolutionResult result = resolver.resolve(
+            dependentStep,
+            plan);
+
+        const PrimitiveOperation& resolvedOperation =
+            result.action.operations.front();
+        const bool passedTest =
+            result.status == ContextResolutionStatus::RESOLVED &&
+            resolvedOperation.parameters.name == "Main.java" &&
+            resolvedOperation.parameters.location == "desktop/NovaProject" &&
+            resolvedOperation.parameters.content.empty() &&
+            result.action.contextReferences.size() == 1 &&
+            result.action.contextReferences.front().sourceStepId == "step_1";
+
+        cout << endl;
+        cout << "["
+            << (passedTest ? "PASS" : "FAIL")
+            << "] Typed context reference resolves to execution parameters"
+            << endl;
+
+        if (passedTest)
+        {
+            passed++;
+        }
+    }
+
+    // ============================================================
     // TEST 2 — THE FOLDER
     // ============================================================
 

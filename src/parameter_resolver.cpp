@@ -1,38 +1,297 @@
 #include "parameter_resolver.hpp"
 
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <cctype>
+#include <initializer_list>
+#include <sstream>
+#include <utility>
+
 using namespace std;
+using json = nlohmann::json;
 
 namespace
 {
-    string stripWrappingQuotes(
-        const string& value
-    )
+    string stripWrappingQuotes(const string& value)
     {
         if (value.size() >= 2)
         {
-            char first = value.front();
-            char last = value.back();
+            const char first = value.front();
+            const char last = value.back();
 
-            if (
-                (first == '"' && last == '"') ||
-                (first == '\'' && last == '\'')
-            )
+            if ((first == '"' && last == '"') ||
+                (first == '\'' && last == '\''))
             {
-                return value.substr(
-                    1,
-                    value.size() - 2
-                );
+                return value.substr(1, value.size() - 2);
             }
         }
 
         return value;
     }
+
+    bool hasExactlyKeys(
+        const json& value,
+        initializer_list<const char*> keys
+    )
+    {
+        if (!value.is_object() || value.size() != keys.size())
+        {
+            return false;
+        }
+
+        for (const char* key : keys)
+        {
+            if (!value.contains(key))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool isMeaningful(const string& value)
+    {
+        return any_of(
+            value.begin(),
+            value.end(),
+            [](unsigned char character)
+            {
+                return !isspace(character);
+            }
+        );
+    }
+
+    const char* requirementName(ParameterRequirement requirement)
+    {
+        switch (requirement)
+        {
+            case ParameterRequirement::NOT_APPLICABLE:
+                return "not_applicable";
+            case ParameterRequirement::REQUIRED:
+                return "required";
+            case ParameterRequirement::OPTIONAL:
+                return "optional";
+        }
+
+        return "invalid";
+    }
+
+    bool parseParameterValue(
+        const json& value,
+        ParameterValue& parameter
+    )
+    {
+        if (!value.is_object() || !value.contains("type") ||
+            !value["type"].is_string())
+        {
+            return false;
+        }
+
+        const string type = value["type"].get<string>();
+
+        if (type == "none")
+        {
+            if (!hasExactlyKeys(value, {"type"}))
+            {
+                return false;
+            }
+
+            parameter = ParameterValue{};
+            return true;
+        }
+
+        if (type == "literal")
+        {
+            if (!hasExactlyKeys(value, {"type", "value"}) ||
+                !value["value"].is_string())
+            {
+                return false;
+            }
+
+            parameter.type = ParameterValueType::LITERAL;
+            parameter.value = value["value"].get<string>();
+            parameter.reference = ContextParameterReference{};
+            return true;
+        }
+
+        if (type == "context_reference")
+        {
+            if (!hasExactlyKeys(value, {"type", "step_id", "output"}) ||
+                !value["step_id"].is_string() ||
+                !value["output"].is_string())
+            {
+                return false;
+            }
+
+            parameter.type = ParameterValueType::CONTEXT_REFERENCE;
+            parameter.value.clear();
+            parameter.reference.stepId =
+                value["step_id"].get<string>();
+            parameter.reference.output =
+                value["output"].get<string>();
+            return true;
+        }
+
+        return false;
+    }
+
+    bool parameterMatchesRequirement(
+        const ParameterValue& parameter,
+        ParameterRequirement requirement,
+        const string& name,
+        string& errorMessage
+    )
+    {
+        if (parameter.type == ParameterValueType::NONE)
+        {
+            if (requirement == ParameterRequirement::REQUIRED)
+            {
+                errorMessage = "Required parameter is missing: " + name;
+                return false;
+            }
+
+            return true;
+        }
+
+        if (requirement == ParameterRequirement::NOT_APPLICABLE)
+        {
+            errorMessage = "Parameter is not applicable: " + name;
+            return false;
+        }
+
+        if (parameter.type == ParameterValueType::LITERAL)
+        {
+            if (!isMeaningful(parameter.value))
+            {
+                errorMessage = "Literal parameter is empty: " + name;
+                return false;
+            }
+
+            return true;
+        }
+
+        if (parameter.type == ParameterValueType::CONTEXT_REFERENCE)
+        {
+            if (!isMeaningful(parameter.reference.stepId) ||
+                !isMeaningful(parameter.reference.output))
+            {
+                errorMessage = "Context reference is incomplete: " + name;
+                return false;
+            }
+
+            return true;
+        }
+
+        errorMessage = "Unknown parameter value type: " + name;
+        return false;
+    }
+
+    string makeSystemPrompt(
+        const PrimitiveDefinition& definition,
+        const PrimitiveParameterSchema& schema
+    )
+    {
+        ostringstream prompt;
+        prompt << R"(You are Nova's semantic parameter resolver.
+Interpret the step description for the specified primitive. Do not execute anything.
+Return only strict JSON matching one of the response schemas below, with no Markdown or extra keys.
+
+Resolved response:
+{"status":"resolved","parameters":{"name":{"type":"none"},"location":{"type":"none"},"application":{"type":"none"},"target":{"type":"none"},"content":{"type":"none"}}}
+
+Each parameter must be exactly one of:
+{"type":"none"}
+{"type":"literal","value":"..."}
+{"type":"context_reference","step_id":"step_1","output":"path"}
+
+Ambiguous response:
+{"status":"ambiguous","question":"..."}
+
+Missing required response:
+{"status":"missing_required_parameter","question":"..."}
+
+Rules:
+1. Preserve user-provided names exactly.
+2. Do not invent filenames, folder names, paths, or content.
+3. Do not infer file content merely from an extension.
+4. Do not convert contextual references into guessed literal paths.
+5. Use context_reference when a value depends on a previous step.
+6. Return only the requested JSON schema.
+7. Never invent a missing required parameter; report ambiguity or missing-required information instead.
+8. Use type none for parameters that were not supplied or are not applicable.
+9. A request to add a code artifact such as a basic class or program explicitly requests its content; return the minimal requested code as a literal.
+10. A request only to create a file by name, even with a source-code extension, leaves content as none.
+11. Escape every quote, backslash, and line break inside JSON string values; never emit raw line breaks inside a JSON string.)";
+
+        prompt << "\n\nPrimitive type: "
+               << static_cast<int>(definition.type)
+               << "\nParameter requirements:\n"
+               << "name: " << requirementName(schema.name) << "\n"
+               << "location: " << requirementName(schema.location) << "\n"
+               << "application: " << requirementName(schema.application) << "\n"
+               << "target: " << requirementName(schema.target) << "\n"
+               << "content: " << requirementName(schema.content);
+        return prompt.str();
+    }
+
+    string makeUserPrompt(
+        const string& description,
+        const PrimitiveOperation& operation,
+        const vector<pair<string, string>>& availableContext
+    )
+    {
+        ostringstream prompt;
+        prompt << "Primitive: " << operation.name
+            << "\nStep description: " << description
+            << "\nResolve only information supported by this description."
+            << "\nValid context outputs are path, name, location, application, target, and content."
+            << "\nUse a context_reference only with one of the exact available step IDs below."
+            << "\nWhen this step refers to a resource created by an available dependency, use that step's path output for location or target; never return the resource name as a guessed path.";
+
+        for (const auto& [stepId, stepDescription] : availableContext)
+        {
+            prompt << "\nAvailable step ID: " << stepId
+                << "\nAvailable step description: " << stepDescription;
+        }
+
+        if (availableContext.empty())
+        {
+            prompt << "\nNo previous-step context is available.";
+        }
+
+        return prompt.str();
+    }
 }
 
+ParameterResolver::ParameterResolver(LLMGenerator generator)
+    : llmGenerator(move(generator))
+{
+}
 
-// ============================================================
-// BRANCH 2
-// ============================================================
+ParameterValue ParameterResolver::makeLiteral(const string& value)
+{
+    return ParameterValue{
+        ParameterValueType::LITERAL,
+        value,
+        ContextParameterReference{}
+    };
+}
+
+bool ParameterResolver::validateParameters(
+    const ActionParameters& parameters,
+    const PrimitiveParameterSchema& schema,
+    string& errorMessage
+)
+{
+    return
+        parameterMatchesRequirement(parameters.name, schema.name, "name", errorMessage) &&
+        parameterMatchesRequirement(parameters.location, schema.location, "location", errorMessage) &&
+        parameterMatchesRequirement(parameters.application, schema.application, "application", errorMessage) &&
+        parameterMatchesRequirement(parameters.target, schema.target, "target", errorMessage) &&
+        parameterMatchesRequirement(parameters.content, schema.content, "content", errorMessage);
+}
 
 ParameterResolverResult ParameterResolver::resolve(
     const string& input,
@@ -40,28 +299,12 @@ ParameterResolverResult ParameterResolver::resolve(
     const Capability& capability
 )
 {
-    ParameterResolverResult result;
-
-    result.success = false;
-    result.status =
-    ParameterResolutionStatus::FAILED;
-
-    result.clarificationQuestion =
-        "";
-
-    result.parameters.name = "";
-    result.parameters.location = "";
-    result.parameters.application = "";
-    result.parameters.target = "";
-    result.parameters.content = "";
-
-    result.message = "";
+    ParameterResolverResult result{};
+    result.status = ParameterResolutionStatus::FAILED;
 
     if (input.empty())
     {
-        result.message =
-            "Cannot resolve parameters from empty input.";
-
+        result.message = "Cannot resolve parameters from empty input.";
         return result;
     }
 
@@ -69,211 +312,214 @@ ParameterResolverResult ParameterResolver::resolve(
     {
         result.message =
             "Cannot resolve parameters for unsupported capability.";
-
         return result;
     }
 
-    // --------------------------------------------------------
-    // CREATE FOLDER
-    // --------------------------------------------------------
-
-    if (
-        action.name ==
-        "create_folder"
-    )
+    if (action.name == "create_folder")
     {
-        const string nameMarker =
-            "called ";
-
-        size_t namePosition =
-            input.find(
-                nameMarker
-            );
-
-        if (
-            namePosition != string::npos
-        )
+        const size_t marker = input.find("called ");
+        if (marker == string::npos)
         {
-            size_t nameStart =
-                namePosition +
-                nameMarker.length();
-
-            size_t nameEnd =
-                input.find(
-                    " on ",
-                    nameStart
-                );
-
-            if (
-                nameEnd != string::npos
-            )
-            {
-                result.parameters.name =
-                    stripWrappingQuotes(
-                        input.substr(
-                            nameStart,
-                            nameEnd - nameStart
-                        )
-                    );
-
-                result.parameters.location =
-                    "desktop";
-
-                if (
-                    result.parameters.name.empty()
-                )
-                {
-                    result.message =
-                        "Folder name cannot be empty.";
-
-                    return result;
-                }
-
-                result.success =
-                    true;
-
-                result.message =
-                    "Folder parameters resolved successfully.";
-
-                return result;
-            }
-        }
-
-        result.message =
-            "Unable to resolve folder name and location.";
-
-        return result;
-    }
-
-    // --------------------------------------------------------
-    // OPEN / CLOSE APPLICATION
-    // --------------------------------------------------------
-
-    if (
-        action.name ==
-        "open_app"
-        ||
-        action.name ==
-        "close_app"
-    )
-    {
-        const string openPrefix =
-            "open ";
-
-        const string launchPrefix =
-            "launch ";
-
-        const string closePrefix =
-            "close ";
-
-        if (
-            input.rfind(
-                openPrefix,
-                0
-            ) == 0
-        )
-        {
-            result.parameters.application =
-                input.substr(
-                    openPrefix.length()
-                );
-        }
-        else if (
-            input.rfind(
-                launchPrefix,
-                0
-            ) == 0
-        )
-        {
-            result.parameters.application =
-                input.substr(
-                    launchPrefix.length()
-                );
-        }
-        else if (
-            input.rfind(
-                closePrefix,
-                0
-            ) == 0
-        )
-        {
-            result.parameters.application =
-                input.substr(
-                    closePrefix.length()
-                );
-        }
-
-        result.parameters.application =
-            stripWrappingQuotes(
-                result.parameters.application
-            );
-
-        if (
-            result.parameters.application.empty()
-        )
-        {
-            result.message =
-                "Unable to resolve application parameter.";
-
+            result.status = ParameterResolutionStatus::MISSING_REQUIRED_PARAMETER;
+            result.message = "Folder name is required.";
+            result.clarificationQuestion =
+                "What should the project folder be named?";
             return result;
         }
 
-        result.success =
-            true;
+        const size_t nameStart = marker + string("called ").size();
+        size_t nameEnd = input.find(" on ", nameStart);
+        if (nameEnd == string::npos)
+        {
+            nameEnd = input.size();
+        }
 
-        result.message =
-            "Application parameter resolved successfully.";
+        const string name = stripWrappingQuotes(
+            input.substr(nameStart, nameEnd - nameStart));
+        if (!isMeaningful(name))
+        {
+            result.status = ParameterResolutionStatus::MISSING_REQUIRED_PARAMETER;
+            result.message = "Folder name is required.";
+            result.clarificationQuestion =
+                "What should the project folder be named?";
+            return result;
+        }
 
+        result.parameters.name = makeLiteral(name);
+        result.parameters.location = makeLiteral("desktop");
+        result.success = true;
+        result.status = ParameterResolutionStatus::RESOLVED;
+        result.message = "Folder parameters resolved successfully.";
         return result;
     }
 
-    // --------------------------------------------------------
-    // UNSUPPORTED ACTION
-    // --------------------------------------------------------
+    if (action.name == "open_app" || action.name == "close_app")
+    {
+        string application;
+        const string prefixes[] = {"open ", "launch ", "close "};
+        for (const string& prefix : prefixes)
+        {
+            if (input.rfind(prefix, 0) == 0)
+            {
+                application = stripWrappingQuotes(input.substr(prefix.size()));
+                break;
+            }
+        }
 
-    result.message =
-        "No parameter resolution rule exists for requested action.";
+        if (!isMeaningful(application))
+        {
+            result.status = ParameterResolutionStatus::MISSING_REQUIRED_PARAMETER;
+            result.message = "Application parameter is required.";
+            result.clarificationQuestion =
+                "Which application should Nova use?";
+            return result;
+        }
 
+        result.parameters.application = makeLiteral(application);
+        result.success = true;
+        result.status = ParameterResolutionStatus::RESOLVED;
+        result.message = "Application parameter resolved successfully.";
+        return result;
+    }
+
+    result.message = "No parameter resolution rule exists for requested action.";
     return result;
 }
 
+ParameterResolverResult ParameterResolver::resolveSemanticParameters(
+    const string& description,
+    const PrimitiveOperation& operation,
+    const PrimitiveDefinition& definition,
+    const vector<pair<string, string>>& availableContext
+)
+{
+    ParameterResolverResult result{};
+    result.status = ParameterResolutionStatus::FAILED;
 
-// ============================================================
-// BRANCH 3
-// ============================================================
+    const PrimitiveParameterSchema& schema = *definition.parameters;
+    const string systemPrompt = makeSystemPrompt(definition, schema);
+    const string userPrompt = makeUserPrompt(
+        description,
+        operation,
+        availableContext);
+    LLMResponse response;
+
+    if (llmGenerator)
+    {
+        response = llmGenerator(systemPrompt, userPrompt);
+    }
+    else
+    {
+        LLMClient client;
+        response = client.generate(systemPrompt, userPrompt);
+    }
+
+    if (!response.success || response.content.empty())
+    {
+        result.message = "Parameter resolution LLM request failed: " +
+            response.message;
+        return result;
+    }
+
+    try
+    {
+        const json parsed = json::parse(response.content);
+        if (!parsed.is_object() || !parsed.contains("status") ||
+            !parsed["status"].is_string())
+        {
+            result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+            result.message = "Parameter resolver response has no valid status.";
+            return result;
+        }
+
+        const string status = parsed["status"].get<string>();
+        if (status == "ambiguous" ||
+            status == "missing_required_parameter")
+        {
+            if (!hasExactlyKeys(parsed, {"status", "question"}) ||
+                !parsed["question"].is_string() ||
+                !isMeaningful(parsed["question"].get<string>()))
+            {
+                result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+                result.message =
+                    "Parameter resolver clarification response is malformed.";
+                return result;
+            }
+
+            result.status = status == "ambiguous"
+                ? ParameterResolutionStatus::AMBIGUOUS
+                : ParameterResolutionStatus::MISSING_REQUIRED_PARAMETER;
+            result.message = status == "ambiguous"
+                ? "Parameter resolution is ambiguous."
+                : "A required parameter is missing.";
+            result.clarificationQuestion =
+                parsed["question"].get<string>();
+            return result;
+        }
+
+        if (status != "resolved" ||
+            !hasExactlyKeys(parsed, {"status", "parameters"}) ||
+            !hasExactlyKeys(
+                parsed["parameters"],
+                {"name", "location", "application", "target", "content"}))
+        {
+            result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+            result.message = "Parameter resolver returned an invalid JSON schema.";
+            return result;
+        }
+
+        const json& parameters = parsed["parameters"];
+        const bool parsedValues =
+            parseParameterValue(parameters["name"], result.parameters.name) &&
+            parseParameterValue(parameters["location"], result.parameters.location) &&
+            parseParameterValue(parameters["application"], result.parameters.application) &&
+            parseParameterValue(parameters["target"], result.parameters.target) &&
+            parseParameterValue(parameters["content"], result.parameters.content);
+
+        if (!parsedValues)
+        {
+            result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+            result.message = "Parameter resolver returned an invalid parameter value.";
+            return result;
+        }
+
+        string validationError;
+        if (!validateParameters(result.parameters, schema, validationError))
+        {
+            result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+            result.message = "Parameter schema validation failed: " +
+                validationError;
+            return result;
+        }
+
+        result.success = true;
+        result.status = ParameterResolutionStatus::RESOLVED;
+        result.message = "Semantic parameters resolved successfully.";
+        return result;
+    }
+    catch (const exception& error)
+    {
+        result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+        result.message = string("Invalid parameter resolver JSON: ") +
+            error.what();
+        return result;
+    }
+}
 
 ParameterResolverResult ParameterResolver::resolve(
     const string& stepDescription,
     const PrimitiveOperation& operation,
-    const Capability& capability
+    const Capability& capability,
+    const vector<pair<string, string>>& availableContext
 )
 {
-    ParameterResolverResult result;
-
-    result.success = false;
-    result.status =
-    ParameterResolutionStatus::FAILED;
-
-    result.clarificationQuestion =
-        "";
-
-    result.parameters.name = "";
-    result.parameters.location = "";
-    result.parameters.application = "";
-    result.parameters.target = "";
-    result.parameters.content = "";
-
-    result.message = "";
-
-    // --------------------------------------------------------
-    // BASIC VALIDATION
-    // --------------------------------------------------------
+    ParameterResolverResult result{};
+    result.status = ParameterResolutionStatus::FAILED;
 
     if (stepDescription.empty())
     {
         result.message =
             "Cannot resolve parameters from empty step description.";
-
         return result;
     }
 
@@ -281,7 +527,6 @@ ParameterResolverResult ParameterResolver::resolve(
     {
         result.message =
             "Cannot resolve parameters for unresolved primitive.";
-
         return result;
     }
 
@@ -289,1052 +534,103 @@ ParameterResolverResult ParameterResolver::resolve(
     {
         result.message =
             "Cannot resolve parameters for unsupported capability.";
-
         return result;
     }
 
-        // --------------------------------------------------------
-        // FILESYSTEM — CREATE FOLDER
-        // --------------------------------------------------------
-
-        if (
-            operation.name ==
-            "filesystem.create"
-        )
-        {
-            string description =
-                stepDescription;
-
-            string folderName;
-
-            // ----------------------------------------------------
-            // Explicit:
-            // "directory named NovaJava"
-            // "folder called NovaJava"
-            // ----------------------------------------------------
-
-            const string namedMarkers[] =
-            {
-                " directory named ",
-                " directory called ",
-                " folder named ",
-                " folder called ",
-                " project named ",
-                " project called "
-            };
-
-            for (const string& marker : namedMarkers)
-            {
-                size_t markerPosition =
-                    description.find(marker);
-
-                if (markerPosition != string::npos)
-                {
-                    size_t nameStart =
-                        markerPosition + marker.length();
-
-                    size_t nameEnd =
-                        description.find(
-                            " on ",
-                            nameStart
-                        );
-
-                    if (nameEnd == string::npos)
-                    {
-                        nameEnd =
-                            description.find(
-                                " in ",
-                                nameStart
-                            );
-                    }
-
-                    if (nameEnd != string::npos)
-                    {
-                        folderName =
-                            description.substr(
-                                nameStart,
-                                nameEnd - nameStart
-                            );
-                    }
-
-                    break;
-                }
-            }
-            folderName =
-                stripWrappingQuotes(
-                    folderName
-                );
-
-            if (!folderName.empty())
-            {
-                result.parameters.name =
-                    folderName;
-
-                result.parameters.location =
-                    "desktop";
-
-                result.success =
-                    true;
-
-                result.status =
-                    ParameterResolutionStatus::RESOLVED;
-
-                result.message =
-                    "Primitive parameters resolved successfully.";
-
-                return result;
-
-                return result;
-            }
-
-            result.status =
-                ParameterResolutionStatus::CLARIFICATION_REQUIRED;
-
-            result.message =
-                "Required folder name is missing.";
-
-            result.clarificationQuestion =
-                "What should the project folder be named?";
-
-            return result;
-            // ----------------------------------------------------
-// Semantic:
-// "Create the NovaJava project directory..."
-// "Create the NovaJava directory..."
-// ----------------------------------------------------
-
-if (folderName.empty())
-{
-    const string createPrefix =
-        "Create ";
-
-    if (
-        description.rfind(
-            createPrefix,
-            0
-        ) == 0
-    )
+    PrimitiveDefinition definition{};
+    if (!PrimitiveRegistry::resolveDefinition(operation.name, definition))
     {
-        string remainder =
-            description.substr(
-                createPrefix.length()
-            );
-
-        // Remove leading article.
-        if (
-            remainder.rfind(
-                "the ",
-                0
-            ) == 0
-        )
-        {
-            remainder =
-                remainder.substr(4);
-        }
-
-        if (
-            remainder.rfind(
-                "a ",
-                0
-            ) == 0
-        )
-        {
-            remainder =
-                remainder.substr(2);
-        }
-
-        // ------------------------------------------------
-        // "NovaJava project directory"
-        // -> "NovaJava"
-        // ------------------------------------------------
-
-        const string projectDirectoryMarker =
-            " project directory";
-
-        size_t markerPosition =
-            remainder.find(
-                projectDirectoryMarker
-            );
-
-        if (markerPosition != string::npos)
-        {
-            folderName =
-                remainder.substr(
-                    0,
-                    markerPosition
-                );
-        }
-
-        // ------------------------------------------------
-        // "NovaJava directory"
-        // -> "NovaJava"
-        // ------------------------------------------------
-
-        if (folderName.empty())
-        {
-            const string directoryMarker =
-                " directory";
-
-            markerPosition =
-                remainder.find(
-                    directoryMarker
-                );
-
-            if (markerPosition != string::npos)
-            {
-                folderName =
-                    remainder.substr(
-                        0,
-                        markerPosition
-                    );
-            }
-        }
+        result.message = "Unsupported primitive: " + operation.name;
+        return result;
     }
-}
-        }
-        // --------------------------------------------------------
-        // FILESYSTEM — CREATE FILE
-// --------------------------------------------------------
 
-if (
-    operation.name ==
-    "filesystem.create_file"
+    if (operation.type != definition.type)
+    {
+        result.status = ParameterResolutionStatus::INVALID_RESPONSE;
+        result.message = "Primitive name and operation type do not match.";
+        return result;
+    }
+
+    if (!definition.parameters.has_value())
+    {
+        result.message =
+            "Primitive parameter schema is not defined: " + operation.name;
+        return result;
+    }
+
+    return resolveSemanticParameters(
+        stepDescription,
+        operation,
+        definition,
+        availableContext);
+}
+
+bool ParameterResolver::toPrimitiveParameters(
+    const ActionParameters& parameters,
+    PrimitiveParameters& primitiveParameters,
+    string& errorMessage
 )
 {
-    string description =
-        stepDescription;
-
-    string fileName;
-
-    // ----------------------------------------------------
-    // FORM 1 / 2:
-    // "file named Main.java"
-    // "file called Main.java"
-    // ----------------------------------------------------
-
-    const string namedMarkers[] =
+    const auto convert = [&errorMessage](
+        const ParameterValue& value,
+        string& output,
+        const string& name)
     {
-        " file named ",
-        " file called "
-    };
-
-    for (const string& marker : namedMarkers)
-    {
-        size_t markerPosition =
-            description.find(marker);
-
-        if (markerPosition != string::npos)
+        if (value.type == ParameterValueType::NONE)
         {
-            size_t nameStart =
-                markerPosition + marker.length();
-
-            size_t nameEnd =
-                description.find(
-                    " inside ",
-                    nameStart
-                );
-
-            if (nameEnd == string::npos)
-            {
-                nameEnd =
-                    description.find(
-                        " in ",
-                        nameStart
-                    );
-            }
-
-            if (nameEnd == string::npos)
-            {
-                nameEnd =
-                    description.find(
-                        " with ",
-                        nameStart
-                    );
-            }
-
-            if (nameEnd != string::npos)
-            {
-                fileName =
-                    description.substr(
-                        nameStart,
-                        nameEnd - nameStart
-                    );
-            }
-            else
-            {
-                fileName =
-                    description.substr(
-                        nameStart
-                    );
-            }
-
-            break;
-        }
-    }
-
-    // ----------------------------------------------------
-    // FORM 3:
-    // "Create a Main.java file ..."
-    // "Create a basic Main.java class file ..."
-    //
-    // Prefer an explicit filename extension.
-    // ----------------------------------------------------
-
-    if (fileName.empty())
-    {
-        const string extensions[] =
-        {
-            ".java",
-            ".cpp",
-            ".py",
-            ".txt"
-        };
-
-        for (const string& extension : extensions)
-        {
-            size_t extensionPosition =
-                description.find(extension);
-
-            if (extensionPosition == string::npos)
-            {
-                continue;
-            }
-
-            size_t nameStart =
-                description.rfind(
-                    ' ',
-                    extensionPosition
-                );
-
-            if (nameStart == string::npos)
-            {
-                nameStart = 0;
-            }
-            else
-            {
-                nameStart++;
-            }
-
-            size_t nameEnd =
-                extensionPosition +
-                extension.length();
-
-            fileName =
-                description.substr(
-                    nameStart,
-                    nameEnd - nameStart
-                );
-
-            break;
-        }
-    }
-
-    fileName =
-        stripWrappingQuotes(
-            fileName
-        );
-
-    // ----------------------------------------------------
-    // SUCCESS
-    // ----------------------------------------------------
-
-    if (!fileName.empty())
-    {
-        result.parameters.name =
-            fileName;
-
-        // ----------------------------------------------------
-        // Resolve semantic file content when requested.
-        // ----------------------------------------------------
-
-        if (
-            description.find(" with ") != string::npos ||
-            description.find(" containing ") != string::npos ||
-            description.find(" that contains ") != string::npos
-        )
-        {
-            ContentResolutionResult contentResult =
-                contentResolver.resolve(
-                    description,
-                    fileName
-                );
-
-            if (
-                contentResult.status ==
-                ContentResolutionStatus::CLARIFICATION_REQUIRED
-            )
-            {
-                result.status =
-                    ParameterResolutionStatus::CLARIFICATION_REQUIRED;
-
-                result.message =
-                    contentResult.message;
-
-                result.clarificationQuestion =
-                    contentResult.clarificationQuestion;
-
-                return result;
-            }
-
-            if (
-                contentResult.status ==
-                ContentResolutionStatus::FAILED
-            )
-            {
-                result.status =
-                    ParameterResolutionStatus::FAILED;
-
-                result.message =
-                    contentResult.message;
-
-                return result;
-            }
-
-            result.parameters.content =
-                contentResult.content;
+            output.clear();
+            return true;
         }
 
-        result.success =
-            true;
-
-        result.status =
-            ParameterResolutionStatus::RESOLVED;
-
-        result.message =
-            "File parameters resolved successfully.";
-
-        return result;
-    }
-
-    // ----------------------------------------------------
-    // CLARIFICATION
-    // ----------------------------------------------------
-
-    result.status =
-        ParameterResolutionStatus::CLARIFICATION_REQUIRED;
-
-    result.message =
-        "Required file name is missing.";
-
-    result.clarificationQuestion =
-        "What should the file be named?";
-
-    return result;
-}
-    // --------------------------------------------------------
-    // APPLICATION — LAUNCH
-    // --------------------------------------------------------
-
-    if (
-        operation.name ==
-        "application.launch"
-    )
-    {
-        string description =
-            stepDescription;
-
-        // ----------------------------------------------------
-        // 1. Resolve semantic form:
-        //
-        // "Open VS Code and navigate to the NovaJava project directory"
-        //
-        // The application is the text immediately after
-        // "Open " and before the navigation clause.
-        // ----------------------------------------------------
-
-        const string openPrefix =
-            "Open ";
-
-        const string launchPrefix =
-            "Launch ";
-
-        if (
-            description.rfind(
-                openPrefix,
-                0
-            ) == 0
-        )
+        if (value.type != ParameterValueType::LITERAL ||
+            !isMeaningful(value.value))
         {
-            string remainder =
-                description.substr(
-                    openPrefix.length()
-                );
-
-            const string navigateMarker =
-                " and navigate to ";
-
-            size_t navigatePosition =
-                remainder.find(
-                    navigateMarker
-                );
-
-            if (
-                navigatePosition != string::npos
-            )
-            {
-                result.parameters.application =
-                    remainder.substr(
-                        0,
-                        navigatePosition
-                    );
-
-                result.parameters.target =
-                    remainder.substr(
-                        navigatePosition +
-                        navigateMarker.length()
-                    );
-
-                result.parameters.application =
-                    stripWrappingQuotes(
-                        result.parameters.application
-                    );
-
-                result.parameters.target =
-                    stripWrappingQuotes(
-                        result.parameters.target
-                    );
-
-                // Remove trailing punctuation.
-                while (
-                    !result.parameters.target.empty()
-                    &&
-                    (
-                        result.parameters.target.back() == '.'
-                        ||
-                        result.parameters.target.back() == '!'
-                        ||
-                        result.parameters.target.back() == '?'
-                    )
-                )
-                {
-                    result.parameters.target.pop_back();
-                }
-
-                // Remove trailing " folder" / " directory".
-                const string folderSuffix =
-                    " folder";
-
-                const string directorySuffix =
-                    " directory";
-
-                if (
-                    result.parameters.target.size() >=
-                    folderSuffix.size()
-                    &&
-                    result.parameters.target.compare(
-                        result.parameters.target.size() -
-                        folderSuffix.size(),
-                        folderSuffix.size(),
-                        folderSuffix
-                    ) == 0
-                )
-                {
-                    result.parameters.target.erase(
-                        result.parameters.target.size() -
-                        folderSuffix.size()
-                    );
-                }
-                else if (
-                    result.parameters.target.size() >=
-                    directorySuffix.size()
-                    &&
-                    result.parameters.target.compare(
-                        result.parameters.target.size() -
-                        directorySuffix.size(),
-                        directorySuffix.size(),
-                        directorySuffix
-                    ) == 0
-                )
-                {
-                    result.parameters.target.erase(
-                        result.parameters.target.size() -
-                        directorySuffix.size()
-                    );
-                }
-
-                if (
-                    !result.parameters.application.empty()
-                    &&
-                    !result.parameters.target.empty()
-                )
-                {
-                    result.success =
-                        true;
-
-                    result.status =
-                        ParameterResolutionStatus::RESOLVED;
-
-                    result.message =
-                        "Application launch parameters resolved successfully.";
-
-                    return result;
-                }
-            }
-        }
-
-        // ----------------------------------------------------
-        // 2. Existing "in" form:
-        //
-        // "Open the NovaJava project directory in VS Code"
-        // ----------------------------------------------------
-
-        const string inMarker =
-            " in ";
-
-        size_t inPosition =
-            description.rfind(
-                inMarker
-            );
-
-        if (inPosition != string::npos)
-        {
-            result.parameters.target =
-                stripWrappingQuotes(
-                    description.substr(
-                        0,
-                        inPosition
-                    )
-                );
-
-            result.parameters.application =
-                stripWrappingQuotes(
-                    description.substr(
-                        inPosition +
-                        inMarker.length()
-                    )
-                );
-
-            // Remove trailing punctuation.
-            while (
-                !result.parameters.application.empty()
-                &&
-                (
-                    result.parameters.application.back() == '.'
-                    ||
-                    result.parameters.application.back() == '!'
-                    ||
-                    result.parameters.application.back() == '?'
-                )
-            )
-            {
-                result.parameters.application.pop_back();
-            }
-
-            // Remove "Open the ..." / "Open ..." from target.
-            const string openThePrefix =
-                "Open the ";
-
-            const string openPrefix =
-                "Open ";
-
-            if (
-                result.parameters.target.rfind(
-                    openThePrefix,
-                    0
-                ) == 0
-            )
-            {
-                result.parameters.target =
-                    result.parameters.target.substr(
-                        openThePrefix.length()
-                    );
-            }
-            else if (
-                result.parameters.target.rfind(
-                    openPrefix,
-                    0
-                ) == 0
-            )
-            {
-                result.parameters.target =
-                    result.parameters.target.substr(
-                        openPrefix.length()
-                    );
-            }
-
-            // Remove trailing " folder" / " directory".
-            const string folderSuffix =
-                " folder";
-
-            const string directorySuffix =
-                " directory";
-
-            if (
-                result.parameters.target.size() >=
-                folderSuffix.size()
-                &&
-                result.parameters.target.compare(
-                    result.parameters.target.size() -
-                    folderSuffix.size(),
-                    folderSuffix.size(),
-                    folderSuffix
-                ) == 0
-            )
-            {
-                result.parameters.target.erase(
-                    result.parameters.target.size() -
-                    folderSuffix.size()
-                );
-            }
-            else if (
-                result.parameters.target.size() >=
-                directorySuffix.size()
-                &&
-                result.parameters.target.compare(
-                    result.parameters.target.size() -
-                    directorySuffix.size(),
-                    directorySuffix.size(),
-                    directorySuffix
-                ) == 0
-            )
-            {
-                result.parameters.target.erase(
-                    result.parameters.target.size() -
-                    directorySuffix.size()
-                );
-            }
-
-            if (
-                !result.parameters.application.empty()
-                &&
-                !result.parameters.target.empty()
-            )
-            {
-                result.success =
-                    true;
-
-                result.status =
-                    ParameterResolutionStatus::RESOLVED;
-
-                result.message =
-                    "Application launch parameters resolved successfully.";
-
-                return result;
-            }
-        }
-
-        // ----------------------------------------------------
-        // 3. Simple form:
-        //
-        // "open VS Code"
-        // "launch VS Code"
-        // ----------------------------------------------------
-
-        const string simpleOpenPrefix =
-            "open ";
-
-        const string simpleLaunchPrefix =
-            "launch ";
-
-        if (
-            description.rfind(
-                simpleOpenPrefix,
-                0
-            ) == 0
-        )
-        {
-            result.parameters.application =
-                description.substr(
-                    simpleOpenPrefix.length()
-                );
-        }
-        else if (
-            description.rfind(
-                simpleLaunchPrefix,
-                0
-            ) == 0
-        )
-        {
-            result.parameters.application =
-                description.substr(
-                    simpleLaunchPrefix.length()
-                );
-        }
-
-        result.parameters.application =
-            stripWrappingQuotes(
-                result.parameters.application
-            );
-
-        if (
-            result.parameters.application.empty()
-        )
-        {
-            result.message =
-                "Unable to resolve application parameter.";
-
-            return result;
-        }
-
-        result.success =
-            true;
-
-        result.status =
-            ParameterResolutionStatus::RESOLVED;
-
-        result.message =
-            "Primitive parameters resolved successfully.";
-
-        return result;
-    }
-    // --------------------------------------------------------
-    // TEXT — WRITE
-    // --------------------------------------------------------
-
-    if (
-        operation.name ==
-        "text.write"
-    )
-    {
-        string normalizedInput =
-            stepDescription;
-
-        const string writePrefix =
-            "write ";
-
-        if (
-            normalizedInput.rfind(
-                writePrefix,
-                0
-            ) == 0
-        )
-        {
-            normalizedInput =
-                normalizedInput.substr(
-                    writePrefix.length()
-                );
-        }
-
-        const string intoMarker =
-            " into ";
-
-        size_t intoPosition =
-            normalizedInput.find(
-                intoMarker
-            );
-
-        if (
-            intoPosition != string::npos
-        )
-        {
-            string content =
-                normalizedInput.substr(
-                    0,
-                    intoPosition
-                );
-
-            string target =
-                normalizedInput.substr(
-                    intoPosition +
-                    intoMarker.length()
-                );
-
-            content =
-                stripWrappingQuotes(
-                    content
-                );
-
-            target =
-                stripWrappingQuotes(
-                    target
-                );
-
-            if (
-                content.empty()
-            )
-            {
-                result.message =
-                    "Unable to resolve text content.";
-
-                return result;
-            }
-
-            if (
-                target.empty()
-            )
-            {
-                result.message =
-                    "Unable to resolve text target.";
-
-                return result;
-            }
-
-            result.parameters.content =
-                content;
-
-            result.parameters.target =
-                target;
-
-            result.success =
-                true;
-
-            result.message =
-                "Text write parameters resolved successfully.";
-
-            return result;
-        }
-
-        // --------------------------------------------------------
-        // SEMANTIC CONTENT RESOLUTION
-        // --------------------------------------------------------
-
-        string target;
-
-        const string targetMarkers[] =
-        {
-            " in ",
-            " inside "
-        };
-
-        for (const string& marker : targetMarkers)
-        {
-            size_t markerPosition =
-                stepDescription.rfind(marker);
-
-            if (markerPosition != string::npos)
-            {
-                target =
-                    stepDescription.substr(
-                        markerPosition + marker.length()
-                    );
-
-                target =
-                    stripWrappingQuotes(
-                        target
-                    );
-
-                break;
-            }
-        }
-
-        if (target.empty())
-        {
-            result.status =
-                ParameterResolutionStatus::CLARIFICATION_REQUIRED;
-
-            result.message =
-                "Unable to determine the target file.";
-
-            result.clarificationQuestion =
-                "Which file should the content be written to?";
-
-            return result;
-        }
-
-        ContentResolutionResult contentResult =
-            contentResolver.resolve(
-                stepDescription,
-                target
-            );
-
-        if (
-            contentResult.status ==
-            ContentResolutionStatus::CLARIFICATION_REQUIRED
-        )
-        {
-            result.status =
-                ParameterResolutionStatus::CLARIFICATION_REQUIRED;
-
-            result.message =
-                contentResult.message;
-
-            result.clarificationQuestion =
-                contentResult.clarificationQuestion;
-
-            return result;
-        }
-
-        if (
-            contentResult.status ==
-            ContentResolutionStatus::FAILED
-        )
-        {
-            result.status =
-                ParameterResolutionStatus::FAILED;
-
-            result.message =
-                contentResult.message;
-
-            return result;
-        }
-
-        result.parameters.target =
-            target;
-
-        result.parameters.content =
-            contentResult.content;
-
-        result.success =
-            true;
-
-        result.status =
-            ParameterResolutionStatus::RESOLVED;
-
-        result.message =
-            "Semantic text content resolved successfully.";
-
-        return result;
-    }
-
-    // --------------------------------------------------------
-    // UNSUPPORTED / NOT YET DEFINED
-    // --------------------------------------------------------
-
-    result.message =
-        "No parameter resolution rule exists for requested primitive.";
-
-        return result;
-}
-
-    // ============================================================
-    // PARAMETER CONVERSION
-    // ============================================================
-
-    PrimitiveParameters ParameterResolver::toPrimitiveParameters(
-        const ActionParameters& parameters
-    )
-    {
-        PrimitiveParameters result;
-
-        result.name =
-            parameters.name;
-
-        result.location =
-            parameters.location;
-
-        result.application =
-            parameters.application;
-
-        result.target =
-            parameters.target;
-
-        result.content =
-            parameters.content;
-
-        return result;
-}
-    bool ParameterResolver::resolveIntoOperation(
-        const string& stepDescription,
-        PrimitiveOperation& operation,
-        const Capability& capability
-    )
-    {
-        ParameterResolverResult result =
-            resolve(
-                stepDescription,
-                operation,
-                capability
-            );
-
-        if (!result.success)
-        {
+            errorMessage =
+                "Parameter must be resolved to a meaningful literal before execution: " +
+                name;
             return false;
         }
 
-        operation.parameters =
-            toPrimitiveParameters(
-                result.parameters
-            );
-
+        output = value.value;
         return true;
+    };
+
+    return
+        convert(parameters.name, primitiveParameters.name, "name") &&
+        convert(parameters.location, primitiveParameters.location, "location") &&
+        convert(parameters.application, primitiveParameters.application, "application") &&
+        convert(parameters.target, primitiveParameters.target, "target") &&
+        convert(parameters.content, primitiveParameters.content, "content");
+}
+
+bool ParameterResolver::resolveIntoOperation(
+    const string& stepDescription,
+    PrimitiveOperation& operation,
+    const Capability& capability,
+    const vector<pair<string, string>>& availableContext
+)
+{
+    const ParameterResolverResult result = resolve(
+        stepDescription,
+        operation,
+        capability,
+        availableContext);
+
+    if (!result.success)
+    {
+        return false;
     }
+
+    PrimitiveParameters primitiveParameters;
+    string errorMessage;
+    if (!toPrimitiveParameters(
+            result.parameters,
+            primitiveParameters,
+            errorMessage))
+    {
+        return false;
+    }
+
+    operation.parameters = primitiveParameters;
+    return true;
+}

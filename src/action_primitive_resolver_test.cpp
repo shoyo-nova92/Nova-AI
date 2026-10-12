@@ -122,7 +122,7 @@ int main()
     }
 
     // --------------------------------------------------
-    // TEST 2: Deterministic Java file creation
+    // TEST 2: Deterministic project creation
     // --------------------------------------------------
 
     {
@@ -131,6 +131,42 @@ int main()
         auto action =
             makeAction(
                 "step_2",
+                "Create a Java project with a Main.java class"
+            );
+
+        auto result =
+            resolver.resolve(action);
+
+        printResult(
+            "CREATE_PROJECT",
+            result
+        );
+
+        bool correct =
+            result.status ==
+                ActionPrimitiveResolutionStatus::RESOLVED
+            &&
+            result.action.operations.size() == 1
+            &&
+            result.action.operations[0].name ==
+                "filesystem.create";
+
+        if (correct)
+        {
+            passed++;
+        }
+    }
+
+    // --------------------------------------------------
+    // TEST 3: Deterministic Java file creation
+    // --------------------------------------------------
+
+    {
+        total++;
+
+        auto action =
+            makeAction(
+                "step_3",
                 "Create a basic Main.java class file"
             );
 
@@ -158,7 +194,7 @@ int main()
     }
 
     // --------------------------------------------------
-    // TEST 3: Deterministic application launch
+    // TEST 4: Deterministic application launch
     // --------------------------------------------------
 
     {
@@ -166,7 +202,7 @@ int main()
 
         auto action =
             makeAction(
-                "step_3",
+                "step_4",
                 "Open the project in VS Code"
             );
 
@@ -194,7 +230,7 @@ int main()
     }
 
     // --------------------------------------------------
-    // TEST 4: Deterministic text writing
+    // TEST 5: Deterministic text writing
     // --------------------------------------------------
 
     {
@@ -202,7 +238,7 @@ int main()
 
         auto action =
             makeAction(
-                "step_4",
+                "step_5",
                 "Write the basic Java class into the file"
             );
 
@@ -230,7 +266,7 @@ int main()
     }
 
     // --------------------------------------------------
-    // TEST 5: Ambiguous semantic step
+    // TEST 6: Ambiguous semantic step
     //
     // The LLM should NOT invent a plan.
     // It should request clarification.
@@ -241,7 +277,7 @@ int main()
 
         auto action =
             makeAction(
-                "step_5",
+                "step_6",
                 "Prepare the project for Java development"
             );
 

@@ -7,6 +7,7 @@
 #include "capability_resolver.hpp"
 #include "parameter_resolver.hpp"
 #include "context_resolver.hpp"
+#include "execution_plan.hpp"
 
 #include <string>
 
@@ -24,6 +25,8 @@ struct MultiStepPipelineResult
     MultiStepPipelineStatus status;
 
     MultiStepPlan plan;
+
+    ExecutionPlan executionPlan;
 
     string message;
 

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "action_parameters.hpp"
 #include "primitive_operation.hpp"
 #include "context_reference.hpp"
 
@@ -14,6 +15,7 @@ struct MultiStepAction
     vector<string> dependencies;
 
     vector<PrimitiveOperation> operations;
+    vector<ActionParameters> semanticParameters;
 
     vector<ContextReference> contextReferences;
 

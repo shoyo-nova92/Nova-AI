@@ -26,13 +26,20 @@ add_executable(Nova
     src/single_action_pipeline.cpp
     src/capability_resolver.cpp
     src/parameter_resolver.cpp
+    src/primitive_registry.cpp
     src/action_validator.cpp
     src/execution_plan_builder.cpp
     src/execution_engine.cpp
     src/application_resolver.cpp
     src/action_primitive_resolver.cpp
-    src/primitive_registry.cpp
     src/content_resolver.cpp
+    src/multistep_pipeline.cpp
+    src/goal_decomposer.cpp
+    src/dependency_resolver.cpp
+    src/context_resolver.cpp
+    src/plan_validator.cpp
+    src/primitive_execution_engine.cpp
+    src/multi_step_executor.cpp
 )
 
 target_link_libraries(Nova
@@ -96,6 +103,7 @@ add_executable(SingleActionPipelineTest
     src/action_parser.cpp
     src/capability_resolver.cpp
     src/parameter_resolver.cpp
+    src/primitive_registry.cpp
     src/action_validator.cpp
     src/execution_plan_builder.cpp
     src/execution_engine.cpp
@@ -116,6 +124,7 @@ add_executable(ApplicationResolverTest
 add_executable(ParameterResolverTest
     src/parameter_resolver_test.cpp
     src/parameter_resolver.cpp
+    src/primitive_registry.cpp
     src/content_resolver.cpp
     src/llm_client.cpp
 )
@@ -141,6 +150,7 @@ add_executable(Branch2Benchmark
     src/action_parser.cpp
     src/capability_resolver.cpp
     src/parameter_resolver.cpp
+    src/primitive_registry.cpp
     src/action_validator.cpp
     src/execution_plan_builder.cpp
     src/execution_engine.cpp
@@ -206,9 +216,42 @@ add_executable(MultiStepPipelineTest
     src/context_resolver.cpp
     src/llm_client.cpp
     src/content_resolver.cpp
+    src/plan_validator.cpp
+    src/execution_plan_builder.cpp
 )
 
 target_link_libraries(MultiStepPipelineTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(
+    PrimitiveExecutionEngineTest
+    src/primitive_execution_engine_test.cpp
+    src/primitive_execution_engine.cpp
+)
+
+add_executable(
+    MultiStepIntegrationTest
+    src/multi_step_integration_test.cpp
+    src/multi_step_executor.cpp
+    src/primitive_execution_engine.cpp
+
+    src/multistep_pipeline.cpp
+    src/goal_decomposer.cpp
+    src/dependency_resolver.cpp
+    src/action_primitive_resolver.cpp
+    src/primitive_registry.cpp
+    src/capability_resolver.cpp
+    src/parameter_resolver.cpp
+    src/context_resolver.cpp
+    src/plan_validator.cpp
+    src/execution_plan_builder.cpp
+    src/content_resolver.cpp
+    src/llm_client.cpp
+)
+target_link_libraries(MultiStepIntegrationTest
     PRIVATE
         CURL::libcurl
         nlohmann_json::nlohmann_json

@@ -39,25 +39,25 @@ void runTest(
 
     cout << "Name: "
          << (
-                result.parameters.name.empty()
+                result.parameters.name.type == ParameterValueType::NONE
                 ? "[none]"
-                : result.parameters.name
+                : result.parameters.name.value
             )
          << endl;
 
     cout << "Location: "
          << (
-                result.parameters.location.empty()
+                result.parameters.location.type == ParameterValueType::NONE
                 ? "[none]"
-                : result.parameters.location
+                : result.parameters.location.value
             )
          << endl;
 
     cout << "Application: "
          << (
-                result.parameters.application.empty()
+                result.parameters.application.type == ParameterValueType::NONE
                 ? "[none]"
-                : result.parameters.application
+                : result.parameters.application.value
             )
          << endl;
 

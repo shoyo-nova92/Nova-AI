@@ -1,4 +1,8 @@
 #include "multistep_pipeline.hpp"
+#include "plan_validator.hpp"
+#include "execution_plan_builder.hpp"
+
+#include <algorithm>
 #include <iostream>
 
 MultiStepPipelineResult MultiStepPipeline::run(
@@ -72,6 +76,8 @@ MultiStepPipelineResult MultiStepPipeline::run(
 
         return result;
     }
+    plan =
+        dependencyResult.plan;
 
     // ============================================================
     // 3. ACTION / PRIMITIVE RESOLUTION
@@ -145,6 +151,7 @@ MultiStepPipelineResult MultiStepPipeline::run(
 
     for (MultiStepAction& step : plan.steps)
     {
+        step.semanticParameters.clear();
         for (PrimitiveOperation& operation : step.operations)
         {
             Capability capability =
@@ -163,16 +170,33 @@ MultiStepPipelineResult MultiStepPipeline::run(
                 return result;
             }
 
+            vector<pair<string, string>> availableContext;
+            for (const MultiStepAction& previousStep : plan.steps)
+            {
+                if (find(
+                        step.dependencies.begin(),
+                        step.dependencies.end(),
+                        previousStep.id) != step.dependencies.end())
+                {
+                    availableContext.emplace_back(
+                        previousStep.id,
+                        previousStep.description);
+                }
+            }
+
             ParameterResolverResult parameterResult =
                 parameterResolver.resolve(
                     step.description,
                     operation,
-                    capability
+                    capability,
+                    availableContext
                 );
 
             if (
                 parameterResult.status ==
-                ParameterResolutionStatus::CLARIFICATION_REQUIRED
+                    ParameterResolutionStatus::AMBIGUOUS ||
+                parameterResult.status ==
+                    ParameterResolutionStatus::MISSING_REQUIRED_PARAMETER
             )
             {
                 result.status =
@@ -190,10 +214,7 @@ MultiStepPipelineResult MultiStepPipeline::run(
                 return result;
             }
 
-            if (
-                parameterResult.status ==
-                ParameterResolutionStatus::FAILED
-            )
+            if (!parameterResult.success)
             {
                 result.status =
                     MultiStepPipelineStatus::FAILED;
@@ -209,10 +230,8 @@ MultiStepPipelineResult MultiStepPipeline::run(
                 return result;
             }
 
-            operation.parameters =
-                parameterResolver.toPrimitiveParameters(
-                    parameterResult.parameters
-                );
+            step.semanticParameters.push_back(
+                parameterResult.parameters);
         }
     }
 
@@ -276,6 +295,84 @@ MultiStepPipelineResult MultiStepPipeline::run(
     result.status =
         MultiStepPipelineStatus::SUCCESS;
 
+    PlanValidator planValidator;
+
+    PlanValidationResult validationResult =
+        planValidator.validate(plan);
+
+    if (validationResult.status ==
+        PlanValidationStatus::INVALID)
+    {
+        result.status =
+            MultiStepPipelineStatus::FAILED;
+
+        result.message =
+            "Plan validation failed: " +
+            validationResult.message;
+
+        return result;
+    }
+
+    cout << "\n[PLAN VALIDATION]\n";
+    cout << "Status: VALID" << endl;
+    cout << "Message: "
+        << validationResult.message
+        << endl;
+
+    // --------------------------------------------------
+    // EXECUTION PLAN
+    // --------------------------------------------------
+
+    ExecutionPlanBuilder executionPlanBuilder;
+
+    ExecutionPlan executionPlan =
+        executionPlanBuilder.build(
+            plan,
+            dependencyResult.executionOrder
+        );
+    
+    result.executionPlan = executionPlan;
+        
+    if (!executionPlan.valid)
+    {
+        result.status =
+            MultiStepPipelineStatus::FAILED;
+
+        result.message =
+            "Execution plan construction failed: " +
+            executionPlan.message;
+
+        return result;
+    }
+
+    cout << "\n[EXECUTION PLAN]\n";
+    cout << "Type: "
+        << executionPlan.type
+        << endl;
+
+    cout << "Steps: "
+        << executionPlan.steps.size()
+        << endl;
+
+    for (const ExecutionPlanStep& step :
+        executionPlan.steps)
+    {
+        cout << "  Step: "
+            << step.id
+            << endl;
+
+        cout << "  Primitive: "
+            << step.operation.name
+            << endl;
+
+        cout << "  Valid: "
+            << (step.valid ? "true" : "false")
+            << endl;
+
+        cout << "------------------------"
+            << endl;
+    }
+        
     result.plan =
         plan;
 

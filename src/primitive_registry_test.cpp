@@ -159,6 +159,64 @@ int main()
     }
 
     // --------------------------------------------------
+    // TEST 6: Defined primitive parameter schema
+    // --------------------------------------------------
+
+    total++;
+
+    PrimitiveDefinition createFileDefinition{};
+    bool createFileDefinitionResolved =
+        PrimitiveRegistry::resolveDefinition(
+            "filesystem.create_file",
+            createFileDefinition
+        );
+
+    bool test6 =
+        createFileDefinitionResolved &&
+        createFileDefinition.parameters.has_value() &&
+        createFileDefinition.parameters->name ==
+            ParameterRequirement::REQUIRED &&
+        createFileDefinition.parameters->location ==
+            ParameterRequirement::REQUIRED &&
+        createFileDefinition.parameters->content ==
+            ParameterRequirement::OPTIONAL;
+
+    cout << "[CREATE_FILE_SCHEMA] "
+         << (test6 ? "PASS" : "FAIL")
+         << endl;
+
+    if (test6)
+    {
+        passed++;
+    }
+
+    // --------------------------------------------------
+    // TEST 7: Undesigned schema remains undefined
+    // --------------------------------------------------
+
+    total++;
+
+    PrimitiveDefinition deleteDefinition{};
+    bool deleteDefinitionResolved =
+        PrimitiveRegistry::resolveDefinition(
+            "filesystem.delete",
+            deleteDefinition
+        );
+
+    bool test7 =
+        deleteDefinitionResolved &&
+        !deleteDefinition.parameters.has_value();
+
+    cout << "[UNDEFINED_SCHEMA] "
+         << (test7 ? "PASS" : "FAIL")
+         << endl;
+
+    if (test7)
+    {
+        passed++;
+    }
+
+    // --------------------------------------------------
     // FINAL RESULT
     // --------------------------------------------------
 

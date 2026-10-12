@@ -4,14 +4,33 @@
 
 using namespace std;
 
+enum class ParameterValueType
+{
+    NONE,
+    LITERAL,
+    CONTEXT_REFERENCE
+};
+
+struct ContextParameterReference
+{
+    string stepId;
+    string output;
+};
+
+struct ParameterValue
+{
+    ParameterValueType type = ParameterValueType::NONE;
+
+    string value;
+
+    ContextParameterReference reference;
+};
+
 struct ActionParameters
 {
-    // Existing Branch 2 parameters
-    string name;
-    string location;
-    string application;
-
-    // B3 generic primitive parameters
-    string target;
-    string content;
+    ParameterValue name;
+    ParameterValue location;
+    ParameterValue application;
+    ParameterValue target;
+    ParameterValue content;
 };
