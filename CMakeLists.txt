@@ -40,12 +40,18 @@ add_executable(Nova
     src/plan_validator.cpp
     src/primitive_execution_engine.cpp
     src/multi_step_executor.cpp
+    src/primitive_mapper.cpp
+    src/branch3_runtime.cpp
 )
 
 target_link_libraries(Nova
     PRIVATE
         CURL::libcurl
         nlohmann_json::nlohmann_json
+        shell32
+        ole32
+        psapi
+        user32
 )
 add_executable(ExecutionEngineTest
     src/execution_engine_test.cpp
@@ -255,4 +261,105 @@ target_link_libraries(MultiStepIntegrationTest
     PRIVATE
         CURL::libcurl
         nlohmann_json::nlohmann_json
+)
+
+add_executable(GoalDecomposerContractTest
+    src/goal_decomposer_contract_test.cpp
+    src/goal_decomposer.cpp
+    src/llm_client.cpp
+)
+
+target_link_libraries(GoalDecomposerContractTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+add_executable(PrimitiveMapperContractTest
+
+    src/primitive_mapper_contract_test.cpp
+
+    src/primitive_mapper.cpp
+
+    src/primitive_registry.cpp
+
+    src/llm_client.cpp
+
+)
+
+target_include_directories(PrimitiveMapperContractTest PRIVATE src)
+
+target_link_libraries(PrimitiveMapperContractTest PRIVATE CURL::libcurl nlohmann_json::nlohmann_json)
+
+add_executable(Branch3LivePlanningTest
+    src/branch3_live_planning_test.cpp
+    src/goal_decomposer.cpp
+    src/primitive_mapper.cpp
+    src/primitive_registry.cpp
+    src/llm_client.cpp
+)
+
+target_include_directories(Branch3LivePlanningTest PRIVATE src)
+
+target_link_libraries(Branch3LivePlanningTest
+    PRIVATE
+        CURL::libcurl
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(
+    FilesystemCreationGroupTest
+    src/filesystem_creation_group_test.cpp
+    src/primitive_execution_engine.cpp
+)
+
+target_include_directories(FilesystemCreationGroupTest PRIVATE src)
+target_link_libraries(FilesystemCreationGroupTest PRIVATE shell32 ole32)
+
+add_executable(
+    FilesystemManipulationGroupTest
+    src/filesystem_manipulation_group_test.cpp
+    src/primitive_execution_engine.cpp
+)
+target_include_directories(FilesystemManipulationGroupTest PRIVATE src)
+target_link_libraries(FilesystemManipulationGroupTest PRIVATE shell32 ole32)
+
+add_executable(
+    ApplicationLifecycleGroupTest
+    src/application_lifecycle_group_test.cpp
+    src/primitive_execution_engine.cpp
+)
+target_include_directories(ApplicationLifecycleGroupTest PRIVATE src)
+target_link_libraries(ApplicationLifecycleGroupTest PRIVATE shell32 ole32 psapi)
+
+add_executable(
+    TextKeyboardGroupTest
+    src/text_keyboard_group_test.cpp
+    src/primitive_execution_engine.cpp
+)
+target_include_directories(TextKeyboardGroupTest PRIVATE src)
+target_link_libraries(TextKeyboardGroupTest PRIVATE shell32 ole32 psapi)
+
+add_executable(
+    MouseGroupTest
+    src/mouse_group_test.cpp
+    src/primitive_execution_engine.cpp
+)
+target_include_directories(MouseGroupTest PRIVATE src)
+target_link_libraries(MouseGroupTest PRIVATE shell32 ole32 psapi user32)
+
+
+add_executable(Branch3RuntimeIntegrationTest
+    src/branch3_runtime_test.cpp
+    src/branch3_runtime.cpp
+    src/goal_decomposer.cpp
+    src/primitive_mapper.cpp
+    src/primitive_registry.cpp
+    src/primitive_execution_engine.cpp
+    src/llm_client.cpp
+)
+target_include_directories(Branch3RuntimeIntegrationTest PRIVATE src)
+target_link_libraries(Branch3RuntimeIntegrationTest PRIVATE
+    CURL::libcurl
+    nlohmann_json::nlohmann_json
+    shell32 ole32 psapi user32
 )

@@ -6,6 +6,7 @@
 #include "single_action_pipeline.hpp"
 #include "multistep_pipeline.hpp"
 #include "multi_step_executor.hpp"
+#include "branch3_runtime.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -534,199 +535,50 @@ int main()
     }
 
     // --------------------------------------------------------
-    // BRANCH 3 — MULTI-STEP GOAL
+    // BRANCH 3 — MULTI-STEP GOAL (Branch 3 planner + mapper)
+    // Branch 2 single-action routing above is intentionally unchanged.
     // --------------------------------------------------------
 
-    if (
-        classification.type ==
-        RequestType::MULTI_STEP_GOAL
-    )
+    if (classification.type == RequestType::MULTI_STEP_GOAL)
     {
-        cout << endl;
-        cout << "[BRANCH 3]" << endl;
+        cout << endl << "[BRANCH 3]" << endl;
         cout << "MULTI_STEP_GOAL" << endl;
+        logger.log("INFO", "BRANCH3_RUNTIME", "Branch 3 runtime selected.", "STARTED");
 
-        logger.log(
-            "INFO",
-            "MULTI_STEP_GOAL",
-            "Multi-step goal branch selected.",
-            "STARTED"
-        );
+        Branch3Runtime runtime;
+        const Branch3RuntimeResult runtimeResult = runtime.run(normalized.normalizedText);
 
-        MultiStepPipeline multiStepPipeline;
-
-        MultiStepPipelineResult multiStepResult =
-            multiStepPipeline.run(
-                normalized.normalizedText
-            );
-
-        if (
-            multiStepResult.status ==
-            MultiStepPipelineStatus::CLARIFICATION_REQUIRED
-        )
-        {
-            cout << endl;
-            cout << "[MULTI-STEP CLARIFICATION]" << endl;
-            cout << multiStepResult.clarificationQuestion
-                << endl;
-
-            logger.log(
-                "INFO",
-                "MULTI_STEP_GOAL",
-                multiStepResult.clarificationQuestion,
-                "CLARIFICATION_REQUIRED"
-            );
-
-            return 0;
+        cout << "\n[GOAL DECOMPOSITION]\n";
+        cout << "Valid: " << boolalpha << runtimeResult.decomposedPlan.valid << "\n";
+        cout << "Steps: " << runtimeResult.decomposedPlan.steps.size() << "\n";
+        if (runtimeResult.decomposedPlan.valid) {
+            for (const auto& step : runtimeResult.decomposedPlan.steps)
+                cout << "  " << step.id << ": " << step.description << "\n";
         }
 
-        if (
-            multiStepResult.status ==
-            MultiStepPipelineStatus::FAILED
-        )
-        {
-            logger.log(
-                "ERROR",
-                "MULTI_STEP_GOAL",
-                multiStepResult.message,
-                "FAILURE"
-            );
-
-            cerr
-                << "[MULTI-STEP FAILURE] "
-                << multiStepResult.message
-                << endl;
-
-            return 1;
+        cout << "\n[PRIMITIVE MAPPING]\n";
+        cout << "Valid: " << boolalpha << runtimeResult.mappedPlan.valid << "\n";
+        if (runtimeResult.mappedPlan.valid) {
+            for (const auto& step : runtimeResult.mappedPlan.steps) {
+                cout << "  " << step.id << "\n";
+                for (const auto& operation : step.operations)
+                    cout << "    -> " << operation.name << "\n";
+            }
         }
 
-        cout << endl;
-        cout << "[MULTI-STEP EXECUTION PLAN]" << endl;
-
-        cout << "Valid: "
-            << (
-                    multiStepResult.executionPlan.valid
-                    ? "true"
-                    : "false"
-                )
-            << endl;
-
-        cout << "Type: "
-            << multiStepResult.executionPlan.type
-            << endl;
-
-        cout << "Steps: "
-            << multiStepResult.executionPlan.steps.size()
-            << endl;
-
-        for (
-            const ExecutionPlanStep& step
-            : multiStepResult.executionPlan.steps
-        )
-        {
-            cout << endl;
-
-            cout << "Step: "
-                << step.id
-                << endl;
-
-            cout << "Primitive: "
-                << step.operation.name
-                << endl;
-
-            cout << "Valid: "
-                << (
-                        step.valid
-                        ? "true"
-                        : "false"
-                    )
-                << endl;
+        cout << "\n[BRANCH 3 EXECUTION]\n";
+        for (const auto& item : runtimeResult.operationResults) {
+            cout << item.stepId << " / operation " << (item.operationIndex + 1)
+                 << " / " << item.execution.action << " : "
+                 << (item.execution.status == ExecutionStatus::SUCCESS ? "SUCCESS" : "FAILED")
+                 << "\n  " << item.execution.message << "\n";
         }
+        cout << "[BRANCH 3 RESULT] " << (runtimeResult.success ? "SUCCESS" : "FAILED")
+             << "\n" << runtimeResult.message << "\n";
 
-        logger.log(
-            "INFO",
-            "EXECUTION_PLAN",
-            "Multi-step execution plan created.",
-            multiStepResult.executionPlan.valid
-                ? "SUCCESS"
-                : "FAILURE"
-        );
-
-        cout << endl;
-        cout << "[MULTI-STEP PIPELINE COMPLETE]"
-            << endl;
-
-        logger.log(
-            "INFO",
-            "MULTI_STEP_GOAL",
-            "Multi-step planning completed successfully.",
-            "SUCCESS"
-        );
-
-        MultiStepExecutor multiStepExecutor;
-
-        MultiStepExecutionResult executionResult =
-            multiStepExecutor.execute(
-                multiStepResult.executionPlan
-            );
-
-        cout << "[MULTI-STEP EXECUTION]" << endl;
-
-        for (
-            size_t i = 0;
-            i < executionResult.stepResults.size();
-            ++i
-        )
-        {
-            const ExecutionResult& stepResult =
-                executionResult.stepResults[i];
-
-            cout
-                << "Step "
-                << (i + 1)
-                << ": "
-                << stepResult.action
-                << endl;
-
-            cout
-                << "Status: "
-                << static_cast<int>(stepResult.status)
-                << endl;
-
-            cout
-                << "Message: "
-                << stepResult.message
-                << endl;
-        }
-
-        if (executionResult.success)
-        {
-            cout
-                << "[MULTI-STEP EXECUTION COMPLETE]"
-                << endl;
-
-            logger.log(
-                "INFO",
-                "MULTI_STEP_EXECUTION",
-                executionResult.message,
-                "SUCCESS"
-            );
-        }
-        else
-        {
-            cout
-                << "[MULTI-STEP EXECUTION FAILED]"
-                << endl;
-
-            logger.log(
-                "ERROR",
-                "MULTI_STEP_EXECUTION",
-                executionResult.message,
-                "FAILED"
-            );
-
-            return 1;
-        }
+        logger.log(runtimeResult.success ? "INFO" : "ERROR", "BRANCH3_RUNTIME",
+                   runtimeResult.message, runtimeResult.success ? "SUCCESS" : "FAILURE");
+        return runtimeResult.success ? 0 : 1;
     }
 
     // --------------------------------------------------------

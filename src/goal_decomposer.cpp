@@ -3,8 +3,45 @@
 
 #include <nlohmann/json.hpp>
 
+#include <string>
+#include <unordered_set>
+#include <utility>
+
 using namespace std;
 using json = nlohmann::json;
+
+namespace
+{
+    bool isNonBlank(const string& value)
+    {
+        return value.find_first_not_of(" \t\r\n")
+            != string::npos;
+    }
+
+    bool hasOnlyKeys(
+        const json& object,
+        const unordered_set<string>& allowed
+    )
+    {
+        if (!object.is_object())
+            return false;
+
+        for (auto it = object.begin(); it != object.end(); ++it)
+        {
+            if (!allowed.contains(it.key()))
+                return false;
+        }
+
+        return true;
+    }
+}
+
+GoalDecomposer::GoalDecomposer() = default;
+
+GoalDecomposer::GoalDecomposer(GoalDecomposerLLM generator)
+    : generator_(move(generator))
+{
+}
 
 MultiStepPlan GoalDecomposer::decompose(const string& goal)
 {
@@ -123,18 +160,27 @@ IMPORTANT DECOMPOSITION AND PRESERVATION RULES:
     const string userPrompt =
         "Decompose this user goal into logical steps:\n\n" + goal;
 
-    LLMClient client;
+    LLMResponse llmResponse;
 
-    LLMResponse llmResponse = client.generate(
-        systemPrompt,
-        userPrompt
-    );
+    if (generator_)
+    {
+        llmResponse = generator_(systemPrompt, userPrompt);
+    }
+    else
+    {
+        LLMClient client;
+        llmResponse = client.generate(systemPrompt, userPrompt);
+    }
+
 
     if (!llmResponse.success)
     {
-        plan.message =
-            "Goal decomposer LLM request failed: " +
-            llmResponse.message;
+        plan.valid = false;
+        plan.steps.clear();
+
+        plan.message = llmResponse.message.empty()
+            ? "Goal decomposer LLM request failed."
+            : llmResponse.message;
 
         return plan;
     }
@@ -149,106 +195,142 @@ IMPORTANT DECOMPOSITION AND PRESERVATION RULES:
 
     try
     {
-        json parsed = json::parse(response);
+        const json parsed = json::parse(response);
 
-        if (!parsed.contains("steps") ||
+        if (!parsed.is_object() ||
+            !hasOnlyKeys(parsed, {"steps"}) ||
+            !parsed.contains("steps") ||
             !parsed["steps"].is_array())
         {
-            plan.message =
-                "Goal decomposer response does not contain a valid steps array.";
-
+            plan.message = "Response must contain only a steps array.";
             return plan;
         }
 
-        for (const auto& stepJson : parsed["steps"])
+        const json& steps = parsed["steps"];
+
+        if (steps.empty())
         {
-            if (!stepJson.contains("id") ||
-                !stepJson["id"].is_string())
-            {
-                plan.message =
-                    "Goal decomposer returned a step without a valid id.";
+            plan.message = "Goal decomposer returned no steps.";
+            return plan;
+        }
 
+        if (steps.size() > 50)
+        {
+            plan.message = "Goal decomposer returned too many steps.";
+            return plan;
+        }
+
+        unordered_set<string> knownIds;
+
+        for (size_t i = 0; i < steps.size(); ++i)
+        {
+            const json& item = steps[i];
+
+            if (!item.is_object() ||
+                !hasOnlyKeys(item, {"id", "description", "depends_on"}) ||
+                !item.contains("id") ||
+                !item["id"].is_string() ||
+                !item.contains("description") ||
+                !item["description"].is_string())
+            {
+                plan.message = "Step contains missing or unexpected fields.";
                 plan.steps.clear();
                 return plan;
             }
 
-            if (!stepJson.contains("description") ||
-                !stepJson["description"].is_string())
-            {
-                plan.message =
-                    "Goal decomposer returned a step without a valid description.";
+            const string expectedId = "step_" + to_string(i + 1);
+            const string id = item["id"].get<string>();
+            const string description = item["description"].get<string>();
 
+            if (id != expectedId)
+            {
+                plan.message = "Step IDs must be sequential: step_1, step_2, etc.";
                 plan.steps.clear();
                 return plan;
             }
 
-            MultiStepAction step;
+            if (!isNonBlank(description))
+            {
+                plan.message = "Step description cannot be blank.";
+                plan.steps.clear();
+                return plan;
+            }
 
-            step.id =
-                stepJson["id"].get<string>();
-
-            step.description =
-                stepJson["description"].get<string>();
-
-            step.operation = "";
-            step.capability = "";
-            step.parameters.clear();
+            MultiStepAction step{};
+            step.id = id;
+            step.description = description;
             step.resolved = false;
 
-            if (stepJson.contains("depends_on"))
-            {
-                if (!stepJson["depends_on"].is_array())
-                {
-                    plan.message =
-                        "Goal decomposer returned an invalid depends_on field.";
+            // Goal decomposition must not assign execution primitives.
+            step.operations.clear();
+            step.semanticParameters.clear();
+            step.contextReferences.clear();
+            step.operation.clear();
+            step.capability.clear();
+            step.parameters.clear();
 
+            if (item.contains("depends_on"))
+            {
+                const json& dependencies = item["depends_on"];
+
+                if (!dependencies.is_array())
+                {
+                    plan.message = "depends_on must be an array.";
                     plan.steps.clear();
                     return plan;
                 }
 
-                for (const auto& dependency :
-                     stepJson["depends_on"])
+                unordered_set<string> seenDependencies;
+
+                for (const auto& dependency : dependencies)
                 {
                     if (!dependency.is_string())
                     {
+                        plan.message = "Dependencies must be strings.";
+                        plan.steps.clear();
+                        return plan;
+                    }
+
+                    const string dependencyId =
+                        dependency.get<string>();
+
+                    // Dependencies must refer to earlier steps.
+                    if (!knownIds.contains(dependencyId))
+                    {
                         plan.message =
-                            "Goal decomposer returned a non-string dependency.";
+                            "Dependency must reference an earlier existing step: " +
+                            dependencyId;
 
                         plan.steps.clear();
                         return plan;
                     }
 
-                    step.dependencies.push_back(
-                        dependency.get<string>()
-                    );
+                    if (!seenDependencies.insert(dependencyId).second)
+                    {
+                        plan.message =
+                            "Duplicate dependency: " + dependencyId;
+
+                        plan.steps.clear();
+                        return plan;
+                    }
+
+                    step.dependencies.push_back(dependencyId);
                 }
             }
 
-            plan.steps.push_back(step);
-        }
-
-        if (plan.steps.empty())
-        {
-            plan.message =
-                "Goal decomposer returned no steps.";
-
-            return plan;
+            knownIds.insert(id);
+            plan.steps.push_back(move(step));
         }
 
         plan.valid = true;
-        plan.message =
-            "Goal decomposed successfully.";
-
+        plan.message = "Goal decomposed and validated successfully.";
         return plan;
     }
     catch (const json::exception& error)
     {
-        plan.message =
-            string("Invalid JSON from goal decomposer: ") +
-            error.what();
-
         plan.steps.clear();
-
+        plan.message =
+            string("Invalid JSON from goal decomposer: ") + error.what();
         return plan;
     }
 }

@@ -1,246 +1,93 @@
 #include "primitive_registry.hpp"
-
+#include <algorithm>
 #include <iostream>
-
+#include <set>
+#include <string>
+#include <vector>
 using namespace std;
 
-int main()
-{
-    PrimitiveOperationType type;
+namespace {
+int passed=0, total=0;
+void check(const string& name, bool ok) {
+    ++total; cout << "[" << name << "] " << (ok ? "PASS" : "FAIL") << '\n';
+    if (ok) ++passed;
+}
+}
 
-    int passed = 0;
-    int total = 0;
+int main() {
+    const vector<pair<string,PrimitiveOperationType>> expected = {
+        {"filesystem.create",PrimitiveOperationType::FILESYSTEM_CREATE},
+        {"filesystem.create_file",PrimitiveOperationType::FILESYSTEM_CREATE_FILE},
+        {"filesystem.delete",PrimitiveOperationType::FILESYSTEM_DELETE},
+        {"filesystem.move",PrimitiveOperationType::FILESYSTEM_MOVE},
+        {"filesystem.copy",PrimitiveOperationType::FILESYSTEM_COPY},
+        {"filesystem.rename",PrimitiveOperationType::FILESYSTEM_RENAME},
+        {"application.launch",PrimitiveOperationType::APPLICATION_LAUNCH},
+        {"application.close",PrimitiveOperationType::APPLICATION_CLOSE},
+        {"application.focus",PrimitiveOperationType::APPLICATION_FOCUS},
+        {"text.write",PrimitiveOperationType::TEXT_WRITE},
+        {"keyboard.press",PrimitiveOperationType::KEYBOARD_PRESS},
+        {"keyboard.type",PrimitiveOperationType::KEYBOARD_TYPE},
+        {"mouse.click",PrimitiveOperationType::MOUSE_CLICK},
+        {"mouse.move",PrimitiveOperationType::MOUSE_MOVE}
+    };
 
-    // --------------------------------------------------
-    // TEST 1: Known filesystem primitive
-    // --------------------------------------------------
+    const auto names=PrimitiveRegistry::getSupportedNames();
+    check("EXACTLY_14_PRIMITIVES",names.size()==14);
+    check("STABLE_SORTED_NAMES",is_sorted(names.begin(),names.end()));
 
-    total++;
-
-    bool createSupported =
-        PrimitiveRegistry::isSupported(
-            "filesystem.create"
-        );
-
-    bool createResolved =
-        PrimitiveRegistry::resolveType(
-            "filesystem.create",
-            type
-        );
-
-    bool test1 =
-        createSupported &&
-        createResolved &&
-        type ==
-            PrimitiveOperationType::FILESYSTEM_CREATE;
-
-    cout << "[FILESYSTEM_CREATE] "
-         << (test1 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test1)
-    {
-        passed++;
+    bool types=true, schemas=true, metadata=true, uniqueFields=true, outputs=true;
+    for (const auto& [name, expectedType] : expected) {
+        PrimitiveDefinition def{};
+        PrimitiveOperationType actual{};
+        bool found=PrimitiveRegistry::isSupported(name)
+            && PrimitiveRegistry::resolveType(name,actual)
+            && PrimitiveRegistry::resolveDefinition(name,def);
+        check("REGISTERED_"+name,found);
+        if (!found) { types=schemas=metadata=outputs=false; continue; }
+        types=types && actual==expectedType && def.type==expectedType;
+        metadata=metadata && !def.description.empty() && !def.capability.empty();
+        schemas=schemas && def.parameters.has_value() && !def.parameters->fields.empty();
+        outputs=outputs && !def.outputs.empty();
+        if (def.parameters) {
+            set<string> seen;
+            for (const auto& f : def.parameters->fields) {
+                if (f.name.empty() || f.description.empty() || !seen.insert(f.name).second)
+                    uniqueFields=false;
+            }
+        }
+        for (const auto& o : def.outputs)
+            if (o.name.empty() || o.type.empty() || o.description.empty()) outputs=false;
     }
+    check("ALL_ENUM_MAPPINGS_CORRECT",types);
+    check("ALL_14_SCHEMAS_DEFINED",schemas);
+    check("ALL_DESCRIPTIONS_AND_CAPABILITIES_DEFINED",metadata);
+    check("UNIQUE_PARAMETER_NAMES",uniqueFields);
+    check("ALL_OUTPUT_CONTRACTS_DEFINED",outputs);
 
-    // --------------------------------------------------
-    // TEST 2: Known application primitive
-    // --------------------------------------------------
+    PrimitiveOperationType unused{};
+    PrimitiveDefinition missing{};
+    check("UNKNOWN_PRIMITIVE_REJECTED",
+        !PrimitiveRegistry::isSupported("system.destroy_everything")
+        && !PrimitiveRegistry::resolveType("system.destroy_everything",unused)
+        && !PrimitiveRegistry::resolveDefinition("system.destroy_everything",missing));
 
-    total++;
+    PrimitiveDefinition createFile{};
+    bool createFileOk=PrimitiveRegistry::resolveDefinition("filesystem.create_file",createFile)
+        && createFile.parameters && createFile.parameters->fields.size()==3;
+    check("CREATE_FILE_SCHEMA",createFileOk);
 
-    bool launchSupported =
-        PrimitiveRegistry::isSupported(
-            "application.launch"
-        );
-
-    bool launchResolved =
-        PrimitiveRegistry::resolveType(
-            "application.launch",
-            type
-        );
-
-    bool test2 =
-        launchSupported &&
-        launchResolved &&
-        type ==
-            PrimitiveOperationType::APPLICATION_LAUNCH;
-
-    cout << "[APPLICATION_LAUNCH] "
-         << (test2 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test2)
-    {
-        passed++;
+    PrimitiveDefinition click{};
+    bool clickOk=PrimitiveRegistry::resolveDefinition("mouse.click",click) && click.parameters;
+    if (clickOk) {
+        const auto& f=click.parameters->fields;
+        clickOk=f.size()==4 && f[0].name=="x" && f[1].name=="y"
+            && f[2].name=="button" && f[3].name=="clickCount";
     }
+    check("MOUSE_CLICK_SCHEMA",clickOk);
 
-    // --------------------------------------------------
-    // TEST 3: Known keyboard primitive
-    // --------------------------------------------------
-
-    total++;
-
-    bool keyboardSupported =
-        PrimitiveRegistry::isSupported(
-            "keyboard.type"
-        );
-
-    bool keyboardResolved =
-        PrimitiveRegistry::resolveType(
-            "keyboard.type",
-            type
-        );
-
-    bool test3 =
-        keyboardSupported &&
-        keyboardResolved &&
-        type ==
-            PrimitiveOperationType::KEYBOARD_TYPE;
-
-    cout << "[KEYBOARD_TYPE] "
-         << (test3 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test3)
-    {
-        passed++;
-    }
-
-    // --------------------------------------------------
-    // TEST 4: Unknown primitive
-    // --------------------------------------------------
-
-    total++;
-
-    bool unknownSupported =
-        PrimitiveRegistry::isSupported(
-            "system.destroy_everything"
-        );
-
-    bool unknownResolved =
-        PrimitiveRegistry::resolveType(
-            "system.destroy_everything",
-            type
-        );
-
-    bool test4 =
-        !unknownSupported &&
-        !unknownResolved;
-
-    cout << "[UNKNOWN_PRIMITIVE] "
-         << (test4 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test4)
-    {
-        passed++;
-    }
-
-    // --------------------------------------------------
-    // TEST 5: Supported primitive list
-    // --------------------------------------------------
-
-    total++;
-
-    vector<string> primitives =
-        PrimitiveRegistry::getSupportedNames();
-
-    bool test5 =
-        !primitives.empty();
-
-    cout << "[REGISTRY_NOT_EMPTY] "
-         << (test5 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test5)
-    {
-        passed++;
-    }
-
-    // --------------------------------------------------
-    // TEST 6: Defined primitive parameter schema
-    // --------------------------------------------------
-
-    total++;
-
-    PrimitiveDefinition createFileDefinition{};
-    bool createFileDefinitionResolved =
-        PrimitiveRegistry::resolveDefinition(
-            "filesystem.create_file",
-            createFileDefinition
-        );
-
-    bool test6 =
-        createFileDefinitionResolved &&
-        createFileDefinition.parameters.has_value() &&
-        createFileDefinition.parameters->name ==
-            ParameterRequirement::REQUIRED &&
-        createFileDefinition.parameters->location ==
-            ParameterRequirement::REQUIRED &&
-        createFileDefinition.parameters->content ==
-            ParameterRequirement::OPTIONAL;
-
-    cout << "[CREATE_FILE_SCHEMA] "
-         << (test6 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test6)
-    {
-        passed++;
-    }
-
-    // --------------------------------------------------
-    // TEST 7: Undesigned schema remains undefined
-    // --------------------------------------------------
-
-    total++;
-
-    PrimitiveDefinition deleteDefinition{};
-    bool deleteDefinitionResolved =
-        PrimitiveRegistry::resolveDefinition(
-            "filesystem.delete",
-            deleteDefinition
-        );
-
-    bool test7 =
-        deleteDefinitionResolved &&
-        !deleteDefinition.parameters.has_value();
-
-    cout << "[UNDEFINED_SCHEMA] "
-         << (test7 ? "PASS" : "FAIL")
-         << endl;
-
-    if (test7)
-    {
-        passed++;
-    }
-
-    // --------------------------------------------------
-    // FINAL RESULT
-    // --------------------------------------------------
-
-    cout << endl;
-    cout << "============================" << endl;
-    cout << "PRIMITIVE REGISTRY TEST" << endl;
-    cout << "============================" << endl;
-
-    cout << "Registered primitives: "
-         << primitives.size()
-         << endl;
-
-    cout << "Passed: "
-         << passed
-         << " / "
-         << total
-         << endl;
-
-    if (passed == total)
-    {
-        cout << "RESULT: PASS" << endl;
-        return 0;
-    }
-
-    cout << "RESULT: FAIL" << endl;
-    return 1;
+    cout << "\nPRIMITIVE REGISTRY TEST\nRegistered: " << names.size()
+         << "\nPassed: " << passed << " / " << total << '\n';
+    cout << (passed==total ? "RESULT: PASS\n" : "RESULT: FAIL\n");
+    return passed==total ? 0 : 1;
 }
