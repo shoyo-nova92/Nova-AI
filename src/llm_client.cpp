@@ -272,36 +272,82 @@ LLMResponse LLMClient::generate(
     // PARSE RESPONSE
     // --------------------------------------------------------
 
+    
     try
     {
-        json response =
-            json::parse(
-                responseBody
-            );
+        json response = json::parse(responseBody);
 
-        result.content =
-            response
-            ["choices"]
-            [0]
-            ["message"]
-            ["content"]
-            .get<string>();
+        if (!response.is_object() ||
+            !response.contains("choices") ||
+            !response["choices"].is_array() ||
+            response["choices"].empty())
+        {
+            result.message =
+                "Invalid OpenRouter response: missing or empty choices array.";
+        }
+        else
+        {
+            const auto& choice = response["choices"][0];
 
-        result.success = true;
+            if (!choice.is_object() ||
+                !choice.contains("message") ||
+                !choice["message"].is_object())
+            {
+                result.message =
+                    "Invalid OpenRouter response: missing message object.";
+            }
+            else
+            {
+                const auto& message = choice["message"];
 
-        result.message =
-            "LLM response received.";
+                if (!message.contains("content") ||
+                    !message["content"].is_string())
+                {
+                    // Some providers return null content for refusal,
+                    // tool-call, or otherwise non-text responses.
+                    string detail =
+                        "OpenRouter returned no usable text content.";
+
+                    if (message.contains("refusal") &&
+                        message["refusal"].is_string())
+                    {
+                        detail += " Refusal: " +
+                            message["refusal"].get<string>();
+                    }
+                    else if (choice.contains("finish_reason") &&
+                             choice["finish_reason"].is_string())
+                    {
+                        detail += " Finish reason: " +
+                            choice["finish_reason"].get<string>();
+                    }
+
+                    result.message = detail;
+                }
+                else
+                {
+                    result.content = message["content"].get<string>();
+
+                    if (result.content.empty())
+                    {
+                        result.message =
+                            "OpenRouter returned an empty text response.";
+                    }
+                    else
+                    {
+                        result.success = true;
+                        result.message = "LLM response received.";
+                    }
+                }
+            }
+        }
     }
-    catch (
-        const exception& exception
-    )
+    catch (const exception& exception)
     {
         result.message =
-            "Failed to parse OpenRouter response: "
-            + string(
-                exception.what()
-            );
+            "Failed to parse OpenRouter response: " +
+            string(exception.what());
     }
+
 
     // --------------------------------------------------------
     // CLEANUP

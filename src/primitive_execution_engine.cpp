@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include "application_resolver.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -151,40 +152,6 @@ bool launchTargetIsSafe(const string& target, fs::path& resolved) {
     const fs::path desktop = getDesktopPath();
     if (!desktopPath(target, desktop, resolved, true)) return false;
     return fs::exists(resolved);
-}
-
-struct LaunchInfo { DWORD pid = 0; HANDLE process = nullptr; };
-
-bool launchApplication(const string& exe, const string& target, LaunchInfo& info, string& error) {
-    string command;
-    if (exe == "notepad.exe") {
-        command = "notepad.exe";
-        if (!target.empty()) command += " \"" + target + "\"";
-    } else if (exe == "calc.exe" || exe == "mspaint.exe" || exe == "explorer.exe" ||
-               exe == "Code.exe" || exe == "chrome.exe" || exe == "msedge.exe") {
-        command = "\"" + exe + "\"";
-        if (!target.empty()) command += " \"" + target + "\"";
-    } else {
-        error = "Application is not in the allowlist.";
-        return false;
-    }
-
-    STARTUPINFOA si{};
-    si.cb = sizeof(si);
-    PROCESS_INFORMATION pi{};
-    vector<char> mutableCommand(command.begin(), command.end());
-    mutableCommand.push_back('\0');
-
-    if (!CreateProcessA(nullptr, mutableCommand.data(), nullptr, nullptr, FALSE,
-            CREATE_NEW_PROCESS_GROUP, nullptr, nullptr, &si, &pi)) {
-        error = "CreateProcess failed with Windows error " + to_string(GetLastError()) +
-                ". The application may need a registered executable path or ShellExecute.";
-        return false;
-    }
-    CloseHandle(pi.hThread);
-    info.pid = pi.dwProcessId;
-    info.process = pi.hProcess;
-    return true;
 }
 
 bool focusWindowByTitle(const string& titleNeedle, HWND& found) {
@@ -426,17 +393,48 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
 
     const fs::path desktop = getDesktopPath();
 
-    if (op.type == PrimitiveOperationType::FILESYSTEM_CREATE && op.name == "filesystem.create") {
-        if (!leafName(op.parameters.name) || op.parameters.location != "desktop")
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Invalid folder name or unsupported folder location.", false);
-        if (desktop.empty()) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Unable to resolve Windows Desktop.");
-        const fs::path folder = desktop / op.parameters.name;
+    
+    if (op.type == PrimitiveOperationType::FILESYSTEM_CREATE &&
+        op.name == "filesystem.create") {
+
+        if (!leafName(op.parameters.name)) {
+            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
+                "Invalid folder name.", false);
+        }
+
+        fs::path parent;
+        if (!desktopPath(op.parameters.location, desktop, parent, true)) {
+            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
+                "Unsupported or unsafe folder location.", false);
+        }
+
         try {
-            if (fs::exists(folder)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Folder already exists: " + folder.string());
-            if (!fs::create_directory(folder)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Folder could not be created: " + folder.string());
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, "Folder created: " + folder.string(), true, true);
-        } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
+            if (!fs::is_directory(parent)) {
+                return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,
+                    "Parent directory does not exist: " + parent.string());
+            }
+
+            const fs::path folder = parent / op.parameters.name;
+
+            if (fs::exists(folder)) {
+                return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                    "Folder already exists: " + folder.string());
+            }
+
+            if (!fs::create_directory(folder)) {
+                return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                    "Folder could not be created: " + folder.string());
+            }
+
+            return makeResult(op, ExecutionStatus::SUCCESS,
+                ExecutionFailureReason::NONE,
+                "Folder created: " + folder.string(), true, true);
+
+        } catch (const fs::filesystem_error& e) {
+            return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what());
+        }
     }
+
 
     if (op.type == PrimitiveOperationType::FILESYSTEM_CREATE_FILE && op.name == "filesystem.create_file") {
         if (!leafName(op.parameters.name)) return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Invalid file name.", false);
@@ -523,30 +521,79 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
     }
 
-    if (op.type == PrimitiveOperationType::APPLICATION_LAUNCH && op.name == "application.launch") {
-        const string exe = appExeFromName(op.parameters.application);
-        if (exe.empty())
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
-                "Application is not in the supported allowlist: " + op.parameters.application, false);
+    
+    if (op.type == PrimitiveOperationType::APPLICATION_LAUNCH &&
+        op.name == "application.launch") {
 
-        fs::path target;
-        if (!op.parameters.target.empty()) {
-            if (!launchTargetIsSafe(op.parameters.target, target))
-                return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
-                    "Launch target must be an existing desktop-relative path such as desktop/NovaWorkspace/Main.java.", false);
+        if (op.parameters.application.empty()) {
+            return fail(
+                op,
+                ExecutionFailureReason::UNSUPPORTED_ACTION,
+                "Application name is missing.",
+                false
+            );
         }
 
-        string error;
-        LaunchInfo info;
-        if (!launchApplication(exe, target.empty() ? string{} : target.string(), info, error))
-            return fail(op, ExecutionFailureReason::EXECUTION_ERROR, error);
+        fs::path target;
 
-        const DWORD pid = info.pid;
-        CloseHandle(info.process);
-        return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE,
-            "Launch request accepted for " + op.parameters.application + " (PID " + to_string(pid) + ").",
-            true, true);
+        if (!op.parameters.target.empty()) {
+            if (!launchTargetIsSafe(op.parameters.target, target)) {
+                return fail(
+                    op,
+                    ExecutionFailureReason::UNSUPPORTED_ACTION,
+                    "Launch target must be an existing Desktop-relative path.",
+                    false
+                );
+            }
+        }
+
+        ApplicationResolver resolver;
+        const ApplicationResolverResult resolved =
+            resolver.resolve(op.parameters.application);
+
+        if (!resolved.success || resolved.appId.empty()) {
+            return fail(
+                op,
+                ExecutionFailureReason::TARGET_NOT_FOUND,
+                resolved.message.empty()
+                    ? "Could not resolve the registered Windows application."
+                    : resolved.message,
+                false
+            );
+        }
+
+        const string shellTarget =
+            "shell:AppsFolder\\" + resolved.appId;
+
+        HINSTANCE launchResult = ShellExecuteA(
+            nullptr,
+            "open",
+            shellTarget.c_str(),
+            nullptr,
+            nullptr,
+            SW_SHOWNORMAL
+        );
+
+        if (reinterpret_cast<INT_PTR>(launchResult) <= 32) {
+            return fail(
+                op,
+                ExecutionFailureReason::EXECUTION_ERROR,
+                "Windows failed to launch application: " +
+                    resolved.displayName,
+                false
+            );
+        }
+
+        return makeResult(
+            op,
+            ExecutionStatus::SUCCESS,
+            ExecutionFailureReason::NONE,
+            "Launch request accepted for " + resolved.displayName + ".",
+            true,
+            true
+        );
     }
+
 
     if (op.type == PrimitiveOperationType::APPLICATION_FOCUS && op.name == "application.focus") {
         const string exe = appExeFromName(op.parameters.application);
