@@ -1,6 +1,6 @@
 # Nova Branch 3 — Canonical Primitive Catalog
 
-This document describes the **14 primitives registered in `src/primitive_registry.cpp`** and their current implementation in `src/primitive_execution_engine.cpp`. The registry schemas are the machine-readable contract used by `PrimitiveMapper`; if this document and the code disagree, treat the code as authoritative and update this document.
+This document describes the **16 primitives registered in `src/primitive_registry.cpp`** and their current implementation in `src/primitive_execution_engine.cpp`. The registry schemas are the machine-readable contract used by `PrimitiveMapper`; if this document and the code disagree, treat the code as authoritative and update this document.
 
 ## Execution contract
 
@@ -152,3 +152,28 @@ This document describes the **14 primitives registered in `src/primitive_registr
 - `application.launch` success does not verify target readiness; `application.close` success does not verify process exit.
 - `keyboard.type` and `keyboard.press` are global input events, so focus must be handled and verified carefully.
 - Keep registry schema, engine validation, tests, and this document synchronized when any primitive changes.
+
+
+### 15. `browser.navigate`
+
+Navigates the Branch 3 controlled browser to a validated absolute HTTP(S) URL. Only `http` and `https` schemes are accepted; embedded URL credentials, whitespace/control characters, and non-web schemes are rejected. The operation waits for a DOM readiness condition before succeeding.
+
+Parameters:
+- `url` (required): absolute HTTP(S) URL.
+- `ready_condition` (required): `domcontentloaded`, `load`, `networkidle`, or `selector`.
+- `selector` (optional): CSS selector to wait for visibility; required when `ready_condition` is `selector`.
+- `timeout_ms` (optional): integer from 1000 to 120000; default 30000.
+
+### 16. `browser.wait_for`
+
+Waits for a DOM readiness condition on the current controlled browser page without navigating. It accepts `ready_condition`, optional `selector`, and optional `timeout_ms` with the same constraints as `browser.navigate`.
+
+#### Runtime dependency and behavior
+
+Branch 3 starts `python/browser_agent.py` on loopback only (`127.0.0.1:47621`). It uses Playwright's installed browser channel (`msedge` or `chrome`) and a dedicated persistent Nova profile under `%LOCALAPPDATA%\Nova\BrowserProfile`. The profile keeps site authentication separate from the user's everyday browser profile. Install the dependency in the same Python environment visible on PATH to Nova:
+
+```powershell
+python -m pip install playwright
+```
+
+The helper does not install browser binaries; it uses the installed Edge or Chrome channel. A readiness timeout fails the primitive and stops subsequent Branch 3 steps rather than continuing blindly. This browser agent is currently for Branch 3; Branch 2 code paths are unchanged.

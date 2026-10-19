@@ -29,11 +29,13 @@ int main() {
         {"keyboard.press",PrimitiveOperationType::KEYBOARD_PRESS},
         {"keyboard.type",PrimitiveOperationType::KEYBOARD_TYPE},
         {"mouse.click",PrimitiveOperationType::MOUSE_CLICK},
-        {"mouse.move",PrimitiveOperationType::MOUSE_MOVE}
+        {"mouse.move",PrimitiveOperationType::MOUSE_MOVE},
+        {"browser.navigate",PrimitiveOperationType::BROWSER_NAVIGATE},
+        {"browser.wait_for",PrimitiveOperationType::BROWSER_WAIT_FOR}
     };
 
     const auto names=PrimitiveRegistry::getSupportedNames();
-    check("EXACTLY_14_PRIMITIVES",names.size()==14);
+    check("EXPECTED_PRIMITIVE_COUNT",names.size()==16);
     check("STABLE_SORTED_NAMES",is_sorted(names.begin(),names.end()));
 
     bool types=true, schemas=true, metadata=true, uniqueFields=true, outputs=true;
@@ -60,10 +62,29 @@ int main() {
             if (o.name.empty() || o.type.empty() || o.description.empty()) outputs=false;
     }
     check("ALL_ENUM_MAPPINGS_CORRECT",types);
-    check("ALL_14_SCHEMAS_DEFINED",schemas);
+    check("ALL_SCHEMAS_DEFINED",schemas);
     check("ALL_DESCRIPTIONS_AND_CAPABILITIES_DEFINED",metadata);
     check("UNIQUE_PARAMETER_NAMES",uniqueFields);
     check("ALL_OUTPUT_CONTRACTS_DEFINED",outputs);
+
+    PrimitiveDefinition browserNavigate{};
+    bool browserNavigateOk = PrimitiveRegistry::resolveDefinition("browser.navigate", browserNavigate)
+        && browserNavigate.parameters && browserNavigate.parameters->fields.size() == 4;
+    if (browserNavigateOk) {
+        const auto& fields = browserNavigate.parameters->fields;
+        browserNavigateOk = fields[0].name == "url" && fields[0].type == PrimitiveParameterType::URL
+            && fields[0].requirement == ParameterRequirement::REQUIRED
+            && fields[1].name == "ready_condition" && fields[1].type == PrimitiveParameterType::ENUM
+            && fields[2].name == "selector" && fields[2].requirement == ParameterRequirement::OPTIONAL
+            && fields[3].name == "timeout_ms" && fields[3].hasMinimum && fields[3].minimum == 1000
+            && fields[3].hasMaximum && fields[3].maximum == 120000;
+    }
+    check("BROWSER_NAVIGATE_SCHEMA_VALIDATED", browserNavigateOk);
+
+    PrimitiveDefinition browserWait{};
+    bool browserWaitOk = PrimitiveRegistry::resolveDefinition("browser.wait_for", browserWait)
+        && browserWait.parameters && browserWait.parameters->fields.size() == 3;
+    check("BROWSER_WAIT_SCHEMA_VALIDATED", browserWaitOk);
 
     PrimitiveOperationType unused{};
     PrimitiveDefinition missing{};

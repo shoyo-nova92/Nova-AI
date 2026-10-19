@@ -125,6 +125,23 @@ const unordered_map<string, PrimitiveDefinition> REGISTRY = {
    p("clickCount",T::INTEGER,R::OPTIONAL,"Click count; defaults to 1.",{},true,1,true,3)}),
   {o("clicked","boolean","Whether click was issued."),o("x","integer","Horizontal coordinate."),o("y","integer","Vertical coordinate.")})},
 
+ {"browser.navigate", d(PrimitiveOperationType::BROWSER_NAVIGATE,
+  "Navigate the controlled browser to a validated HTTP(S) URL and wait for a DOM readiness condition.", "browser_control",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
+   p("url",T::URL,R::REQUIRED,"Absolute HTTP or HTTPS URL; credentials and non-web schemes are rejected."),
+   p("ready_condition",T::ENUM,R::REQUIRED,"Readiness condition: domcontentloaded, load, networkidle, or selector.",{"domcontentloaded","load","networkidle","selector"}),
+   p("selector",T::STRING,R::OPTIONAL,"CSS selector that must become visible when ready_condition is selector."),
+   p("timeout_ms",T::INTEGER,R::OPTIONAL,"Readiness timeout in milliseconds; defaults to 30000.",{},true,1000,true,120000)}),
+  {o("url","url","Final navigated URL."),o("ready","boolean","Whether the requested readiness condition was satisfied."),o("title","string","Document title after readiness.")})},
+
+ {"browser.wait_for", d(PrimitiveOperationType::BROWSER_WAIT_FOR,
+  "Wait for a condition on the current controlled page DOM without navigating.", "browser_control",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
+   p("ready_condition",T::ENUM,R::REQUIRED,"DOM readiness condition.",{"domcontentloaded","load","networkidle","selector"}),
+   p("selector",T::STRING,R::OPTIONAL,"CSS selector that must become visible when ready_condition is selector."),
+   p("timeout_ms",T::INTEGER,R::OPTIONAL,"Readiness timeout in milliseconds; defaults to 30000.",{},true,1000,true,120000)}),
+  {o("ready","boolean","Whether the condition was satisfied."),o("url","url","Current page URL."),o("title","string","Current document title.")})},
+
  {"mouse.move", d(PrimitiveOperationType::MOUSE_MOVE,
   "Move the pointer to screen coordinates without clicking.", "mouse_input",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{

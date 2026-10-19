@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 #include <exception>
 #include <set>
 #include <sstream>
@@ -32,6 +33,7 @@ string typeToString(PrimitiveParameterType value) {
         case PrimitiveParameterType::FILE_PATH: return "file_path";
         case PrimitiveParameterType::DIRECTORY_PATH: return "directory_path";
         case PrimitiveParameterType::APPLICATION: return "application";
+        case PrimitiveParameterType::URL: return "url";
         case PrimitiveParameterType::KEY: return "key";
         case PrimitiveParameterType::MODIFIER_LIST: return "modifier_list";
         case PrimitiveParameterType::ENUM: return "enum";
@@ -130,11 +132,31 @@ bool assignParameter(PrimitiveParameters& output, const string& name,
     else if (name == "y") output.y = value;
     else if (name == "button") output.button = value;
     else if (name == "clickCount") output.clickCount = value;
+    else if (name == "url") output.url = value;
+    else if (name == "ready_condition") output.readyCondition = value;
+    else if (name == "selector") output.selector = value;
+    else if (name == "timeout_ms") output.timeoutMs = value;
     else {
         error = "Registry parameter '" + name + "' has no PrimitiveParameters storage field.";
         return false;
     }
     return true;
+}
+
+bool validHttpUrlValue(const string& value) {
+    if (value.empty() || value.size() > 8192) return false;
+    for (unsigned char ch : value) if (ch <= 0x20 || ch == 0x7f) return false;
+    const size_t schemeEnd = value.find("://");
+    if (schemeEnd == string::npos) return false;
+    string scheme = value.substr(0, schemeEnd);
+    transform(scheme.begin(), scheme.end(), scheme.begin(),
+        [](unsigned char c) { return static_cast<char>(tolower(c)); });
+    if (scheme != "http" && scheme != "https") return false;
+    const size_t authorityStart = schemeEnd + 3;
+    const size_t authorityEnd = value.find_first_of("/?#", authorityStart);
+    const string authority = value.substr(authorityStart,
+        authorityEnd == string::npos ? string::npos : authorityEnd - authorityStart);
+    return !authority.empty() && authority.find('@') == string::npos;
 }
 
 bool convertAndValidateValue(const json& value,
@@ -166,6 +188,18 @@ bool convertAndValidateValue(const json& value,
                 !field.allowedValues.empty() &&
                 std::find(field.allowedValues.begin(), field.allowedValues.end(), output) == field.allowedValues.end()) {
                 error = label + "must be one of the allowed values.";
+                return false;
+            }
+            return true;
+
+        case PrimitiveParameterType::URL:
+            if (!value.is_string()) {
+                error = label + "must be a JSON string.";
+                return false;
+            }
+            output = value.get<string>();
+            if (!validHttpUrlValue(output)) {
+                error = label + "must be an absolute HTTP or HTTPS URL without embedded credentials or whitespace.";
                 return false;
             }
             return true;
@@ -340,6 +374,7 @@ Return only strict JSON in this exact shape:
 {"steps":[{"id":"step_1","operations":[{"name":"filesystem.create","parameters":{"name":"Example","location":"desktop"}}]}]}
 Rules:
 - Use only primitive names present in the supplied live registry catalog.
+- For browser navigation, use browser.navigate with the exact HTTP(S) URL and an explicit ready_condition. Use browser.wait_for for a separate page-readiness step. For ready_condition=selector, provide selector only when the goal/context identifies a concrete selector; otherwise use domcontentloaded or load.
 - Map every source step to one or more operations. Use the minimum sufficient operations.
 - Do not add, remove, reorder, rename, or merge source steps. Copy each source step ID exactly.
 - Do not return descriptions, dependencies, explanations, or extra JSON keys. Dependencies are retained by the host.

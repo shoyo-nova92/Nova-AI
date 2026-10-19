@@ -52,6 +52,7 @@ target_link_libraries(Nova
         ole32
         psapi
         user32
+        winhttp
 )
 add_executable(ExecutionEngineTest
     src/execution_engine_test.cpp
@@ -236,13 +237,16 @@ add_executable(
     PrimitiveExecutionEngineTest
     src/primitive_execution_engine_test.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 )
+target_link_libraries(PrimitiveExecutionEngineTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 add_executable(
     MultiStepIntegrationTest
     src/multi_step_integration_test.cpp
     src/multi_step_executor.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 
     src/multistep_pipeline.cpp
     src/goal_decomposer.cpp
@@ -261,6 +265,7 @@ target_link_libraries(MultiStepIntegrationTest
     PRIVATE
         CURL::libcurl
         nlohmann_json::nlohmann_json
+        shell32 ole32 psapi user32 winhttp
 )
 
 add_executable(GoalDecomposerContractTest
@@ -310,42 +315,47 @@ add_executable(
     FilesystemCreationGroupTest
     src/filesystem_creation_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 )
 
 target_include_directories(FilesystemCreationGroupTest PRIVATE src)
-target_link_libraries(FilesystemCreationGroupTest PRIVATE shell32 ole32)
+target_link_libraries(FilesystemCreationGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 add_executable(
     FilesystemManipulationGroupTest
     src/filesystem_manipulation_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 )
 target_include_directories(FilesystemManipulationGroupTest PRIVATE src)
-target_link_libraries(FilesystemManipulationGroupTest PRIVATE shell32 ole32)
+target_link_libraries(FilesystemManipulationGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 add_executable(
     ApplicationLifecycleGroupTest
     src/application_lifecycle_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 )
 target_include_directories(ApplicationLifecycleGroupTest PRIVATE src)
-target_link_libraries(ApplicationLifecycleGroupTest PRIVATE shell32 ole32 psapi)
+target_link_libraries(ApplicationLifecycleGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 add_executable(
     TextKeyboardGroupTest
     src/text_keyboard_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 )
 target_include_directories(TextKeyboardGroupTest PRIVATE src)
-target_link_libraries(TextKeyboardGroupTest PRIVATE shell32 ole32 psapi)
+target_link_libraries(TextKeyboardGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 add_executable(
     MouseGroupTest
     src/mouse_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
 )
 target_include_directories(MouseGroupTest PRIVATE src)
-target_link_libraries(MouseGroupTest PRIVATE shell32 ole32 psapi user32)
+target_link_libraries(MouseGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 
 add_executable(Branch3RuntimeIntegrationTest
@@ -355,11 +365,12 @@ add_executable(Branch3RuntimeIntegrationTest
     src/primitive_mapper.cpp
     src/primitive_registry.cpp
     src/primitive_execution_engine.cpp
+    src/application_resolver.cpp
     src/llm_client.cpp
 )
 target_include_directories(Branch3RuntimeIntegrationTest PRIVATE src)
 target_link_libraries(Branch3RuntimeIntegrationTest PRIVATE
     CURL::libcurl
     nlohmann_json::nlohmann_json
-    shell32 ole32 psapi user32
+    shell32 ole32 psapi user32 winhttp
 )

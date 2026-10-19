@@ -277,6 +277,7 @@ LLMResponse LLMClient::generate(
     {
         json response = json::parse(responseBody);
 
+        
         if (!response.is_object() ||
             !response.contains("choices") ||
             !response["choices"].is_array() ||
@@ -284,7 +285,13 @@ LLMResponse LLMClient::generate(
         {
             result.message =
                 "Invalid OpenRouter response: missing or empty choices array.";
+
+            // Print the response for diagnosis, without exposing credentials.
+            std::cerr << "[LLM] Unexpected OpenRouter response: "
+                    << response.dump().substr(0, 2000)
+                    << std::endl;
         }
+
         else
         {
             const auto& choice = response["choices"][0];

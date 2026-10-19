@@ -11,4 +11,6 @@ struct PrimitiveParameters {
     string key, modifiers, repeatCount;
     // Mouse-specific
     string x, y, button, clickCount;
+    // Browser automation
+    string url, readyCondition, selector, timeoutMs;
 };

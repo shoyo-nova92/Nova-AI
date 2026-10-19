@@ -1,4 +1,6 @@
 #include <windows.h>
+#include <winhttp.h>
+#include <nlohmann/json.hpp>
 #include <psapi.h>
 #include <shlobj.h>
 #include "primitive_execution_engine.hpp"
@@ -11,6 +13,8 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <regex>
+#include <set>
 #include "application_resolver.hpp"
 
 using namespace std;
@@ -354,6 +358,180 @@ bool moveCursorTo(int x, int y, string& error) {
     return true;
 }
 
+bool validHttpUrl(const string& url, string& error) {
+    if (url.empty() || url.size() > 8192) {
+        error = "URL must be non-empty and no longer than 8192 characters.";
+        return false;
+    }
+    for (unsigned char ch : url) {
+        if (ch <= 0x20 || ch == 0x7f) {
+            error = "URL must not contain whitespace or control characters.";
+            return false;
+        }
+    }
+    const size_t schemeEnd = url.find("://");
+    if (schemeEnd == string::npos) {
+        error = "Only absolute HTTP and HTTPS URLs are allowed.";
+        return false;
+    }
+    const string scheme = lower(url.substr(0, schemeEnd));
+    if (scheme != "http" && scheme != "https") {
+        error = "Only absolute HTTP and HTTPS URLs are allowed.";
+        return false;
+    }
+    const size_t authorityStart = schemeEnd + 3;
+    const size_t authorityEnd = url.find_first_of("/?#", authorityStart);
+    const string authority = url.substr(authorityStart,
+        authorityEnd == string::npos ? string::npos : authorityEnd - authorityStart);
+    if (authority.empty() || authority.find('@') != string::npos) {
+        error = "URL must include a host and must not contain embedded credentials.";
+        return false;
+    }
+    return true;
+}
+
+bool browserHttpRequest(const wchar_t* method, const wchar_t* path,
+                        const string& body, string& response, DWORD& status) {
+    HINTERNET session = WinHttpOpen(L"NovaBrowserControl/1.0",
+        WINHTTP_ACCESS_TYPE_NO_PROXY, WINHTTP_NO_PROXY_NAME,
+        WINHTTP_NO_PROXY_BYPASS, 0);
+    if (!session) return false;
+    WinHttpSetTimeouts(session, 3000, 5000, 10000, 90000);
+    HINTERNET connection = WinHttpConnect(session, L"127.0.0.1", 47621, 0);
+    if (!connection) { WinHttpCloseHandle(session); return false; }
+    HINTERNET request = WinHttpOpenRequest(connection, method, path, nullptr,
+        WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
+    if (!request) {
+        WinHttpCloseHandle(connection); WinHttpCloseHandle(session); return false;
+    }
+    const wchar_t* headers = L"Content-Type: application/json; charset=utf-8\r\n";
+    const void* data = body.empty() ? WINHTTP_NO_REQUEST_DATA : body.data();
+    const DWORD dataSize = static_cast<DWORD>(body.size());
+    BOOL ok = WinHttpSendRequest(request, headers, static_cast<DWORD>(-1),
+        const_cast<void*>(data), dataSize, dataSize, 0);
+    if (ok) ok = WinHttpReceiveResponse(request, nullptr);
+    if (ok) {
+        DWORD size = sizeof(status);
+        ok = WinHttpQueryHeaders(request, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+            WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX);
+    }
+    if (ok) {
+        response.clear();
+        DWORD available = 0;
+        while (WinHttpQueryDataAvailable(request, &available) && available > 0) {
+            string chunk(available, '\0');
+            DWORD read = 0;
+            if (!WinHttpReadData(request, chunk.data(), available, &read)) { ok = FALSE; break; }
+            chunk.resize(read);
+            response += chunk;
+        }
+    }
+    WinHttpCloseHandle(request);
+    WinHttpCloseHandle(connection);
+    WinHttpCloseHandle(session);
+    return ok == TRUE;
+}
+
+
+bool ensureBrowserAgent(string& error) {
+    string response;
+    DWORD status = 0;
+
+    if (browserHttpRequest(L"GET", L"/health", {}, response, status) &&
+        status == 200 && response.find("NovaBrowserAgent") != string::npos) {
+        return true;
+    }
+
+    char modulePath[MAX_PATH * 4]{};
+    const DWORD length = GetModuleFileNameA(
+        nullptr, modulePath, static_cast<DWORD>(sizeof(modulePath)));
+
+    if (length == 0 || length >= sizeof(modulePath)) {
+        error = "Cannot locate Nova executable to start the browser agent.";
+        return false;
+    }
+
+    const fs::path root =
+        fs::path(string(modulePath, length)).parent_path().parent_path();
+
+    const fs::path script = root / "python" / "browser_agent.py";
+    const fs::path venvPython = root / ".venv-win" / "Scripts" / "python.exe";
+
+    if (!fs::exists(script)) {
+        error = "Browser agent script not found: " + script.string();
+        return false;
+    }
+
+    if (!fs::exists(venvPython)) {
+        error = "Nova virtual-environment Python not found: " +
+                venvPython.string();
+        return false;
+    }
+
+    // Quote executable and script paths for Windows process creation.
+    string command =
+        "\"" + venvPython.string() + "\" \"" + script.string() + "\"";
+
+    vector<char> mutableCommand(command.begin(), command.end());
+    mutableCommand.push_back('\0');
+
+    STARTUPINFOA startup{};
+    startup.cb = sizeof(startup);
+    PROCESS_INFORMATION process{};
+
+    if (!CreateProcessA(
+            venvPython.string().c_str(),
+            mutableCommand.data(),
+            nullptr, nullptr, FALSE,
+            DETACHED_PROCESS | CREATE_NO_WINDOW,
+            nullptr, root.string().c_str(),
+            &startup, &process)) {
+        error = "Could not start browser agent with " +
+                venvPython.string() +
+                " (Windows error " + to_string(GetLastError()) + ").";
+        return false;
+    }
+
+    CloseHandle(process.hThread);
+    CloseHandle(process.hProcess);
+
+    for (int i = 0; i < 40; ++i) {
+        Sleep(250);
+
+        if (browserHttpRequest(L"GET", L"/health", {}, response, status) &&
+            status == 200 &&
+            response.find("NovaBrowserAgent") != string::npos) {
+            return true;
+        }
+    }
+
+    error = "Browser agent did not become ready. Verify the Python "
+            "environment and python/browser_agent.py.";
+    return false;
+}
+
+
+bool browserAgentRequest(const nlohmann::json& payload, nlohmann::json& result, string& error) {
+    if (!ensureBrowserAgent(error)) return false;
+    string response;
+    DWORD status = 0;
+    if (!browserHttpRequest(L"POST", L"/command", payload.dump(), response, status)) {
+        error = "Could not communicate with the local browser agent.";
+        return false;
+    }
+    try {
+        result = nlohmann::json::parse(response);
+    } catch (...) {
+        error = "Browser agent returned invalid JSON.";
+        return false;
+    }
+    if (status < 200 || status >= 300 || !result.value("success", false)) {
+        error = result.value("error", string("Browser agent request failed with HTTP status ") + to_string(status) + ".");
+        return false;
+    }
+    return true;
+}
+
 bool sendMouseClick(const string& button, int clickCount, string& error) {
     DWORD down = 0, up = 0;
     const string b = lower(button);
@@ -522,6 +700,64 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
     }
 
     
+    if ((op.type == PrimitiveOperationType::BROWSER_NAVIGATE && op.name == "browser.navigate") ||
+        (op.type == PrimitiveOperationType::BROWSER_WAIT_FOR && op.name == "browser.wait_for")) {
+        const bool navigating = op.type == PrimitiveOperationType::BROWSER_NAVIGATE;
+        string validationError;
+        if (navigating && !validHttpUrl(op.parameters.url, validationError))
+            return fail(op, ExecutionFailureReason::INVALID_PLAN, validationError, false);
+
+        const string condition = op.parameters.readyCondition.empty()
+            ? string("domcontentloaded") : op.parameters.readyCondition;
+        const set<string> allowedConditions = {"domcontentloaded", "load", "networkidle", "selector"};
+        if (!allowedConditions.contains(condition))
+            return fail(op, ExecutionFailureReason::INVALID_PLAN,
+                "ready_condition must be domcontentloaded, load, networkidle, or selector.", false);
+        if (condition == "selector" && op.parameters.selector.empty())
+            return fail(op, ExecutionFailureReason::INVALID_PLAN,
+                "selector is required when ready_condition is selector.", false);
+        if (!op.parameters.timeoutMs.empty()) {
+            try {
+                size_t used = 0;
+                const int timeout = stoi(op.parameters.timeoutMs, &used);
+                if (used != op.parameters.timeoutMs.size() || timeout < 1000 || timeout > 120000)
+                    throw invalid_argument("timeout");
+            } catch (...) {
+                return fail(op, ExecutionFailureReason::INVALID_PLAN,
+                    "timeout_ms must be an integer from 1000 to 120000.", false);
+            }
+        }
+        nlohmann::json request = {
+            {"command", navigating ? "navigate" : "wait_for"},
+            {"ready_condition", condition},
+            {"timeout_ms", op.parameters.timeoutMs.empty() ? 30000 : stoi(op.parameters.timeoutMs)},
+            {"selector", op.parameters.selector}
+        };
+        if (navigating) request["url"] = op.parameters.url;
+        nlohmann::json response;
+        string error;
+        if (!browserAgentRequest(request, response, error))
+            return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                "Browser control failed: " + error);
+        const string currentUrl = response.value("url", string("unknown URL"));
+        const string title = response.value("title", string{});
+        string domSummary;
+        if (response.contains("dom") && response["dom"].is_object()) {
+            const auto& dom = response["dom"];
+            domSummary = " DOM readyState=" + dom.value("readyState", string("unknown")) +
+                ", documentElement=" + string(dom.value("hasDocumentElement", false) ? "present" : "missing") +
+                ", body=" + string(dom.value("hasBody", false) ? "present" : "missing") +
+                ", bodyVisible=" + string(dom.value("bodyVisible", false) ? "true" : "false") + ".";
+        }
+        const string selectorSummary = condition == "selector"
+            ? " Visible selector confirmed: " + op.parameters.selector + "." : string{};
+        const string message = (navigating ? "Navigated to " : "DOM readiness confirmed at ") +
+            currentUrl + (title.empty() ? string{} : " (" + title + ")") +
+            ". Readiness condition '" + condition + "' satisfied." + domSummary + selectorSummary;
+        return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE,
+            message, true, true);
+    }
+
     if (op.type == PrimitiveOperationType::APPLICATION_LAUNCH &&
         op.name == "application.launch") {
 
@@ -532,6 +768,24 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
                 "Application name is missing.",
                 false
             );
+        }
+
+        const string requestedApp = lower(op.parameters.application);
+        if (op.parameters.target.empty() &&
+            (requestedApp == "edge" || requestedApp == "microsoft edge" || requestedApp == "msedge.exe" ||
+             requestedApp == "chrome" || requestedApp == "google chrome" || requestedApp == "chrome.exe")) {
+            nlohmann::json browserRequest = {
+                {"command", "launch"},
+                {"browser", (requestedApp == "chrome" || requestedApp == "google chrome" || requestedApp == "chrome.exe")
+                    ? "chrome" : "msedge"}
+            };
+            nlohmann::json browserResponse;
+            string browserError;
+            if (!browserAgentRequest(browserRequest, browserResponse, browserError))
+                return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                    "Could not launch the controlled browser: " + browserError);
+            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE,
+                browserResponse.value("message", string("Controlled browser launched.")), true, true);
         }
 
         fs::path target;
