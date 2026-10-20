@@ -45,6 +45,8 @@ namespace
 
 int main()
 {
+    cout << unitbuf;
+
     namespace fs = filesystem;
 
     fs::create_directories("logs");
@@ -565,6 +567,9 @@ int main()
                     cout << "    -> " << operation.name << "\n";
             }
         }
+
+        cout << "\n[STATE-AWARE LOOP LOG]\n";
+        cout << runtimeResult.stateLog << "\n";
 
         cout << "\n[BRANCH 3 EXECUTION]\n";
         for (const auto& item : runtimeResult.operationResults) {

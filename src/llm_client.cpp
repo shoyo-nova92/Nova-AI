@@ -97,7 +97,7 @@ LLMResponse LLMClient::generate(
     {
         {
             "model",
-            "dots-studio/dots-3-note-preview:free"
+            "nvidia/nemotron-3-ultra-550b-a55b:free"
         },
         {
             "messages",

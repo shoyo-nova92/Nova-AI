@@ -90,8 +90,15 @@ int main() {
         ++mapperCalls;
         return LLMResponse{true, mappedJson, ""};
     };
+    int plannerCalls = 0;
+    NextActionLLM planner = [&](const string&, const string&) {
+        ++plannerCalls;
+        if (plannerCalls == 1) return LLMResponse{true, json{{"status","operation"},{"step_id","step_1"},{"operation",json{{"name","filesystem.create"},{"parameters",json{{"name",folder},{"location","desktop"}}}}},{"message","Create the workspace"}}.dump(), ""};
+        if (plannerCalls == 2) return LLMResponse{true, json{{"status","operation"},{"step_id","step_2"},{"operation",json{{"name","filesystem.create_file"},{"parameters",json{{"name","Main.java"},{"location","desktop/"+folder},{"content","class Main {}\n"}}}}},{"message","Create the file"}}.dump(), ""};
+        return LLMResponse{true, json{{"status","done"},{"message","Test artifacts are created."}}.dump(), ""};
+    };
 
-    Branch3Runtime runtime(decomposer, mapper);
+    Branch3Runtime runtime(decomposer, mapper, planner);
     const auto result = runtime.run("Create folder " + folder + " and create Main.java inside it.");
 
     if (!result.success) {
@@ -106,18 +113,19 @@ int main() {
     check("02_PLANNING_SUCCEEDED", result.planningSuccess);
     check("03_EXECUTION_STARTED", result.executionStarted);
     check("04_EXACTLY_ONE_DECOMPOSER_CALL", decomposerCalls == 1);
-    check("05_EXACTLY_ONE_WHOLE_PLAN_MAPPER_CALL", mapperCalls == 1);
-    check("06_TWO_LOGICAL_STEPS", result.mappedPlan.steps.size() == 2);
-    check("07_TWO_EXECUTED_PRIMITIVES", result.operationResults.size() == 2);
-    check("08_FOLDER_EXISTS_ON_DISK", fs::is_directory(workspace));
-    check("09_FILE_EXISTS_ON_DISK", fs::is_regular_file(workspace / "Main.java"));
+    check("05_LEGACY_MAPPER_NOT_CALLED", mapperCalls == 0);
+    check("06_THREE_PLANNER_DECISIONS", plannerCalls == 3);
+    check("07_TWO_LOGICAL_STEPS", result.mappedPlan.steps.size() == 2);
+    check("08_TWO_EXECUTED_PRIMITIVES", result.operationResults.size() == 2);
+    check("09_FOLDER_EXISTS_ON_DISK", fs::is_directory(workspace));
+    check("10_FILE_EXISTS_ON_DISK", fs::is_regular_file(workspace / "Main.java"));
 
     if (fs::is_regular_file(workspace / "Main.java")) {
         ifstream input(workspace / "Main.java", ios::binary);
         const string content((istreambuf_iterator<char>(input)), istreambuf_iterator<char>());
-        check("10_FILE_CONTENT_VERIFIED", content == "class Main {}\n");
+        check("11_FILE_CONTENT_VERIFIED", content == "class Main {}\n");
     } else {
-        check("10_FILE_CONTENT_VERIFIED", false);
+        check("11_FILE_CONTENT_VERIFIED", false);
     }
 
     // An unsupported primitive must be rejected before execution.
@@ -153,17 +161,19 @@ int main() {
         return LLMResponse{true, badRoot.dump(), ""};
     };
 
-    Branch3Runtime guardedRuntime(badDecomposer, badMapper);
+    NextActionLLM badPlanner = [&](const string&, const string&) {
+        return LLMResponse{true, json{{"status","operation"},{"step_id","step_1"},{"operation",json{{"name","filesystem.dangerous"},{"parameters",json::object()}}},{"message","test invalid operation"}}.dump(), ""};
+    };
+    Branch3Runtime guardedRuntime(badDecomposer, badMapper, badPlanner);
     const auto guarded = guardedRuntime.run("Create a folder");
-    check("11_UNSUPPORTED_PRIMITIVE_REJECTED", !guarded.success && !guarded.executionStarted);
-    check("12_BAD_PLAN_USED_ONE_CALL_PER_STAGE",
-          badDecomposerCalls == 1 && badMapperCalls == 1);
+    check("12_UNSUPPORTED_PRIMITIVE_REJECTED", !guarded.success && guarded.executionStarted && guarded.operationResults.empty());
+    check("13_BAD_PLAN_DID_NOT_CALL_LEGACY_MAPPER", badDecomposerCalls == 1 && badMapperCalls == 0);
 
     // The workspace path was confirmed absent before this test, so any contents
     // at this exact unique path belong to this test and can be safely removed.
     ec.clear();
     if (fs::exists(workspace)) fs::remove_all(workspace, ec);
-    check("13_TEST_WORKSPACE_CLEANED", !fs::exists(workspace) && !ec);
+    check("14_TEST_WORKSPACE_CLEANED", !fs::exists(workspace) && !ec);
 
     cout << "\nBRANCH 3 RUNTIME INTEGRATION TEST\nPassed: " << (checks - failures)
          << "\nFailed: " << failures << '\n'

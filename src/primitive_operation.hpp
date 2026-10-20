@@ -8,7 +8,7 @@ enum class PrimitiveOperationType {
     FILESYSTEM_MOVE, FILESYSTEM_COPY, FILESYSTEM_RENAME,
     APPLICATION_LAUNCH, APPLICATION_CLOSE, APPLICATION_FOCUS,
     TEXT_WRITE, KEYBOARD_PRESS, KEYBOARD_TYPE, MOUSE_CLICK, MOUSE_MOVE,
-    BROWSER_NAVIGATE, BROWSER_WAIT_FOR
+    BROWSER_NAVIGATE, BROWSER_WAIT_FOR, BROWSER_OBSERVE, BROWSER_CLICK, BROWSER_TYPE
 };
 
 struct PrimitiveOperation {
@@ -36,6 +36,9 @@ inline string primitiveOperationTypeToString(PrimitiveOperationType type) {
         case PrimitiveOperationType::MOUSE_MOVE: return "mouse.move";
         case PrimitiveOperationType::BROWSER_NAVIGATE: return "browser.navigate";
         case PrimitiveOperationType::BROWSER_WAIT_FOR: return "browser.wait_for";
+        case PrimitiveOperationType::BROWSER_OBSERVE: return "browser.observe";
+        case PrimitiveOperationType::BROWSER_CLICK: return "browser.click";
+        case PrimitiveOperationType::BROWSER_TYPE: return "browser.type";
     }
     return "unknown";
 }

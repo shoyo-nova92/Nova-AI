@@ -1,5 +1,12 @@
 import msvcrt
+import sys
 import time
+
+# Ensure immediate unbuffered / line-buffered flushing to stdout and stderr
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True, write_through=True)
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(line_buffering=True, write_through=True)
 
 from pathlib import Path
 
@@ -110,22 +117,22 @@ def calculate_rms(audio):
 # LOAD MODELS
 # ============================================================
 
-print()
-print("=" * 60)
-print("NOVA PART A RUNTIME")
-print("=" * 60)
-print()
+print(flush=True)
+print("=" * 60, flush=True)
+print("NOVA PART A RUNTIME", flush=True)
+print("=" * 60, flush=True)
+print(flush=True)
 
-print("[INIT] Loading OpenWakeWord...")
+print("[INIT] Loading OpenWakeWord...", flush=True)
 
 wakeword_model = Model(
     wakeword_models=["hey_jarvis_v0.1"],
     inference_framework="onnx"
 )
 
-print("[INIT] OpenWakeWord: READY")
+print("[INIT] OpenWakeWord: READY", flush=True)
 
-print("[INIT] Loading Whisper Large-v3...")
+print("[INIT] Loading Whisper Large-v3...", flush=True)
 
 stt_model = WhisperModel(
     "large-v3",
@@ -133,20 +140,20 @@ stt_model = WhisperModel(
     compute_type="float16"
 )
 
-print("[INIT] Whisper Large-v3: READY")
+print("[INIT] Whisper Large-v3: READY", flush=True)
 
 OUTPUT_DIRECTORY.mkdir(
     parents=True,
     exist_ok=True
 )
 
-print()
-print("[INIT] All Part A models ready.")
-print()
-print("Press V to bypass wake word.")
-print("Say 'Hey Jarvis' to activate.")
-print("Press Q to quit.")
-print()
+print(flush=True)
+print("[INIT] All Part A models ready.", flush=True)
+print(flush=True)
+print("Press V to bypass wake word.", flush=True)
+print("Say 'Hey Jarvis' to activate.", flush=True)
+print("Press Q to quit.", flush=True)
+print(flush=True)
 
 
 # ============================================================
@@ -172,15 +179,16 @@ with sd.InputStream(
 
             if key == "q":
 
-                print()
-                print("[EXIT] Nova stopped.")
+                print(flush=True)
+                print("[EXIT] Nova stopped.", flush=True)
                 break
 
             if key == "v" and state == STATE_IDLE:
 
-                print()
+                print(flush=True)
                 print(
-                    "[WAKE] V-key bypass activated."
+                    "[WAKE] V-key bypass activated.",
+                    flush=True
                 )
 
                 state = STATE_LISTENING
@@ -216,10 +224,11 @@ with sd.InputStream(
 
             if score >= WAKEWORD_THRESHOLD:
 
-                print()
+                print(flush=True)
                 print(
                     f"[WAKE] Hey Jarvis "
-                    f"(score={score:.4f})"
+                    f"(score={score:.4f})",
+                    flush=True
                 )
 
                 wakeword_model.reset()
@@ -235,7 +244,8 @@ with sd.InputStream(
         if state == STATE_LISTENING:
 
             print(
-                "[LISTENING] Speak now..."
+                "[LISTENING] Speak now...",
+                flush=True
             )
 
             audio_buffer = []
@@ -390,7 +400,8 @@ with sd.InputStream(
 
             print(
                 f"[AUDIO] Saved: "
-                f"{audio_path}"
+                f"{audio_path}",
+                flush=True
             )
 
             state = STATE_TRANSCRIBING
@@ -404,7 +415,8 @@ with sd.InputStream(
 
             print(
                 "[STT] Transcribing "
-                "with Whisper Large-v3..."
+                "with Whisper Large-v3...",
+                flush=True
             )
 
             segments, info = (

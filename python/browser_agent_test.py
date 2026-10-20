@@ -1,5 +1,5 @@
 import unittest
-from browser_agent import validate_url, validate_timeout
+from browser_agent import validate_url, validate_timeout, classify_page
 
 
 class BrowserAgentValidationTests(unittest.TestCase):
@@ -23,6 +23,27 @@ class BrowserAgentValidationTests(unittest.TestCase):
         for value in (999, 120001, True, "5000"):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 validate_timeout(value)
+
+    def test_page_classification_is_domain_agnostic(self):
+        kind, required, evidence = classify_page("https://example.org/account", {
+            "visible_password_input": True, "visible_auth_form": True, "auth_evidence": []
+        })
+        self.assertEqual(kind, "auth_required")
+        self.assertTrue(required)
+        self.assertIn("visible_password_input", evidence)
+
+    def test_authenticated_content_is_not_misclassified_by_url_or_canvas(self):
+        kind, required, _ = classify_page("https://example.org/login-help", {
+            "visible_password_input": False, "visible_auth_form": False,
+            "auth_evidence": [], "has_qr_canvas": True
+        })
+        self.assertEqual(kind, "content")
+        self.assertFalse(required)
+
+    def test_blank_page(self):
+        kind, required, _ = classify_page("about:blank", {})
+        self.assertEqual(kind, "blank")
+        self.assertFalse(required)
 
 
 if __name__ == "__main__":

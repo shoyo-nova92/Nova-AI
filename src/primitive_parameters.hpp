@@ -13,4 +13,5 @@ struct PrimitiveParameters {
     string x, y, button, clickCount;
     // Browser automation
     string url, readyCondition, selector, timeoutMs;
+    string role, text, elementId, submit;
 };

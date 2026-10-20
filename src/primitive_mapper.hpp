@@ -17,8 +17,11 @@ public:
     PrimitiveMapper();
     explicit PrimitiveMapper(PrimitiveMapperLLM generator);
 
-    // Maps the entire decomposed plan in one LLM call. It never executes actions.
+    // Maps a complete plan (legacy compatibility). Never executes actions.
     MultiStepPlan map(const MultiStepPlan& decomposedPlan);
+
+    // Validates one planner-proposed operation without another LLM call.
+    MultiStepPlan mapStep(const MultiStepAction& sourceStep, const std::string& operationJson);
 
 private:
     PrimitiveMapperLLM generator_;

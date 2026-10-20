@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -23,6 +24,7 @@ _page = None
 _channel = "msedge"
 _playwright = None
 _import_error = None
+_observation_token = ""
 
 
 def validate_url(value: str) -> str:
@@ -122,6 +124,91 @@ def wait_for_condition(page, condition: str, selector: str, timeout_ms: int):
     })""")
 
 
+def classify_page(url: str, snapshot: dict) -> tuple[str, bool, list[str]]:
+    """Classify only from generic DOM evidence; never infer from a site/domain name."""
+    if url == "about:blank":
+        return "blank", False, []
+    evidence = []
+    for item in snapshot.get("auth_evidence", []):
+        if item not in evidence:
+            evidence.append(item)
+    # A visible password field is strong generic evidence of an authentication form.
+    if snapshot.get("visible_password_input"):
+        evidence.append("visible_password_input")
+    # One-time-code fields are useful evidence but are not enough alone to label a page login.
+    if snapshot.get("visible_auth_form"):
+        evidence.append("visible_auth_form")
+    auth_required = bool(snapshot.get("visible_password_input") or snapshot.get("visible_auth_form"))
+    return ("auth_required" if auth_required else "content"), auth_required, evidence
+
+
+def observe_page(page):
+    global _observation_token
+    # Element IDs are opaque tokens attached to the exact DOM nodes observed,
+    # not positional indexes that can drift when selector order or visibility changes.
+    _observation_token = uuid.uuid4().hex
+    snapshot = page.evaluate(r"""(token) => {
+      const visible = el => {
+        const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+        return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none';
+      };
+      const out = [];
+      document.querySelectorAll('[data-nova-observation-token]').forEach(el => el.removeAttribute('data-nova-observation-token'));
+      const nodes = document.querySelectorAll('button, a, input, textarea, select, [role], [contenteditable="true"]');
+      for (const el of nodes) {
+        if (out.length >= 60) break;
+        if (!visible(el)) continue;
+        const role = el.getAttribute('role') || ({BUTTON:'button', A:'link', INPUT: (el.type === 'checkbox' ? 'checkbox' : 'textbox'), TEXTAREA:'textbox', SELECT:'combobox'}[el.tagName] || (el.isContentEditable ? 'textbox' : 'element'));
+        const label = el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.getAttribute('title') || el.getAttribute('name') || '';
+        const text = (el.innerText || label || el.value || '').trim().slice(0, 120);
+        const active = el === document.activeElement;
+        const editable = !!(el.isContentEditable || ['INPUT', 'TEXTAREA'].includes(el.tagName) && !['button', 'checkbox', 'radio', 'submit', 'reset', 'hidden'].includes((el.type || '').toLowerCase()));
+        const id = token + '-' + String(out.length + 1);
+        el.setAttribute('data-nova-observation-token', id);
+        out.push({id, role, text, tag: el.tagName.toLowerCase(),
+                  type: (el.getAttribute('type') || '').slice(0, 30),
+                  placeholder: (el.getAttribute('placeholder') || '').slice(0, 100),
+                  accessible_name: label.slice(0, 120), focused: active,
+                  editable, enabled: !el.matches(':disabled') && el.getAttribute('aria-disabled') !== 'true',
+                  value: editable ? String(el.innerText || el.value || '').slice(0, 300) : ''});
+      }
+      const visiblePasswords = [...document.querySelectorAll('input[type="password"]')].some(visible);
+      const visibleOtp = [...document.querySelectorAll('input')].some(el => visible(el) && /one.?time|otp|verification.?code|security.?code/i.test([
+        el.getAttribute('autocomplete'), el.getAttribute('name'), el.getAttribute('aria-label'), el.getAttribute('placeholder')
+      ].filter(Boolean).join(' ')));
+      const visibleAuthForm = [...document.querySelectorAll('form')].some(form => visible(form) &&
+        [...form.querySelectorAll('input,button,[role="button"]')].some(visible) &&
+        (/sign.?in|log.?in|authenticate|verify|password|one.?time.?code/i.test(form.innerText || '') ||
+         [...form.querySelectorAll('input')].some(el => visible(el) && /password/i.test(el.type))));
+      const active = document.activeElement;
+      const activeLabel = active ? (active.getAttribute('aria-label') || active.getAttribute('placeholder') || active.getAttribute('title') || active.getAttribute('name') || active.innerText || '') : '';
+      const activeEditable = !!(active && (active.isContentEditable || ['INPUT', 'TEXTAREA'].includes(active.tagName) && !['button', 'checkbox', 'radio', 'submit', 'reset', 'hidden'].includes((active.type || '').toLowerCase())));
+      return {
+        elements: out,
+        focus: {present: !!active && active !== document.body && active !== document.documentElement,
+                role: active ? (active.getAttribute('role') || ({INPUT:'textbox', TEXTAREA:'textbox'}[active.tagName] || (active.isContentEditable ? 'textbox' : 'element'))) : '',
+                tag: active ? active.tagName.toLowerCase() : '', label: String(activeLabel).trim().slice(0, 120),
+                focused: !!active && active === document.activeElement, editable: activeEditable,
+                enabled: !!active && !active.matches(':disabled') && active.getAttribute('aria-disabled') !== 'true',
+                value: activeEditable ? String(active.innerText || active.value || '').slice(0, 300) : ''},
+        visible_text: ((document.body && document.body.innerText) || '').slice(0, 2400),
+        ready_state: document.readyState,
+        visible_password_input: visiblePasswords,
+        visible_otp_input: visibleOtp,
+        visible_auth_form: visibleAuthForm,
+        document_has_body: !!document.body
+      };
+    }""", _observation_token)
+    page_kind, auth_required, auth_evidence = classify_page(page.url, snapshot)
+    return {"success": True, "browser_ready": True, "url": page.url, "title": page.title(),
+            "page_kind": page_kind, "auth_required": auth_required,
+            "auth_evidence": auth_evidence,
+            "visible_text": snapshot.get("visible_text", ""),
+            "ready_state": snapshot.get("ready_state", "unknown"),
+            "elements": snapshot.get("elements", []),
+            "focus": snapshot.get("focus", {"present": False, "focused": False, "editable": False, "enabled": False}),
+            "message": "Fresh DOM observation: visible interactive elements, active keyboard focus, editability, page text, and generic authentication signals."}
+
 def execute(payload):
     global _page
     if not isinstance(payload, dict):
@@ -163,6 +250,67 @@ def execute(payload):
         return {"success": True, "url": _page.url, "title": _page.title(), "dom": dom,
                 "selector": selector or None, "ready_condition": condition,
                 "message": "Current page DOM readiness condition satisfied."}
+    if command == "observe":
+        if _context is None:
+            return {"success": True, "browser_ready": False, "url": "", "title": "",
+                    "page_kind": "browser_not_started", "auth_required": False,
+                    "auth_evidence": [], "elements": [],
+                    "message": "Nova's controlled browser has not been started."}
+        if _page is None or _page.is_closed():
+            _page = _context.new_page()
+        return observe_page(_page)
+    if command in ("click", "type"):
+        if _context is None or _page is None or _page.is_closed():
+            raise RuntimeError("Nova's controlled browser is not open. Launch it first.")
+        element_id = payload.get("element_id", "")
+        role = payload.get("role", "")
+        text = payload.get("text", "")
+        if not all(isinstance(v, str) for v in (element_id, role, text)):
+            raise ValueError("element_id, role and text must be strings.")
+        if len(text) > 10000 or len(role) > 40 or len(element_id) > 80:
+            raise ValueError("Element selector or text exceeds the allowed size.")
+        if element_id:
+            # Resolve the exact node tagged by the latest observation. Never
+            # reinterpret an observed ID as an index in a newly enumerated list.
+            if not re.fullmatch(r"[0-9a-f]{32}-[1-9][0-9]*", element_id):
+                raise ValueError("element_id is invalid or stale; observe again.")
+            locator = _page.locator(f'[data-nova-observation-token="{element_id}"]')
+            if locator.count() != 1:
+                raise ValueError("Observed element ID is stale or no longer unique; observe again.")
+            if not locator.is_visible():
+                raise ValueError("Observed target is no longer visible; observe again.")
+        else:
+            if not role or not text:
+                raise ValueError("Provide element_id or both role and text.")
+            locator = _page.get_by_role(role, name=text, exact=True)
+            count = locator.count()
+            if count != 1:
+                raise ValueError(f"Expected exactly one element matching role={role!r}, text={text!r}; found {count}. Observe and clarify if ambiguous.")
+        if command == "click":
+            locator.click(timeout=10000)
+            post_action = observe_page(_page)
+            return {"success": True, "action": "click", "url": _page.url, "title": _page.title(),
+                    "post_action_observation": post_action,
+                    "message": "Click dispatched; fresh DOM observation captured for state-transition verification."}
+        content = payload.get("content", "")
+        if not isinstance(content, str) or len(content) > 10000:
+            raise ValueError("content must be a string of at most 10000 characters.")
+        # Fail closed if a stale/ambiguous semantic locator resolves to a button,
+        # submit control, or other non-editable element.
+        try:
+            editable = locator.evaluate("el => !!(el.isContentEditable || ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && !['button','checkbox','radio','submit','reset','hidden','image','file'].includes((el.type || '').toLowerCase())))")
+            enabled = locator.is_enabled()
+        except Exception as exc:
+            raise ValueError(f"Could not validate typing target: {exc}") from exc
+        if not editable:
+            raise ValueError("Typing target is not an editable input; observe again and select an editable element.")
+        if not enabled:
+            raise ValueError("Typing target is disabled; observe again.")
+        locator.fill(content, timeout=10000)
+        post_action = observe_page(_page)
+        return {"success": True, "action": "type", "url": _page.url, "title": _page.title(),
+                "post_action_observation": post_action,
+                "message": "Input filled; fresh DOM observation captured for state-transition verification."}
     raise ValueError("Unsupported browser-agent command.")
 
 

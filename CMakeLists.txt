@@ -42,6 +42,8 @@ add_executable(Nova
     src/multi_step_executor.cpp
     src/primitive_mapper.cpp
     src/branch3_runtime.cpp
+    src/next_action_planner.cpp
+    src/state_manager.cpp
 )
 
 target_link_libraries(Nova
@@ -361,6 +363,8 @@ target_link_libraries(MouseGroupTest PRIVATE shell32 ole32 psapi user32 winhttp 
 add_executable(Branch3RuntimeIntegrationTest
     src/branch3_runtime_test.cpp
     src/branch3_runtime.cpp
+    src/next_action_planner.cpp
+    src/state_manager.cpp
     src/goal_decomposer.cpp
     src/primitive_mapper.cpp
     src/primitive_registry.cpp

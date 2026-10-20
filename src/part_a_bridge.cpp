@@ -1,6 +1,7 @@
 #include "part_a_bridge.hpp"
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <iostream>
 
@@ -14,6 +15,9 @@ PartAResult PartABridge::waitForText()
     result.keyboardRequest = false;
     result.rawText = "";
     result.message = "";
+
+    cout << unitbuf;
+    _putenv("PYTHONUNBUFFERED=1");
 
     cout
         << "[BRIDGE] Starting Python Part A..."
@@ -71,7 +75,8 @@ PartAResult PartABridge::waitForText()
 
         cout
             << "[PYTHON] "
-            << line;
+            << line
+            << flush;
 
         // ----------------------------------------------------
         // KEYBOARD OVERRIDE REQUEST

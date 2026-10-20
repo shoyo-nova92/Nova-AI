@@ -177,3 +177,12 @@ python -m pip install playwright
 ```
 
 The helper does not install browser binaries; it uses the installed Edge or Chrome channel. A readiness timeout fails the primitive and stops subsequent Branch 3 steps rather than continuing blindly. This browser agent is currently for Branch 3; Branch 2 code paths are unchanged.
+
+
+## State-aware browser primitives (Branch 3)
+
+- `browser.observe`: returns the controlled browser URL, title, page-kind hint, and up to 40 visible interactive elements with observed IDs, roles, and accessible text. IDs are transient and must be refreshed after navigation or UI changes.
+- `browser.click`: clicks an element by an ID from the most recent observation or by an exact accessible role and name. Ambiguous role/name matches fail rather than guessing.
+- `browser.type`: fills an identified input by the same ID or exact role/name matching. Text is bounded by the browser agent.
+
+These primitives operate only in Nova's loopback-controlled Playwright browser profile. They do not inspect or control the user's unrelated everyday browser profile. Branch 3 observes before each planning decision and validates every proposed operation against the live primitive registry.

@@ -136,6 +136,10 @@ bool assignParameter(PrimitiveParameters& output, const string& name,
     else if (name == "ready_condition") output.readyCondition = value;
     else if (name == "selector") output.selector = value;
     else if (name == "timeout_ms") output.timeoutMs = value;
+    else if (name == "role") output.role = value;
+    else if (name == "text") output.text = value;
+    else if (name == "element_id") output.elementId = value;
+    else if (name == "submit") output.submit = value;
     else {
         error = "Registry parameter '" + name + "' has no PrimitiveParameters storage field.";
         return false;
@@ -353,6 +357,32 @@ PrimitiveMapper::PrimitiveMapper()
 
 PrimitiveMapper::PrimitiveMapper(PrimitiveMapperLLM generator)
     : generator_(std::move(generator)) {}
+
+MultiStepPlan PrimitiveMapper::mapStep(const MultiStepAction& sourceStep, const string& operationJson) {
+    MultiStepPlan result{};
+    result.valid = false;
+    result.goal = sourceStep.description;
+    result.steps = {sourceStep};
+    result.steps.front().operations.clear();
+    result.steps.front().resolved = false;
+    try {
+        const json operation = json::parse(operationJson);
+        json wrapped = {{"id", sourceStep.id}, {"operations", json::array({operation})}};
+        unordered_map<string, PrimitiveDefinition> definitions;
+        for (const auto& entry : PrimitiveRegistry::getCatalog()) definitions.emplace(entry.first, entry.second);
+        if (!parseOperations(wrapped, result.steps.front(), definitions, result.message)) {
+            result.steps.clear();
+            return result;
+        }
+        result.valid = true;
+        result.message = "Single operation validated against the live primitive registry.";
+        return result;
+    } catch (const exception& ex) {
+        result.message = string("Single-operation validation failed: ") + ex.what();
+        result.steps.clear();
+        return result;
+    }
+}
 
 MultiStepPlan PrimitiveMapper::map(const MultiStepPlan& decomposedPlan) {
     if (!decomposedPlan.valid) return failedPlan(decomposedPlan, "Cannot map an invalid decomposed plan.");

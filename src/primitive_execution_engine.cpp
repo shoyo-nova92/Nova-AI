@@ -700,6 +700,36 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
     }
 
     
+    if (op.name == "browser.observe" || op.name == "browser.click" || op.name == "browser.type") {
+        nlohmann::json request;
+        if (op.name == "browser.observe") {
+            request = {{"command", "observe"}};
+        } else {
+            const bool typing = op.name == "browser.type";
+            if (op.parameters.elementId.empty() &&
+                (op.parameters.role.empty() || op.parameters.text.empty())) {
+                return fail(op, ExecutionFailureReason::INVALID_PLAN,
+                    "Browser action requires element_id or both role and text.", false);
+            }
+            request = {{"command", typing ? "type" : "click"},
+                       {"element_id", op.parameters.elementId},
+                       {"role", op.parameters.role},
+                       {"text", op.parameters.text}};
+            if (typing) request["content"] = op.parameters.content;
+        }
+        nlohmann::json response;
+        string error;
+        if (!browserAgentRequest(request, response, error))
+            return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Browser control failed: " + error);
+        string message = response.value("message", string("Browser operation completed."));
+        // Include the structured DOM snapshot for every browser primitive. Click/type
+        // responses contain a fresh post-action observation, so later planning is based
+        // on actual page state rather than site-specific success assumptions.
+        message += "\nBrowser DOM result: " + response.dump();
+        return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE,
+            message, true, true);
+    }
+
     if ((op.type == PrimitiveOperationType::BROWSER_NAVIGATE && op.name == "browser.navigate") ||
         (op.type == PrimitiveOperationType::BROWSER_WAIT_FOR && op.name == "browser.wait_for")) {
         const bool navigating = op.type == PrimitiveOperationType::BROWSER_NAVIGATE;

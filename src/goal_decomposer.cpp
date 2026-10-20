@@ -36,7 +36,10 @@ namespace
     }
 }
 
-GoalDecomposer::GoalDecomposer() = default;
+GoalDecomposer::GoalDecomposer()
+    : generator_([](const string& systemPrompt, const string& userPrompt) {
+          LLMClient client; return client.generate(systemPrompt, userPrompt);
+      }) {}
 
 GoalDecomposer::GoalDecomposer(GoalDecomposerLLM generator)
     : generator_(move(generator))
