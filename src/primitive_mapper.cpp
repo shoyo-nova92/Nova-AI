@@ -125,6 +125,9 @@ bool assignParameter(PrimitiveParameters& output, const string& name,
     else if (name == "newName") output.newName = value;
     else if (name == "recursive") output.recursive = value;
     else if (name == "overwrite") output.overwrite = value;
+    else if (name == "query") output.query = value;
+    else if (name == "max_results") output.maxResults = value;
+    else if (name == "entry_type") output.entryType = value;
     else if (name == "key") output.key = value;
     else if (name == "modifiers") output.modifiers = value;
     else if (name == "repeatCount") output.repeatCount = value;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -28,9 +29,15 @@ struct ExecutionResult
 
     string action;
     string message;
+    // Stable machine-readable category retained alongside the human message.
+    string failureCategory;
 
     double confidence;
 
     bool targetResolved;
     bool executionMechanismResolved;
+
+    // File operations populate the normalized, policy-checked physical target.
+    string resolvedPath;
+    vector<string> discoveredPaths;
 };

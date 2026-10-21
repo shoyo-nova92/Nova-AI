@@ -4,6 +4,8 @@
 #include "state_manager.hpp"
 #include <nlohmann/json.hpp>
 #include <exception>
+#include <algorithm>
+#include <cctype>
 #include <sstream>
 #include <utility>
 #include <string>
@@ -41,6 +43,50 @@ std::string snapshotSignature(const std::string& observationMessage) {
         return observationMessage;
     }
 }
+
+std::string lower(std::string value) {
+    std::transform(value.begin(), value.end(), value.begin(),
+        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return value;
+}
+
+bool browserObservationNeeded(const MultiStepPlan& guide) {
+    for (const auto& step : guide.steps) {
+        const std::string description = lower(step.description);
+        if (description.find("browser") != std::string::npos ||
+            description.find("website") != std::string::npos ||
+            description.find("web page") != std::string::npos ||
+            description.find("http://") != std::string::npos ||
+            description.find("https://") != std::string::npos) return true;
+    }
+    return false;
+}
+
+std::string operationSignature(const PrimitiveOperation& operation,
+                               const std::string& errorCategory) {
+    const auto& p = operation.parameters;
+    return operation.name + "|" + p.name + "|" + p.location + "|" + p.target +
+        "|" + p.source + "|" + p.destination + "|" + p.newName + "|" +
+        p.query + "|" + p.entryType + "|reason=" + errorCategory;
+}
+
+std::string operationKey(const PrimitiveOperation& operation) {
+    const std::string signature = operationSignature(operation, "none");
+    return signature.substr(0, signature.rfind("|reason="));
+}
+
+std::string resultEvidence(const ExecutionResult& execution) {
+    std::string evidence = execution.message;
+    if (!execution.resolvedPath.empty()) evidence += " | resolved_path=" + execution.resolvedPath;
+    if (!execution.discoveredPaths.empty()) {
+        evidence += " | discovered_paths=";
+        for (std::size_t index = 0; index < execution.discoveredPaths.size(); ++index) {
+            if (index) evidence += ", ";
+            evidence += execution.discoveredPaths[index];
+        }
+    }
+    return evidence;
+}
 }
 
 Branch3Runtime::Branch3Runtime() = default;
@@ -67,19 +113,28 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
     result.executionStarted = true;
     constexpr unsigned MAX_ITERATIONS = 12;
     const std::string catalog = liveCatalog();
+    const bool observeBrowser = browserObservationNeeded(result.decomposedPlan);
     std::string lastBrowserAction;
     std::string snapshotBeforeLastBrowserAction;
 
     for (unsigned iteration = 0; iteration < MAX_ITERATIONS; ++iteration) {
         state.nextIteration();
-        // Refresh the browser environment before every planning decision.
-        PrimitiveOperation observe{};
-        observe.name = "browser.observe"; observe.type = PrimitiveOperationType::BROWSER_OBSERVE; observe.resolved = true;
-        auto observation = engine.execute(observe);
-        std::string observed = observation.message;
-        if (observation.status != ExecutionStatus::SUCCESS) observed = "Browser observation unavailable: " + observation.message;
-        state.setObservation(observed);
-        const std::string currentSnapshot = snapshotSignature(observed);
+        std::string observed;
+        std::string currentSnapshot;
+        if (observeBrowser) {
+            // Browser operations require a fresh live DOM observation. Filesystem
+            // goals instead use explicit inspect/list/search evidence.
+            PrimitiveOperation observe{};
+            observe.name = "browser.observe"; observe.type = PrimitiveOperationType::BROWSER_OBSERVE; observe.resolved = true;
+            auto observation = engine.execute(observe);
+            observed = observation.message;
+            if (observation.status != ExecutionStatus::SUCCESS) observed = "Browser observation unavailable: " + observation.message;
+            state.setObservation(observed);
+            currentSnapshot = snapshotSignature(observed);
+        } else {
+            observed = "No automatic filesystem observation. Use filesystem.inspect, filesystem.list_directory, or filesystem.search when location evidence is needed.";
+            state.setObservation(observed);
+        }
         result.stateLog += state.render() + "\n";
 
         if (!lastBrowserAction.empty()) {
@@ -118,8 +173,8 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
             return result;
         }
         const PrimitiveOperation& operation = mapped.steps.front().operations.front();
-        if (state.repeatedFailure(operation.name)) {
-            result.message = "Branch 3 blocked: operation '" + operation.name + "' failed three times consecutively."; return result;
+        if (state.repeatedFailure(operationKey(operation))) {
+            result.message = "Branch 3 blocked: the same operation with the same normalized arguments and failure category failed three times consecutively."; return result;
         }
         if (operation.name == "browser.click" || operation.name == "browser.type") {
             lastBrowserAction = operation.name;
@@ -133,13 +188,20 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
         result.operationResults.push_back(operationResult);
         if (operationResult.execution.status == ExecutionStatus::SUCCESS) {
             state.recordSuccess();
-            state.addHistory("Succeeded " + operation.name + ": " + operationResult.execution.message);
+            const std::string evidence = resultEvidence(operationResult.execution);
+            state.addHistory("Succeeded " + operation.name + ": " + evidence);
+            state.setObservation("Filesystem/action result: " + evidence);
             result.mappedPlan.steps.push_back(mapped.steps.front());
-            result.stateLog += "[EXECUTION] success " + operation.name + ": " + operationResult.execution.message + "\n";
+            result.stateLog += "[EXECUTION] success " + operation.name + ": " + evidence + "\n";
         } else {
-            state.recordFailure(operation.name);
-            state.addHistory("Failed " + operation.name + ": " + operationResult.execution.message);
-            result.stateLog += "[EXECUTION] failed " + operation.name + ": " + operationResult.execution.message + "\n";
+            const std::string failureSignature = operationSignature(operation,
+                operationResult.execution.failureCategory);
+            state.recordFailure(failureSignature);
+            const std::string evidence = resultEvidence(operationResult.execution);
+            state.addHistory("Failed " + operation.name + " [" +
+                operationResult.execution.failureCategory + "]: " + evidence);
+            state.setObservation("Filesystem/action failure: " + evidence);
+            result.stateLog += "[EXECUTION] failed " + operation.name + ": " + evidence + "\n";
         }
     }
     result.message = "Branch 3 stopped after reaching the maximum of 12 observe-plan-execute iterations without verified completion.";

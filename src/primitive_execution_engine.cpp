@@ -4,6 +4,7 @@
 #include <psapi.h>
 #include <shlobj.h>
 #include "primitive_execution_engine.hpp"
+#include "filesystem_path_policy.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -21,15 +22,6 @@ using namespace std;
 namespace fs = std::filesystem;
 
 namespace {
-fs::path getDesktopPath() {
-    PWSTR raw = nullptr;
-    HRESULT hr = SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &raw);
-    if (FAILED(hr) || raw == nullptr) return {};
-    fs::path path(raw);
-    CoTaskMemFree(raw);
-    return path;
-}
-
 ExecutionResult makeResult(const PrimitiveOperation& op, ExecutionStatus status,
     ExecutionFailureReason reason, const string& message,
     bool targetResolved = false, bool mechanismResolved = false) {
@@ -38,6 +30,14 @@ ExecutionResult makeResult(const PrimitiveOperation& op, ExecutionStatus status,
     r.reason = reason;
     r.action = op.name;
     r.message = message;
+    switch (reason) {
+        case ExecutionFailureReason::NONE: r.failureCategory = "none"; break;
+        case ExecutionFailureReason::INVALID_PLAN: r.failureCategory = "invalid_plan"; break;
+        case ExecutionFailureReason::LOW_CONFIDENCE: r.failureCategory = "low_confidence"; break;
+        case ExecutionFailureReason::UNSUPPORTED_ACTION: r.failureCategory = "unsupported_action"; break;
+        case ExecutionFailureReason::TARGET_NOT_FOUND: r.failureCategory = "target_not_found"; break;
+        case ExecutionFailureReason::EXECUTION_ERROR: r.failureCategory = "execution_error"; break;
+    }
     r.confidence = targetResolved && mechanismResolved ? 1.0 : 0.0;
     r.targetResolved = targetResolved;
     r.executionMechanismResolved = mechanismResolved;
@@ -57,29 +57,52 @@ bool leafName(const string& name) {
     return !p.is_absolute() && !p.has_root_name() && !p.has_root_directory() && p.filename() == p;
 }
 
-bool desktopPath(const string& text, const fs::path& desktop, fs::path& result,
-    bool allowDesktopRoot = false) {
-    if (desktop.empty() || text.empty()) return false;
-    if (text == "desktop") {
-        if (!allowDesktopRoot) return false;
-        result = desktop.lexically_normal();
-        return true;
+ExecutionFailureReason failureReasonForPath(FilesystemPathError error) {
+    switch (error) {
+        case FilesystemPathError::NOT_FOUND: return ExecutionFailureReason::TARGET_NOT_FOUND;
+        case FilesystemPathError::ACCESS_DENIED:
+        case FilesystemPathError::IO_ERROR: return ExecutionFailureReason::EXECUTION_ERROR;
+        case FilesystemPathError::NONE:
+        case FilesystemPathError::MALFORMED_PATH:
+        case FilesystemPathError::UNKNOWN_LOCATION:
+        case FilesystemPathError::PROTECTED_LOCATION: return ExecutionFailureReason::UNSUPPORTED_ACTION;
     }
-    const string prefix = "desktop/";
-    if (text.rfind(prefix, 0) != 0) return false;
-    fs::path rel(text.substr(8));
-    if (rel.empty() || rel.is_absolute() || rel.has_root_name() || rel.has_root_directory()) return false;
-    for (const auto& part : rel) {
-        const string s = part.string();
-        if (s.empty() || s == "." || s == "..") return false;
+    return ExecutionFailureReason::UNSUPPORTED_ACTION;
+}
+
+bool resolvePathForOperation(const PrimitiveOperation& op, const string& raw,
+                             FilesystemAccess access, fs::path& resolved,
+                             ExecutionResult& failure) {
+    FilesystemPathPolicy policy;
+    const FilesystemPathResult path = policy.resolve(raw);
+    if (!path.ok) {
+        failure = fail(op, failureReasonForPath(path.error),
+            "Filesystem path resolution failed (" + FilesystemPathPolicy::errorName(path.error) + "): " + path.message,
+            false);
+        failure.failureCategory = FilesystemPathPolicy::errorName(path.error);
+        return false;
     }
-    fs::path base = desktop.lexically_normal();
-    fs::path candidate = (base / rel).lexically_normal();
-    auto b = base.begin(); auto c = candidate.begin();
-    for (; b != base.end(); ++b, ++c)
-        if (c == candidate.end() || *b != *c) return false;
-    result = candidate;
+    const FilesystemPathResult authorization = policy.authorize(path.path, access);
+    if (!authorization.ok) {
+        failure = fail(op, failureReasonForPath(authorization.error),
+            "Filesystem path authorization failed (" + FilesystemPathPolicy::errorName(authorization.error) + "): " + authorization.message,
+            false);
+        failure.resolvedPath = authorization.path.string();
+        failure.failureCategory = FilesystemPathPolicy::errorName(authorization.error);
+        return false;
+    }
+    resolved = authorization.path;
     return true;
+}
+
+ExecutionResult filesystemSuccess(const PrimitiveOperation& op, const string& message,
+                                  const fs::path& path,
+                                  vector<string> discovered = {}) {
+    ExecutionResult result = makeResult(op, ExecutionStatus::SUCCESS,
+        ExecutionFailureReason::NONE, message, true, true);
+    result.resolvedPath = path.string();
+    result.discoveredPaths = move(discovered);
+    return result;
 }
 
 bool boolParameter(const string& value, bool defaultValue, bool& out) {
@@ -153,8 +176,12 @@ string appExeFromName(const string& application) {
 
 bool launchTargetIsSafe(const string& target, fs::path& resolved) {
     if (target.empty()) return true;
-    const fs::path desktop = getDesktopPath();
-    if (!desktopPath(target, desktop, resolved, true)) return false;
+    FilesystemPathPolicy policy;
+    const FilesystemPathResult path = policy.resolve(target);
+    if (!path.ok) return false;
+    const FilesystemPathResult allowed = policy.authorize(path.path, FilesystemAccess::DISCOVER);
+    if (!allowed.ok) return false;
+    resolved = allowed.path;
     return fs::exists(resolved);
 }
 
@@ -569,56 +596,31 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
         return makeResult(op, ExecutionStatus::NOT_EXECUTED, ExecutionFailureReason::INVALID_PLAN,
             "Primitive operation is unresolved.");
 
-    const fs::path desktop = getDesktopPath();
-
-    
     if (op.type == PrimitiveOperationType::FILESYSTEM_CREATE &&
         op.name == "filesystem.create") {
-
-        if (!leafName(op.parameters.name)) {
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
-                "Invalid folder name.", false);
-        }
-
-        fs::path parent;
-        if (!desktopPath(op.parameters.location, desktop, parent, true)) {
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
-                "Unsupported or unsafe folder location.", false);
-        }
+        if (!leafName(op.parameters.name))
+            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Invalid folder name.", false);
+        fs::path parent; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.location, FilesystemAccess::CREATE, parent, pathFailure)) return pathFailure;
 
         try {
-            if (!fs::is_directory(parent)) {
-                return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,
-                    "Parent directory does not exist: " + parent.string());
-            }
-
+            if (!fs::is_directory(parent)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,
+                "Parent directory does not exist: " + parent.string());
             const fs::path folder = parent / op.parameters.name;
-
-            if (fs::exists(folder)) {
-                return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
-                    "Folder already exists: " + folder.string());
-            }
-
-            if (!fs::create_directory(folder)) {
-                return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
-                    "Folder could not be created: " + folder.string());
-            }
-
-            return makeResult(op, ExecutionStatus::SUCCESS,
-                ExecutionFailureReason::NONE,
-                "Folder created: " + folder.string(), true, true);
-
+            if (fs::exists(folder)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                "Folder already exists: " + folder.string());
+            if (!fs::create_directory(folder)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                "Folder could not be created: " + folder.string());
+            return filesystemSuccess(op, "Folder created: " + folder.string(), folder);
         } catch (const fs::filesystem_error& e) {
             return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what());
         }
     }
 
-
     if (op.type == PrimitiveOperationType::FILESYSTEM_CREATE_FILE && op.name == "filesystem.create_file") {
         if (!leafName(op.parameters.name)) return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Invalid file name.", false);
-        fs::path dir;
-        if (!desktopPath(op.parameters.location, desktop, dir, true))
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Unsupported or unsafe file location.", false);
+        fs::path dir; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.location, FilesystemAccess::CREATE, dir, pathFailure)) return pathFailure;
         const fs::path filePath = dir / op.parameters.name;
         try {
             if (!fs::is_directory(dir)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Parent directory does not exist: " + dir.string());
@@ -628,14 +630,14 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
             file.write(op.parameters.content.data(), static_cast<streamsize>(op.parameters.content.size()));
             file.close();
             if (!file) { error_code ignored; fs::remove(filePath, ignored); return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Failed writing file: " + filePath.string()); }
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, "File created: " + filePath.string(), true, true);
+            return filesystemSuccess(op, "File created: " + filePath.string(), filePath);
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
     }
 
     if (op.type == PrimitiveOperationType::FILESYSTEM_COPY && op.name == "filesystem.copy") {
-        fs::path source, dest;
-        if (!desktopPath(op.parameters.source, desktop, source) || !desktopPath(op.parameters.destination, desktop, dest))
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Copy requires safe desktop-relative paths.", false);
+        fs::path source, dest; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.source, FilesystemAccess::DISCOVER, source, pathFailure) ||
+            !resolvePathForOperation(op, op.parameters.destination, FilesystemAccess::COPY, dest, pathFailure)) return pathFailure;
         bool overwrite = false;
         if (!boolParameter(op.parameters.overwrite, false, overwrite))
             return fail(op, ExecutionFailureReason::INVALID_PLAN, "overwrite must be true/false or 1/0.", false);
@@ -648,27 +650,27 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
                 fs::copy(source, dest, fs::copy_options::recursive);
             } else if (overwrite) fs::copy_file(source, dest, fs::copy_options::overwrite_existing);
             else fs::copy_file(source, dest);
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, "Copied to: " + dest.string(), true, true);
+            return filesystemSuccess(op, "Copied to: " + dest.string(), dest);
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
     }
 
     if (op.type == PrimitiveOperationType::FILESYSTEM_RENAME && op.name == "filesystem.rename") {
-        fs::path target;
-        if (!desktopPath(op.parameters.target, desktop, target) || !leafName(op.parameters.newName))
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Rename requires a safe target and a single-component newName.", false);
+        fs::path target; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.target, FilesystemAccess::RENAME, target, pathFailure) || !leafName(op.parameters.newName))
+            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Rename requires an authorized target and a single-component newName.", false);
         try {
             if (!fs::exists(target)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Rename target does not exist: " + target.string());
             fs::path dest = target.parent_path() / op.parameters.newName;
             if (fs::exists(dest)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Rename destination already exists: " + dest.string());
             fs::rename(target, dest);
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, "Renamed to: " + dest.string(), true, true);
+            return filesystemSuccess(op, "Renamed to: " + dest.string(), dest);
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
     }
 
     if (op.type == PrimitiveOperationType::FILESYSTEM_MOVE && op.name == "filesystem.move") {
-        fs::path source, dest;
-        if (!desktopPath(op.parameters.source, desktop, source) || !desktopPath(op.parameters.destination, desktop, dest))
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Move requires safe desktop-relative paths.", false);
+        fs::path source, dest; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.source, FilesystemAccess::MOVE, source, pathFailure) ||
+            !resolvePathForOperation(op, op.parameters.destination, FilesystemAccess::MOVE, dest, pathFailure)) return pathFailure;
         try {
             if (!fs::exists(source)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Move source does not exist: " + source.string());
             if (fs::exists(dest)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Move destination already exists.");
@@ -678,14 +680,13 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
                 if (!rel.empty() && *rel.begin() != "..") return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Cannot move a directory inside itself.");
             }
             fs::rename(source, dest);
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, "Moved to: " + dest.string(), true, true);
+            return filesystemSuccess(op, "Moved to: " + dest.string(), dest);
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, string(e.what()) + " (rename-based move can fail across volumes)"); }
     }
 
     if (op.type == PrimitiveOperationType::FILESYSTEM_DELETE && op.name == "filesystem.delete") {
-        fs::path target;
-        if (!desktopPath(op.parameters.target, desktop, target))
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION, "Delete requires a safe desktop-relative target.", false);
+        fs::path target; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.target, FilesystemAccess::DELETE_RESOURCE, target, pathFailure)) return pathFailure;
         bool recursive = false;
         if (!boolParameter(op.parameters.recursive, false, recursive))
             return fail(op, ExecutionFailureReason::INVALID_PLAN, "recursive must be true/false or 1/0.", false);
@@ -695,7 +696,62 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
                 if (!recursive && !fs::is_empty(target)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Directory is not empty; recursive deletion was not enabled.");
                 if (recursive) fs::remove_all(target); else fs::remove(target);
             } else fs::remove(target);
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, "Deleted: " + target.string(), true, true);
+            return filesystemSuccess(op, "Deleted: " + target.string(), target);
+        } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
+    }
+
+    if (op.type == PrimitiveOperationType::FILESYSTEM_LIST_DIRECTORY && op.name == "filesystem.list_directory") {
+        fs::path directory; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.location, FilesystemAccess::DISCOVER, directory, pathFailure)) return pathFailure;
+        int limit = 100;
+        try { if (!op.parameters.maxResults.empty()) limit = stoi(op.parameters.maxResults); }
+        catch (...) { return fail(op, ExecutionFailureReason::INVALID_PLAN, "max_results must be an integer.", false); }
+        if (limit < 1 || limit > 200) return fail(op, ExecutionFailureReason::INVALID_PLAN, "max_results must be from 1 to 200.", false);
+        try {
+            if (!fs::is_directory(directory)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Directory does not exist: " + directory.string());
+            vector<string> entries;
+            for (const auto& entry : fs::directory_iterator(directory, fs::directory_options::skip_permission_denied)) {
+                entries.push_back(entry.path().string());
+                if (static_cast<int>(entries.size()) == limit) break;
+            }
+            return filesystemSuccess(op, "Listed " + to_string(entries.size()) + " entries in: " + directory.string(), directory, entries);
+        } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
+    }
+
+    if (op.type == PrimitiveOperationType::FILESYSTEM_SEARCH && op.name == "filesystem.search") {
+        fs::path root; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.location, FilesystemAccess::DISCOVER, root, pathFailure)) return pathFailure;
+        int limit = 100;
+        try { if (!op.parameters.maxResults.empty()) limit = stoi(op.parameters.maxResults); }
+        catch (...) { return fail(op, ExecutionFailureReason::INVALID_PLAN, "max_results must be an integer.", false); }
+        if (op.parameters.query.empty() || limit < 1 || limit > 1000)
+            return fail(op, ExecutionFailureReason::INVALID_PLAN, "search requires query and max_results from 1 to 1000.", false);
+        const string type = lower(op.parameters.entryType.empty() ? "any" : op.parameters.entryType);
+        if (type != "any" && type != "file" && type != "directory")
+            return fail(op, ExecutionFailureReason::INVALID_PLAN, "entry_type must be any, file, or directory.", false);
+        try {
+            if (!fs::is_directory(root)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Search root does not exist: " + root.string());
+            vector<string> matches;
+            const string needle = lower(op.parameters.query);
+            for (const auto& entry : fs::recursive_directory_iterator(root, fs::directory_options::skip_permission_denied)) {
+                const bool acceptedType = type == "any" || (type == "file" && entry.is_regular_file()) ||
+                    (type == "directory" && entry.is_directory());
+                if (acceptedType && lower(entry.path().filename().string()).find(needle) != string::npos) {
+                    matches.push_back(entry.path().string());
+                    if (static_cast<int>(matches.size()) == limit) break;
+                }
+            }
+            return filesystemSuccess(op, "Found " + to_string(matches.size()) + " matching entries under: " + root.string(), root, matches);
+        } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
+    }
+
+    if (op.type == PrimitiveOperationType::FILESYSTEM_INSPECT && op.name == "filesystem.inspect") {
+        fs::path target; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.target, FilesystemAccess::DISCOVER, target, pathFailure)) return pathFailure;
+        try {
+            if (!fs::exists(target)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Path does not exist: " + target.string());
+            const string kind = fs::is_directory(target) ? "directory" : (fs::is_regular_file(target) ? "file" : "other");
+            return filesystemSuccess(op, "Inspected " + kind + ": " + target.string(), target, {target.string()});
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
     }
 
@@ -825,7 +881,7 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
                 return fail(
                     op,
                     ExecutionFailureReason::UNSUPPORTED_ACTION,
-                    "Launch target must be an existing Desktop-relative path.",
+                    "Launch target must be an existing authorized filesystem path.",
                     false
                 );
             }
@@ -948,10 +1004,8 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
 
 
     if (op.type == PrimitiveOperationType::TEXT_WRITE && op.name == "text.write") {
-        fs::path target;
-        if (!desktopPath(op.parameters.target, desktop, target))
-            return fail(op, ExecutionFailureReason::UNSUPPORTED_ACTION,
-                "text.write requires a safe desktop-relative file path.", false);
+        fs::path target; ExecutionResult pathFailure;
+        if (!resolvePathForOperation(op, op.parameters.target, FilesystemAccess::WRITE, target, pathFailure)) return pathFailure;
         try {
             if (!fs::is_regular_file(target))
                 return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,
@@ -966,8 +1020,7 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
             if (!file)
                 return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
                     "Failed while writing target: " + target.string());
-            return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE,
-                "Text written to file: " + target.string(), true, true);
+            return filesystemSuccess(op, "Text written to file: " + target.string(), target);
         } catch (const fs::filesystem_error& e) {
             return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what());
         }

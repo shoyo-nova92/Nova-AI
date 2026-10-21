@@ -73,6 +73,28 @@ const unordered_map<string, PrimitiveDefinition> REGISTRY = {
    p("newName",T::STRING,R::REQUIRED,"New base name, not a parent path.")}),
   {o("path","file_path","Final path after renaming."),o("renamed","boolean","Whether rename succeeded.")})},
 
+ {"filesystem.list_directory", d(PrimitiveOperationType::FILESYSTEM_LIST_DIRECTORY,
+  "List a bounded set of entries in one authorized directory without recursing.", "filesystem",
+  s(R::NOT_APPLICABLE,R::REQUIRED,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
+   p("location",T::DIRECTORY_PATH,R::REQUIRED,"Directory to list; accepts an absolute path or a supported known-folder alias."),
+   p("max_results",T::INTEGER,R::OPTIONAL,"Maximum entries to return; defaults to 100.",{},true,1,true,200)}),
+  {o("path","directory_path","Resolved directory path."),o("entries","array","Bounded list of absolute entry paths."),o("entry_count","integer","Number of entries returned.")})},
+
+ {"filesystem.search", d(PrimitiveOperationType::FILESYSTEM_SEARCH,
+  "Recursively search a bounded authorized root for names containing the requested query.", "filesystem",
+  s(R::NOT_APPLICABLE,R::REQUIRED,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
+   p("location",T::DIRECTORY_PATH,R::REQUIRED,"Authorized root directory to search."),
+   p("query",T::STRING,R::REQUIRED,"Case-insensitive substring to match against file or directory names."),
+   p("entry_type",T::ENUM,R::OPTIONAL,"Limit matches by resource type; defaults to any.",{"any","file","directory"}),
+   p("max_results",T::INTEGER,R::OPTIONAL,"Maximum matches to return; defaults to 100.",{},true,1,true,1000)}),
+  {o("path","directory_path","Resolved search root."),o("matches","array","Bounded list of matching absolute paths."),o("match_count","integer","Number of matches returned.")})},
+
+ {"filesystem.inspect", d(PrimitiveOperationType::FILESYSTEM_INSPECT,
+  "Inspect an authorized filesystem path to verify existence and resource type.", "filesystem",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::NOT_APPLICABLE,{
+   p("target",T::FILE_PATH,R::REQUIRED,"Exact path to inspect.")}),
+  {o("path","file_path","Resolved inspected path."),o("exists","boolean","Whether the path exists."),o("resource_type","string","file, directory, or other.")})},
+
  {"application.launch", d(PrimitiveOperationType::APPLICATION_LAUNCH,
   "Launch an application, optionally opening a specified file or folder.", "application_control",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::OPTIONAL,R::NOT_APPLICABLE,{

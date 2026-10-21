@@ -7,6 +7,7 @@ struct PrimitiveParameters {
     string name, location, application, target, content;
     // Filesystem-specific
     string source, destination, newName, recursive, overwrite;
+    string query, maxResults, entryType;
     // Keyboard-specific
     string key, modifiers, repeatCount;
     // Mouse-specific

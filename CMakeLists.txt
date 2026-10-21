@@ -37,6 +37,7 @@ add_executable(Nova
     src/goal_decomposer.cpp
     src/dependency_resolver.cpp
     src/context_resolver.cpp
+    src/filesystem_path_policy.cpp
     src/plan_validator.cpp
     src/primitive_execution_engine.cpp
     src/multi_step_executor.cpp
@@ -208,10 +209,19 @@ add_executable(PrimitiveRegistryTest
     src/primitive_registry.cpp
 )
 
+add_executable(FilesystemPathPolicyTest
+    src/filesystem_path_policy_test.cpp
+    src/filesystem_path_policy.cpp
+)
+target_include_directories(FilesystemPathPolicyTest PRIVATE src)
+target_link_libraries(FilesystemPathPolicyTest PRIVATE shell32 ole32)
+
 add_executable(ContextResolverTest
     src/context_resolver_test.cpp
     src/context_resolver.cpp
+    src/filesystem_path_policy.cpp
 )
+target_link_libraries(ContextResolverTest PRIVATE shell32 ole32)
 
 add_executable(MultiStepPipelineTest
     src/multistep_pipeline_test.cpp
@@ -223,6 +233,7 @@ add_executable(MultiStepPipelineTest
     src/capability_resolver.cpp
     src/parameter_resolver.cpp
     src/context_resolver.cpp
+    src/filesystem_path_policy.cpp
     src/llm_client.cpp
     src/content_resolver.cpp
     src/plan_validator.cpp
@@ -233,12 +244,14 @@ target_link_libraries(MultiStepPipelineTest
     PRIVATE
         CURL::libcurl
         nlohmann_json::nlohmann_json
+        shell32 ole32
 )
 
 add_executable(
     PrimitiveExecutionEngineTest
     src/primitive_execution_engine_test.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 )
 target_link_libraries(PrimitiveExecutionEngineTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
@@ -248,6 +261,7 @@ add_executable(
     src/multi_step_integration_test.cpp
     src/multi_step_executor.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 
     src/multistep_pipeline.cpp
@@ -317,6 +331,7 @@ add_executable(
     FilesystemCreationGroupTest
     src/filesystem_creation_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 )
 
@@ -327,15 +342,27 @@ add_executable(
     FilesystemManipulationGroupTest
     src/filesystem_manipulation_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 )
 target_include_directories(FilesystemManipulationGroupTest PRIVATE src)
 target_link_libraries(FilesystemManipulationGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
 
 add_executable(
+    FilesystemDiscoveryGroupTest
+    src/filesystem_discovery_group_test.cpp
+    src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
+    src/application_resolver.cpp
+)
+target_include_directories(FilesystemDiscoveryGroupTest PRIVATE src)
+target_link_libraries(FilesystemDiscoveryGroupTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
+
+add_executable(
     ApplicationLifecycleGroupTest
     src/application_lifecycle_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 )
 target_include_directories(ApplicationLifecycleGroupTest PRIVATE src)
@@ -345,6 +372,7 @@ add_executable(
     TextKeyboardGroupTest
     src/text_keyboard_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 )
 target_include_directories(TextKeyboardGroupTest PRIVATE src)
@@ -354,6 +382,7 @@ add_executable(
     MouseGroupTest
     src/mouse_group_test.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
 )
 target_include_directories(MouseGroupTest PRIVATE src)
@@ -369,6 +398,7 @@ add_executable(Branch3RuntimeIntegrationTest
     src/primitive_mapper.cpp
     src/primitive_registry.cpp
     src/primitive_execution_engine.cpp
+    src/filesystem_path_policy.cpp
     src/application_resolver.cpp
     src/llm_client.cpp
 )

@@ -6,6 +6,7 @@ using namespace std;
 enum class PrimitiveOperationType {
     FILESYSTEM_CREATE, FILESYSTEM_CREATE_FILE, FILESYSTEM_DELETE,
     FILESYSTEM_MOVE, FILESYSTEM_COPY, FILESYSTEM_RENAME,
+    FILESYSTEM_LIST_DIRECTORY, FILESYSTEM_SEARCH, FILESYSTEM_INSPECT,
     APPLICATION_LAUNCH, APPLICATION_CLOSE, APPLICATION_FOCUS,
     TEXT_WRITE, KEYBOARD_PRESS, KEYBOARD_TYPE, MOUSE_CLICK, MOUSE_MOVE,
     BROWSER_NAVIGATE, BROWSER_WAIT_FOR, BROWSER_OBSERVE, BROWSER_CLICK, BROWSER_TYPE
@@ -26,6 +27,9 @@ inline string primitiveOperationTypeToString(PrimitiveOperationType type) {
         case PrimitiveOperationType::FILESYSTEM_MOVE: return "filesystem.move";
         case PrimitiveOperationType::FILESYSTEM_COPY: return "filesystem.copy";
         case PrimitiveOperationType::FILESYSTEM_RENAME: return "filesystem.rename";
+        case PrimitiveOperationType::FILESYSTEM_LIST_DIRECTORY: return "filesystem.list_directory";
+        case PrimitiveOperationType::FILESYSTEM_SEARCH: return "filesystem.search";
+        case PrimitiveOperationType::FILESYSTEM_INSPECT: return "filesystem.inspect";
         case PrimitiveOperationType::APPLICATION_LAUNCH: return "application.launch";
         case PrimitiveOperationType::APPLICATION_CLOSE: return "application.close";
         case PrimitiveOperationType::APPLICATION_FOCUS: return "application.focus";

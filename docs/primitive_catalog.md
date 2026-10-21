@@ -1,6 +1,6 @@
 # Nova Branch 3 — Canonical Primitive Catalog
 
-This document describes the **16 primitives registered in `src/primitive_registry.cpp`** and their current implementation in `src/primitive_execution_engine.cpp`. The registry schemas are the machine-readable contract used by `PrimitiveMapper`; if this document and the code disagree, treat the code as authoritative and update this document.
+This document describes the **22 primitives registered in `src/primitive_registry.cpp`** and their current implementation in `src/primitive_execution_engine.cpp`. The registry schemas are the machine-readable contract used by `PrimitiveMapper`; if this document and the code disagree, treat the code as authoritative and update this document.
 
 ## Execution contract
 
@@ -9,14 +9,14 @@ This document describes the **16 primitives registered in `src/primitive_registr
 - The host validates the mapped result against the registry and only then starts execution.
 - Branch 3 executes steps in plan order and operations within each step in listed order. It stops on the first failed operation.
 - Branch 2's single-action pipeline remains separate and unchanged.
-- Current filesystem targets are intentionally restricted to the Windows Desktop or `desktop/...` paths. The runtime does not support arbitrary absolute paths for filesystem primitives.
+- Filesystem paths are resolved by a shared Windows-aware policy. It supports absolute paths and the `desktop`, `documents`, and `downloads` aliases, normalizes paths before use, checks reparse-point-aware physical destinations, and blocks mutations in protected Windows and application locations.
 
 ## Primitive reference
 
 ### 1. `filesystem.create`
 
-- **Purpose:** Create one new directory directly on the Desktop.
-- **Required parameters:** `name` (single directory name), `location` (must currently be `desktop`).
+- **Purpose:** Create one new directory under an existing authorized parent.
+- **Required parameters:** `name` (single directory name), `location` (absolute path or supported known-folder alias).
 - **Outputs described by registry:** `path`, `created`.
 - **Side effects:** Creates a real directory. Fails if it already exists.
 - **Limitations:** Does not create nested parent directories; rejects names containing path separators, `.` or `..`.
@@ -24,7 +24,7 @@ This document describes the **16 primitives registered in `src/primitive_registr
 ### 2. `filesystem.create_file`
 
 - **Purpose:** Create a new file in an existing supported directory.
-- **Required:** `name`, `location` (`desktop` or a safe path such as `desktop/NovaWorkspace`).
+- **Required:** `name`, `location` (absolute path or a safe alias path such as `desktop/NovaWorkspace`).
 - **Optional:** `content` (defaults to empty when omitted).
 - **Outputs:** `path`, `created`.
 - **Side effects:** Creates a real file and writes initial content. It will not overwrite an existing file.
@@ -33,16 +33,16 @@ This document describes the **16 primitives registered in `src/primitive_registr
 ### 3. `filesystem.delete`
 
 - **Purpose:** Delete a file or directory.
-- **Required:** `target` (safe Desktop-relative path such as `desktop/NovaWorkspace/file.txt`).
+- **Required:** `target` (an authorized absolute or alias path such as `desktop/NovaWorkspace/file.txt`).
 - **Optional:** `recursive` (defaults to `false`).
 - **Outputs:** `deleted_path`, `deleted`.
 - **Side effects:** Destructive and potentially irreversible. A non-empty directory is rejected unless recursive deletion is explicitly enabled.
-- **Limitations:** Only supported Desktop-relative targets; traversal components are rejected.
+- **Limitations:** Traversal components are rejected for aliases/relative resolution; recursive deletion remains opt-in.
 
 ### 4. `filesystem.move`
 
 - **Purpose:** Move a file or directory.
-- **Required:** `source`, `destination` (both safe Desktop-relative paths).
+- **Required:** `source`, `destination` (authorized absolute or alias paths).
 - **Outputs:** `path`, `moved`.
 - **Side effects:** Changes the resource's location. Existing destinations are rejected.
 - **Limitations:** Destination parent must exist; moving a directory into itself is rejected. The implementation uses filesystem rename semantics and may fail across volumes.
@@ -50,7 +50,7 @@ This document describes the **16 primitives registered in `src/primitive_registr
 ### 5. `filesystem.copy`
 
 - **Purpose:** Copy a file or directory.
-- **Required:** `source`, `destination` (safe Desktop-relative paths).
+- **Required:** `source`, `destination` (authorized absolute or alias paths).
 - **Optional:** `overwrite` (defaults to `false`).
 - **Outputs:** `path`, `copied`.
 - **Side effects:** Creates a copy. File overwrite must be explicitly requested; copying a directory to an existing destination is unsupported.
@@ -64,11 +64,19 @@ This document describes the **16 primitives registered in `src/primitive_registr
 - **Side effects:** Changes the resource name. Existing destination names are rejected.
 - **Limitations:** Does not move a resource to a different parent directory.
 
+### Filesystem discovery primitives
+
+- `filesystem.list_directory` lists up to 200 entries in one authorized directory. It returns the resolved directory and absolute entry paths.
+- `filesystem.search` recursively searches an authorized root for a case-insensitive name substring, optionally limited to files or directories, with a maximum of 1000 returned matches.
+- `filesystem.inspect` verifies an authorized path and reports its resolved path and resource type.
+
+Discovery does not guess a location. When multiple candidates remain viable, the planner must ask the user. Successful filesystem operations expose their resolved paths to later state-aware planning.
+
 ### 7. `application.launch`
 
 - **Purpose:** Launch an allowlisted application, optionally opening an existing file or folder.
 - **Required:** `application`.
-- **Optional:** `target` (must be an existing supported Desktop-relative path).
+- **Optional:** `target` (must be an existing authorized filesystem path).
 - **Outputs:** `launched`, `application`.
 - **Current allowlist:** Notepad, Calculator, Paint, Explorer, VS Code, Chrome, and Edge (including aliases implemented in `appExeFromName`).
 - **Side effects:** Starts a real Windows process. Success means the launch request was accepted, not that the application finished loading or opened the target successfully.
@@ -95,7 +103,7 @@ This document describes the **16 primitives registered in `src/primitive_registr
 ### 10. `text.write`
 
 - **Purpose:** Replace the contents of an existing text file.
-- **Required:** `target` (safe Desktop-relative file path), `content` (exact text).
+- **Required:** `target` (authorized existing file path), `content` (exact text).
 - **Outputs:** `written`, `target`.
 - **Side effects:** Opens the file with truncation, replacing its previous contents.
 - **Limitations:** Target must already exist and be a regular file. Despite the generic registry description, the current implementation does not write to arbitrary GUI text fields; use `keyboard.type` for GUI input.
@@ -153,12 +161,12 @@ This document describes the **16 primitives registered in `src/primitive_registr
 - `keyboard.type` and `keyboard.press` are global input events, so focus must be handled and verified carefully.
 - Keep registry schema, engine validation, tests, and this document synchronized when any primitive changes.
 
-
 ### 15. `browser.navigate`
 
 Navigates the Branch 3 controlled browser to a validated absolute HTTP(S) URL. Only `http` and `https` schemes are accepted; embedded URL credentials, whitespace/control characters, and non-web schemes are rejected. The operation waits for a DOM readiness condition before succeeding.
 
 Parameters:
+
 - `url` (required): absolute HTTP(S) URL.
 - `ready_condition` (required): `domcontentloaded`, `load`, `networkidle`, or `selector`.
 - `selector` (optional): CSS selector to wait for visibility; required when `ready_condition` is `selector`.
@@ -177,7 +185,6 @@ python -m pip install playwright
 ```
 
 The helper does not install browser binaries; it uses the installed Edge or Chrome channel. A readiness timeout fails the primitive and stops subsequent Branch 3 steps rather than continuing blindly. This browser agent is currently for Branch 3; Branch 2 code paths are unchanged.
-
 
 ## State-aware browser primitives (Branch 3)
 

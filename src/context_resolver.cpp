@@ -1,8 +1,35 @@
 #include "context_resolver.hpp"
-#include <iostream>
+#include "filesystem_path_policy.hpp"
 
 namespace
 {
+    bool createdResourcePath(
+        const PrimitiveOperation& operation,
+        string& value)
+    {
+        if (operation.name != "filesystem.create" ||
+            operation.parameters.name.empty() ||
+            operation.parameters.location.empty())
+        {
+            return false;
+        }
+
+        FilesystemPathPolicy policy;
+        const FilesystemPathResult parent =
+            policy.resolve(operation.parameters.location);
+        if (!parent.ok)
+        {
+            return false;
+        }
+
+        // The executor will authorize and create this target. Context
+        // resolution only carries a normalized path; it never manufactures one
+        // by concatenating strings.
+        value = (parent.path / operation.parameters.name)
+            .lexically_normal().string();
+        return true;
+    }
+
     bool resolveOutput(
         const MultiStepAction& sourceStep,
         const string& outputName,
@@ -40,10 +67,10 @@ namespace
             }
             if (outputName == "path")
             {
-                if (!parameters.location.empty() &&
-                    !parameters.name.empty())
+                string createdPath;
+                if (createdResourcePath(operation, createdPath))
                 {
-                    value = parameters.location + "/" + parameters.name;
+                    value = createdPath;
                     return true;
                 }
                 if (!parameters.target.empty())
@@ -334,27 +361,6 @@ bool ContextResolver::resolvePreviousStepContext(
     {
         return true;
     }
-    cout << "\n[CONTEXT DEBUG]" << endl;
-
-    cout << "Action: "
-        << action.id
-        << endl;
-
-    cout << "Description: "
-        << action.description
-        << endl;
-
-    cout << "Dependencies: ";
-
-    for (
-        const string& dependency
-        : action.dependencies
-    )
-    {
-        cout << dependency << " ";
-    }
-
-    cout << endl;
     // --------------------------------------------------------
     // Search dependency ancestry for the resource.
     // --------------------------------------------------------
@@ -368,10 +374,6 @@ bool ContextResolver::resolvePreviousStepContext(
             pendingDependencies.back();
 
         pendingDependencies.pop_back();
-            cout << "Checking dependency: "
-                << dependencyId
-                << endl;
-
         for (const MultiStepAction& previousStep : plan.steps)
         {
             if (previousStep.id != dependencyId)
@@ -409,8 +411,11 @@ bool ContextResolver::resolvePreviousStepContext(
                         continue;
                     }
 
-                    string resolvedPath =
-                        location + "/" + name;
+                    string resolvedPath;
+                    if (!createdResourcePath(operation, resolvedPath))
+                    {
+                        continue;
+                    }
 
                     ContextReference reference
                     {
@@ -595,8 +600,11 @@ bool ContextResolver::resolvePreviousStepContext(
                     }
                 }
 
-                string resolvedPath =
-                    location + "/" + name;
+                string resolvedPath;
+                if (!createdResourcePath(operation, resolvedPath))
+                {
+                    continue;
+                }
 
                 ContextReference reference
                 {
@@ -670,8 +678,5 @@ bool ContextResolver::resolvePreviousStepContext(
             }
         }
     }
-    cout << "No contextual resource resolved."
-     << endl;
-
     return false;
 }

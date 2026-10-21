@@ -22,6 +22,9 @@ int main() {
         {"filesystem.move",PrimitiveOperationType::FILESYSTEM_MOVE},
         {"filesystem.copy",PrimitiveOperationType::FILESYSTEM_COPY},
         {"filesystem.rename",PrimitiveOperationType::FILESYSTEM_RENAME},
+        {"filesystem.list_directory",PrimitiveOperationType::FILESYSTEM_LIST_DIRECTORY},
+        {"filesystem.search",PrimitiveOperationType::FILESYSTEM_SEARCH},
+        {"filesystem.inspect",PrimitiveOperationType::FILESYSTEM_INSPECT},
         {"application.launch",PrimitiveOperationType::APPLICATION_LAUNCH},
         {"application.close",PrimitiveOperationType::APPLICATION_CLOSE},
         {"application.focus",PrimitiveOperationType::APPLICATION_FOCUS},
@@ -31,11 +34,14 @@ int main() {
         {"mouse.click",PrimitiveOperationType::MOUSE_CLICK},
         {"mouse.move",PrimitiveOperationType::MOUSE_MOVE},
         {"browser.navigate",PrimitiveOperationType::BROWSER_NAVIGATE},
-        {"browser.wait_for",PrimitiveOperationType::BROWSER_WAIT_FOR}
+        {"browser.wait_for",PrimitiveOperationType::BROWSER_WAIT_FOR},
+        {"browser.observe",PrimitiveOperationType::BROWSER_OBSERVE},
+        {"browser.click",PrimitiveOperationType::BROWSER_CLICK},
+        {"browser.type",PrimitiveOperationType::BROWSER_TYPE}
     };
 
     const auto names=PrimitiveRegistry::getSupportedNames();
-    check("EXPECTED_PRIMITIVE_COUNT",names.size()==16);
+    check("EXPECTED_PRIMITIVE_COUNT",names.size()==22);
     check("STABLE_SORTED_NAMES",is_sorted(names.begin(),names.end()));
 
     bool types=true, schemas=true, metadata=true, uniqueFields=true, outputs=true;

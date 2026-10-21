@@ -1,7 +1,16 @@
 #include "context_resolver.hpp"
+#include "filesystem_path_policy.hpp"
 
 #include <iostream>
 using namespace std;
+
+namespace {
+string expectedDesktopChild(const string& name) {
+    FilesystemPathPolicy policy;
+    const FilesystemPathResult desktop = policy.resolve("desktop");
+    return desktop.ok ? (desktop.path / name).lexically_normal().string() : string{};
+}
+}
 
 int main()
 {
@@ -90,7 +99,7 @@ int main()
         const bool passedTest =
             result.status == ContextResolutionStatus::RESOLVED &&
             resolvedOperation.parameters.name == "Main.java" &&
-            resolvedOperation.parameters.location == "desktop/NovaProject" &&
+            resolvedOperation.parameters.location == expectedDesktopChild("NovaProject") &&
             resolvedOperation.parameters.content.empty() &&
             result.action.contextReferences.size() == 1 &&
             result.action.contextReferences.front().sourceStepId == "step_1";
@@ -316,7 +325,7 @@ int main()
         bool correctValue =
             referenceFound &&
             plan.steps[1].contextReferences[0].resolvedValue ==
-                "desktop/MyProject";
+                expectedDesktopChild("MyProject");
 
         bool passedTestFinal =
             passedTest &&
@@ -531,7 +540,7 @@ int main()
             result.resolvedContext[
                 "Create Main.java in the project directory"
             ] ==
-                "desktop/MyProject";
+                expectedDesktopChild("MyProject");
 
         cout << endl;
 
