@@ -38,6 +38,7 @@ add_executable(Nova
     src/dependency_resolver.cpp
     src/context_resolver.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/plan_validator.cpp
     src/primitive_execution_engine.cpp
     src/multi_step_executor.cpp
@@ -216,6 +217,13 @@ add_executable(FilesystemPathPolicyTest
 target_include_directories(FilesystemPathPolicyTest PRIVATE src)
 target_link_libraries(FilesystemPathPolicyTest PRIVATE shell32 ole32)
 
+add_executable(FilesystemLocationResolverTest
+    src/filesystem_location_resolver_test.cpp
+    src/filesystem_location_resolver.cpp
+)
+target_include_directories(FilesystemLocationResolverTest PRIVATE src)
+target_link_libraries(FilesystemLocationResolverTest PRIVATE shell32 ole32)
+
 add_executable(ContextResolverTest
     src/context_resolver_test.cpp
     src/context_resolver.cpp
@@ -252,6 +260,7 @@ add_executable(
     src/primitive_execution_engine_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 target_link_libraries(PrimitiveExecutionEngineTest PRIVATE shell32 ole32 psapi user32 winhttp nlohmann_json::nlohmann_json)
@@ -262,6 +271,7 @@ add_executable(
     src/multi_step_executor.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 
     src/multistep_pipeline.cpp
@@ -332,6 +342,7 @@ add_executable(
     src/filesystem_creation_group_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 
@@ -343,6 +354,7 @@ add_executable(
     src/filesystem_manipulation_group_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 target_include_directories(FilesystemManipulationGroupTest PRIVATE src)
@@ -353,6 +365,7 @@ add_executable(
     src/filesystem_discovery_group_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 target_include_directories(FilesystemDiscoveryGroupTest PRIVATE src)
@@ -363,6 +376,7 @@ add_executable(
     src/application_lifecycle_group_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 target_include_directories(ApplicationLifecycleGroupTest PRIVATE src)
@@ -373,6 +387,7 @@ add_executable(
     src/text_keyboard_group_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 target_include_directories(TextKeyboardGroupTest PRIVATE src)
@@ -383,6 +398,7 @@ add_executable(
     src/mouse_group_test.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
 )
 target_include_directories(MouseGroupTest PRIVATE src)
@@ -399,6 +415,7 @@ add_executable(Branch3RuntimeIntegrationTest
     src/primitive_registry.cpp
     src/primitive_execution_engine.cpp
     src/filesystem_path_policy.cpp
+    src/filesystem_location_resolver.cpp
     src/application_resolver.cpp
     src/llm_client.cpp
 )

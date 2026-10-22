@@ -5,6 +5,7 @@
 #include <shlobj.h>
 #include "primitive_execution_engine.hpp"
 #include "filesystem_path_policy.hpp"
+#include "filesystem_location_resolver.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -65,6 +66,7 @@ ExecutionFailureReason failureReasonForPath(FilesystemPathError error) {
         case FilesystemPathError::NONE:
         case FilesystemPathError::MALFORMED_PATH:
         case FilesystemPathError::UNKNOWN_LOCATION:
+        case FilesystemPathError::AMBIGUOUS_LOCATION:
         case FilesystemPathError::PROTECTED_LOCATION: return ExecutionFailureReason::UNSUPPORTED_ACTION;
     }
     return ExecutionFailureReason::UNSUPPORTED_ACTION;
@@ -76,6 +78,33 @@ bool resolvePathForOperation(const PrimitiveOperation& op, const string& raw,
     FilesystemPathPolicy policy;
     const FilesystemPathResult path = policy.resolve(raw);
     if (!path.ok) {
+        if (path.error == FilesystemPathError::UNKNOWN_LOCATION) {
+            const FilesystemLocationResult discovery = FilesystemLocationResolver{}.resolve(raw);
+            if (discovery.status == FilesystemLocationResolution::RESOLVED) {
+                const FilesystemPathResult authorization = policy.authorize(discovery.path, access);
+                if (authorization.ok) {
+                    resolved = authorization.path;
+                    return true;
+                }
+                failure = fail(op, failureReasonForPath(authorization.error),
+                    "Filesystem location was found but is not authorized (" +
+                    FilesystemPathPolicy::errorName(authorization.error) + "): " + authorization.message,
+                    false);
+                failure.failureCategory = FilesystemPathPolicy::errorName(authorization.error);
+                return false;
+            }
+            const FilesystemPathError discoveryError =
+                discovery.status == FilesystemLocationResolution::AMBIGUOUS
+                    ? FilesystemPathError::AMBIGUOUS_LOCATION : path.error;
+            failure = fail(op, failureReasonForPath(discoveryError),
+                "Filesystem keyword location search failed (" +
+                FilesystemPathPolicy::errorName(discoveryError) + "): " + discovery.message,
+                false);
+            failure.failureCategory = FilesystemPathPolicy::errorName(discoveryError);
+            for (const auto& candidate : discovery.candidates)
+                failure.discoveredPaths.push_back(candidate.path.string());
+            return false;
+        }
         failure = fail(op, failureReasonForPath(path.error),
             "Filesystem path resolution failed (" + FilesystemPathPolicy::errorName(path.error) + "): " + path.message,
             false);
@@ -733,13 +762,24 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
             if (!fs::is_directory(root)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Search root does not exist: " + root.string());
             vector<string> matches;
             const string needle = lower(op.parameters.query);
-            for (const auto& entry : fs::recursive_directory_iterator(root, fs::directory_options::skip_permission_denied)) {
-                const bool acceptedType = type == "any" || (type == "file" && entry.is_regular_file()) ||
-                    (type == "directory" && entry.is_directory());
+            error_code iteratorError;
+            fs::recursive_directory_iterator iterator(root,
+                fs::directory_options::skip_permission_denied, iteratorError);
+            const fs::recursive_directory_iterator end;
+            while (!iteratorError && iterator != end) {
+                const fs::directory_entry entry = *iterator;
+                error_code typeError;
+                const bool isFile = entry.is_regular_file(typeError);
+                typeError.clear();
+                const bool isDirectory = entry.is_directory(typeError);
+                const bool acceptedType = !typeError && (type == "any" ||
+                    (type == "file" && isFile) || (type == "directory" && isDirectory));
                 if (acceptedType && lower(entry.path().filename().string()).find(needle) != string::npos) {
                     matches.push_back(entry.path().string());
                     if (static_cast<int>(matches.size()) == limit) break;
                 }
+                iterator.increment(iteratorError);
+                if (iteratorError) iteratorError.clear(); // skip an unreadable child and continue.
             }
             return filesystemSuccess(op, "Found " + to_string(matches.size()) + " matching entries under: " + root.string(), root, matches);
         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }

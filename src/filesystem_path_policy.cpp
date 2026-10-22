@@ -117,6 +117,7 @@ std::string FilesystemPathPolicy::errorName(FilesystemPathError error) {
         case FilesystemPathError::NONE: return "none";
         case FilesystemPathError::MALFORMED_PATH: return "malformed_path";
         case FilesystemPathError::UNKNOWN_LOCATION: return "unknown_location";
+        case FilesystemPathError::AMBIGUOUS_LOCATION: return "ambiguous_location";
         case FilesystemPathError::NOT_FOUND: return "not_found";
         case FilesystemPathError::ACCESS_DENIED: return "access_denied";
         case FilesystemPathError::PROTECTED_LOCATION: return "protected_location";

@@ -1,6 +1,3 @@
-#include <windows.h>
-#include <shlobj.h>
-
 #include "branch3_runtime.hpp"
 
 #include <nlohmann/json.hpp>
@@ -16,14 +13,6 @@ using namespace std;
 using nlohmann::json;
 namespace fs = std::filesystem;
 
-static fs::path getDesktop() {
-    PWSTR raw = nullptr;
-    if (FAILED(SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &raw)) || !raw) return {};
-    fs::path result(raw);
-    CoTaskMemFree(raw);
-    return result;
-}
-
 int main() {
     int failures = 0;
     int checks = 0;
@@ -33,15 +22,10 @@ int main() {
         if (!condition) ++failures;
     };
 
-    const fs::path desktop = getDesktop();
-    if (desktop.empty()) {
-        cerr << "Desktop path unavailable; cannot run integration test.\n";
-        return 2;
-    }
-
     const string folder = "NovaBranch3RuntimeTest_" +
         to_string(chrono::steady_clock::now().time_since_epoch().count());
-    const fs::path workspace = desktop / folder;
+    const fs::path base = fs::temp_directory_path();
+    const fs::path workspace = base / folder;
     error_code ec;
     if (fs::exists(workspace)) {
         cerr << "Unique test workspace collision; refusing to touch existing path.\n";
@@ -70,13 +54,13 @@ int main() {
                  {"operations", json::array({
                      json{{"name", "filesystem.create"},
                           {"parameters", json{{"name", folder},
-                                              {"location", "desktop"}}}}
+                                              {"location", base.string()}}}}
                  })}},
             json{{"id", "step_2"},
                  {"operations", json::array({
                      json{{"name", "filesystem.create_file"},
                           {"parameters", json{{"name", "Main.java"},
-                                              {"location", "desktop/" + folder},
+                                              {"location", workspace.string()},
                                               {"content", "class Main {}\n"}}}}
                  })}}
         })}
@@ -93,8 +77,8 @@ int main() {
     int plannerCalls = 0;
     NextActionLLM planner = [&](const string&, const string&) {
         ++plannerCalls;
-        if (plannerCalls == 1) return LLMResponse{true, json{{"status","operation"},{"step_id","step_1"},{"operation",json{{"name","filesystem.create"},{"parameters",json{{"name",folder},{"location","desktop"}}}}},{"message","Create the workspace"}}.dump(), ""};
-        if (plannerCalls == 2) return LLMResponse{true, json{{"status","operation"},{"step_id","step_2"},{"operation",json{{"name","filesystem.create_file"},{"parameters",json{{"name","Main.java"},{"location","desktop/"+folder},{"content","class Main {}\n"}}}}},{"message","Create the file"}}.dump(), ""};
+        if (plannerCalls == 1) return LLMResponse{true, json{{"status","operation"},{"step_id","step_1"},{"operation",json{{"name","filesystem.create"},{"parameters",json{{"name",folder},{"location",base.string()}}}}},{"message","Create the workspace"}}.dump(), ""};
+        if (plannerCalls == 2) return LLMResponse{true, json{{"status","operation"},{"step_id","step_2"},{"operation",json{{"name","filesystem.create_file"},{"parameters",json{{"name","Main.java"},{"location",workspace.string()},{"content","class Main {}\n"}}}}},{"message","Create the file"}}.dump(), ""};
         return LLMResponse{true, json{{"status","done"},{"message","Test artifacts are created."}}.dump(), ""};
     };
 

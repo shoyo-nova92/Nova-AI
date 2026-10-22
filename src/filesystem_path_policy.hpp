@@ -20,6 +20,7 @@ enum class FilesystemPathError {
     NONE,
     MALFORMED_PATH,
     UNKNOWN_LOCATION,
+    AMBIGUOUS_LOCATION,
     NOT_FOUND,
     ACCESS_DENIED,
     PROTECTED_LOCATION,
