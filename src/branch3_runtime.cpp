@@ -9,6 +9,7 @@
 #include <sstream>
 #include <utility>
 #include <string>
+#include <vector>
 
 namespace {
 std::string liveCatalog() {
@@ -60,6 +61,102 @@ bool browserObservationNeeded(const MultiStepPlan& guide) {
             description.find("https://") != std::string::npos) return true;
     }
     return false;
+}
+
+std::string expectedCreatedFolderName(const std::string& description) {
+    const std::string normalized = lower(description);
+    const std::vector<std::string> prefixes = {
+        "create folder '", "create directory '", "create a folder named '",
+        "create a directory named '", "create folder \"", "create directory \"",
+        "create a folder named \"", "create a directory named \""
+    };
+    for (const auto& prefix : prefixes) {
+        const auto start = normalized.find(prefix);
+        if (start == std::string::npos) continue;
+        const std::size_t valueStart = start + prefix.size();
+        const char quote = prefix.back();
+        const auto end = description.find(quote, valueStart);
+        if (end != std::string::npos && end > valueStart)
+            return description.substr(valueStart, end - valueStart);
+    }
+
+    // Fallback for a decomposer that describes the intended target as a path.
+    const auto at = normalized.find(" at ");
+    if (at != std::string::npos) {
+        std::string path = description.substr(at + 4);
+        while (!path.empty() && (path.back() == '.' || path.back() == ',' ||
+                                 path.back() == ';' || path.back() == ' ')) path.pop_back();
+        const auto separator = path.find_last_of("/\\");
+        if (separator != std::string::npos && separator + 1 < path.size())
+            return path.substr(separator + 1);
+    }
+    return {};
+}
+
+std::vector<std::string> expectedParentLocationTokens(const std::string& description) {
+    const std::string normalized = lower(description);
+    const auto at = normalized.find(" at ");
+    if (at == std::string::npos) return {};
+    std::string path = description.substr(at + 4);
+    while (!path.empty() && (path.back() == '.' || path.back() == ',' ||
+                             path.back() == ';' || path.back() == ' ')) path.pop_back();
+    const auto separator = path.find_last_of("/\\");
+    if (separator == std::string::npos) return {};
+    path.resize(separator);
+
+    std::vector<std::string> tokens;
+    std::string token;
+    auto flush = [&]() {
+        if (!token.empty()) {
+            tokens.push_back(lower(token));
+            token.clear();
+        }
+    };
+    for (unsigned char c : path) {
+        if (std::isalnum(c)) token.push_back(static_cast<char>(std::tolower(c)));
+        else flush();
+    }
+    flush();
+
+    auto alias = tokens.end();
+    for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+        if (*it == "desktop" || *it == "documents" || *it == "downloads")
+            alias = it;
+    }
+    if (alias != tokens.end()) {
+        tokens.erase(tokens.begin(), alias + 1);
+    } else if (tokens.size() > 3) {
+        // Absolute paths may not contain a known-folder alias. Retain the
+        // destination's trailing path context, not machine/user-name tokens.
+        tokens.erase(tokens.begin(), tokens.end() - 3);
+    }
+    return tokens;
+}
+
+bool locationContainsExpectedTokens(const std::string& location,
+                                    const std::vector<std::string>& expected) {
+    std::vector<std::string> actual;
+    std::string token;
+    auto flush = [&]() {
+        if (!token.empty()) {
+            actual.push_back(lower(token));
+            token.clear();
+        }
+    };
+    for (unsigned char c : location) {
+        if (std::isalnum(c)) token.push_back(static_cast<char>(std::tolower(c)));
+        else flush();
+    }
+    flush();
+
+    for (const auto& clue : expected) {
+        const bool found = std::any_of(actual.begin(), actual.end(), [&](const std::string& value) {
+            return value == clue || (clue.size() >= 3 && value.size() >= 3 &&
+                (value.starts_with(clue) || clue.starts_with(value)));
+        });
+        if (!found) return false;
+    }
+    return true;
 }
 
 std::string operationSignature(const PrimitiveOperation& operation,
@@ -173,6 +270,34 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
             return result;
         }
         const PrimitiveOperation& operation = mapped.steps.front().operations.front();
+
+        // A missing destination is not permission to manufacture its ancestors.
+        // The create target must match the folder explicitly requested by the
+        // selected logical step; location path segments are not new targets.
+        if (operation.type == PrimitiveOperationType::FILESYSTEM_CREATE &&
+            operation.name == "filesystem.create") {
+            const std::string expected = expectedCreatedFolderName(sourceStep->description);
+            const auto expectedParent = expectedParentLocationTokens(sourceStep->description);
+            const bool targetMismatch = !expected.empty() &&
+                lower(expected) != lower(operation.parameters.name);
+            const bool locationMismatch = !expectedParent.empty() &&
+                !locationContainsExpectedTokens(operation.parameters.location, expectedParent);
+            if (targetMismatch || locationMismatch) {
+                const std::string category = "planner_target_mismatch";
+                state.recordFailure(operationSignature(operation, category));
+                std::string diagnostic = "Rejected filesystem.create for '" +
+                    operation.parameters.name + "' at '" + operation.parameters.location + "'.";
+                if (targetMismatch)
+                    diagnostic += " The selected step requests folder '" + expected + "'.";
+                if (locationMismatch)
+                    diagnostic += " The destination does not contain the parent-location clues from the selected step.";
+                diagnostic += " Resolve the existing destination; do not create missing path ancestors.";
+                state.addHistory(diagnostic);
+                result.stateLog += "[VALIDATION] rejected: " + diagnostic + "\n";
+                continue;
+            }
+        }
+
         if (state.repeatedFailure(operationKey(operation))) {
             result.message = "Branch 3 blocked: the same operation with the same normalized arguments and failure category failed three times consecutively."; return result;
         }

@@ -77,40 +77,72 @@ bool resolvePathForOperation(const PrimitiveOperation& op, const string& raw,
                              ExecutionResult& failure) {
     FilesystemPathPolicy policy;
     const FilesystemPathResult path = policy.resolve(raw);
-    if (!path.ok) {
-        if (path.error == FilesystemPathError::UNKNOWN_LOCATION) {
-            const FilesystemLocationResult discovery = FilesystemLocationResolver{}.resolve(raw);
-            if (discovery.status == FilesystemLocationResolution::RESOLVED) {
-                const FilesystemPathResult authorization = policy.authorize(discovery.path, access);
-                if (authorization.ok) {
-                    resolved = authorization.path;
-                    return true;
-                }
-                failure = fail(op, failureReasonForPath(authorization.error),
-                    "Filesystem location was found but is not authorized (" +
-                    FilesystemPathPolicy::errorName(authorization.error) + "): " + authorization.message,
-                    false);
-                failure.failureCategory = FilesystemPathPolicy::errorName(authorization.error);
-                return false;
+
+    const bool expectsDirectory =
+        op.type == PrimitiveOperationType::FILESYSTEM_CREATE ||
+        op.type == PrimitiveOperationType::FILESYSTEM_CREATE_FILE ||
+        op.type == PrimitiveOperationType::FILESYSTEM_LIST_DIRECTORY ||
+        op.type == PrimitiveOperationType::FILESYSTEM_SEARCH;
+
+    std::error_code locationExistsError;
+    const bool locationExists = path.ok && fs::exists(path.path, locationExistsError);
+    const bool resolvedDirectoryMissing =
+        path.ok && expectsDirectory && !locationExists && !locationExistsError;
+
+    auto resolveByKeywords = [&]() -> bool {
+        const FilesystemLocationResult discovery = FilesystemLocationResolver{}.resolve(raw);
+        if (discovery.status == FilesystemLocationResolution::RESOLVED) {
+            const FilesystemPathResult authorization = policy.authorize(discovery.path, access);
+            if (authorization.ok) {
+                resolved = authorization.path;
+                return true;
             }
-            const FilesystemPathError discoveryError =
-                discovery.status == FilesystemLocationResolution::AMBIGUOUS
-                    ? FilesystemPathError::AMBIGUOUS_LOCATION : path.error;
-            failure = fail(op, failureReasonForPath(discoveryError),
-                "Filesystem keyword location search failed (" +
-                FilesystemPathPolicy::errorName(discoveryError) + "): " + discovery.message,
+            failure = fail(op, failureReasonForPath(authorization.error),
+                "Filesystem location was found but is not authorized (" +
+                FilesystemPathPolicy::errorName(authorization.error) + "): " + authorization.message,
                 false);
-            failure.failureCategory = FilesystemPathPolicy::errorName(discoveryError);
-            for (const auto& candidate : discovery.candidates)
-                failure.discoveredPaths.push_back(candidate.path.string());
+            failure.failureCategory = FilesystemPathPolicy::errorName(authorization.error);
+            failure.resolvedPath = authorization.path.string();
             return false;
         }
+
+        FilesystemPathError discoveryError = FilesystemPathError::NOT_FOUND;
+        if (discovery.status == FilesystemLocationResolution::AMBIGUOUS)
+            discoveryError = FilesystemPathError::AMBIGUOUS_LOCATION;
+        else if (discovery.status == FilesystemLocationResolution::INCOMPLETE)
+            discoveryError = FilesystemPathError::IO_ERROR;
+
+        failure = fail(op, failureReasonForPath(discoveryError),
+            "Filesystem keyword location search failed (" +
+            (discovery.status == FilesystemLocationResolution::INCOMPLETE
+                ? string("incomplete_search")
+                : FilesystemPathPolicy::errorName(discoveryError)) +
+            "): " + discovery.message, false);
+        failure.failureCategory = discovery.status == FilesystemLocationResolution::INCOMPLETE
+            ? "incomplete_search" : FilesystemPathPolicy::errorName(discoveryError);
+        for (const auto& candidate : discovery.candidates)
+            failure.discoveredPaths.push_back(candidate.path.string());
+        return false;
+    };
+
+    if (!path.ok) {
+        if (path.error == FilesystemPathError::UNKNOWN_LOCATION)
+            return resolveByKeywords();
+
         failure = fail(op, failureReasonForPath(path.error),
             "Filesystem path resolution failed (" + FilesystemPathPolicy::errorName(path.error) + "): " + path.message,
             false);
         failure.failureCategory = FilesystemPathPolicy::errorName(path.error);
         return false;
     }
+
+    // A syntactically valid alias can still point at a stale or nonexistent
+    // directory (for example, a Desktop redirected to a removed sync folder).
+    // For directory-location operations, search for the existing destination
+    // before allowing the planner to treat that missing path as a new parent.
+    if (resolvedDirectoryMissing)
+        return resolveByKeywords();
+
     const FilesystemPathResult authorization = policy.authorize(path.path, access);
     if (!authorization.ok) {
         failure = fail(op, failureReasonForPath(authorization.error),
@@ -1044,8 +1076,16 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op) 
 
 
     if (op.type == PrimitiveOperationType::TEXT_WRITE && op.name == "text.write") {
+        // LLM-generated file targets sometimes include a trailing separator,
+        // which turns a regular filename into a directory-like path on Windows.
+        string targetText = op.parameters.target;
+        while (targetText.size() > 1 &&
+               (targetText.back() == '\\' || targetText.back() == '/') &&
+               !(targetText.size() == 3 && targetText[1] == ':')) {
+            targetText.pop_back();
+        }
         fs::path target; ExecutionResult pathFailure;
-        if (!resolvePathForOperation(op, op.parameters.target, FilesystemAccess::WRITE, target, pathFailure)) return pathFailure;
+        if (!resolvePathForOperation(op, targetText, FilesystemAccess::WRITE, target, pathFailure)) return pathFailure;
         try {
             if (!fs::is_regular_file(target))
                 return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,

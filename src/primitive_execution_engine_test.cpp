@@ -1,5 +1,7 @@
 #include <iostream>
 #include <filesystem>
+#include <windows.h>
+#include <shlobj.h>
 
 #include "primitive_execution_engine.hpp"
 
@@ -10,12 +12,17 @@ int main()
     cout << "=== PrimitiveExecutionEngine Test ===" << endl;
 
     PrimitiveExecutionEngine engine;
-    const filesystem::path testFolder =
-    filesystem::path(
-        "C:/Users/shour/OneDrive/Desktop/NovaPrimitiveTest"
-    );
+    PWSTR desktopRaw = nullptr;
+    if (FAILED(SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &desktopRaw)) ||
+        desktopRaw == nullptr) {
+        cerr << "[FAIL] Could not resolve the Windows Desktop known folder." << endl;
+        return 1;
+    }
+    const filesystem::path desktop(desktopRaw);
+    CoTaskMemFree(desktopRaw);
+    const filesystem::path testFolder = desktop / "NovaPrimitiveTest";
 
-filesystem::remove_all(testFolder);
+    filesystem::remove_all(testFolder);
 
     const string folderName = "NovaPrimitiveTest";
     const string fileName = "Main.java";

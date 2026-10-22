@@ -30,6 +30,11 @@ int main() {
           resolved.status == FilesystemLocationResolution::RESOLVED &&
               fs::equivalent(resolved.path, intended, error), failed);
 
+    const auto desktopHint = resolver.resolve("Desktop/projects/sem 3", {root});
+    check("DESKTOP_ALIAS_IS_A_SEARCH_HINT_NOT_A_REQUIRED_PATH_SEGMENT",
+          desktopHint.status == FilesystemLocationResolution::RESOLVED &&
+              fs::equivalent(desktopHint.path, intended, error), failed);
+
     const auto ambiguous = resolver.resolve("sem 3", {root});
     check("AMBIGUOUS_KEYWORDS_ARE_NOT_GUESSED",
           ambiguous.status == FilesystemLocationResolution::AMBIGUOUS &&

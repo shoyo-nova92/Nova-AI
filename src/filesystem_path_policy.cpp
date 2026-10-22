@@ -32,13 +32,37 @@ bool sameOrDescendant(const fs::path& path, const fs::path& root) {
     return true;
 }
 
-fs::path knownFolder(REFKNOWNFOLDERID id) {
+fs::path queryKnownFolder(REFKNOWNFOLDERID id) {
     PWSTR raw = nullptr;
     const HRESULT result = SHGetKnownFolderPath(id, 0, nullptr, &raw);
     if (FAILED(result) || raw == nullptr) return {};
     fs::path path(raw);
     CoTaskMemFree(raw);
     return path;
+}
+
+fs::path knownFolder(REFKNOWNFOLDERID id) {
+    // Prefer Windows' configured known-folder location, including a deliberate
+    // user redirection. If that location no longer exists (for example, after
+    // removing a cloud-sync folder), fall back to the standard folder under
+    // the live Windows user profile instead of continuing to target a stale path.
+    const fs::path configured = queryKnownFolder(id);
+    std::error_code error;
+    if (!configured.empty() && fs::is_directory(configured, error) && !error)
+        return configured;
+
+    const fs::path profile = queryKnownFolder(FOLDERID_Profile);
+    if (profile.empty()) return configured;
+
+    fs::path fallback;
+    if (IsEqualGUID(id, FOLDERID_Desktop)) fallback = profile / L"Desktop";
+    else if (IsEqualGUID(id, FOLDERID_Documents)) fallback = profile / L"Documents";
+    else if (IsEqualGUID(id, FOLDERID_Downloads)) fallback = profile / L"Downloads";
+    else return configured;
+
+    error.clear();
+    if (fs::is_directory(fallback, error) && !error) return fallback;
+    return configured.empty() ? fallback : configured;
 }
 } // namespace
 

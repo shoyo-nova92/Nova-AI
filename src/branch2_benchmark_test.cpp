@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <windows.h>
+#include <shlobj.h>
 
 using namespace std;
 
@@ -94,10 +96,15 @@ int main()
         the benchmark starts. We create them here so the benchmark
         is repeatable.
     */
-    const filesystem::path desktop =
-        filesystem::path(getenv("USERPROFILE"))
-        / "OneDrive"
-        / "Desktop";
+    PWSTR desktopRaw = nullptr;
+    if (FAILED(SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &desktopRaw)) ||
+        desktopRaw == nullptr)
+    {
+        cerr << "[FAIL] Could not resolve the Windows Desktop known folder." << endl;
+        return 1;
+    }
+    const filesystem::path desktop(desktopRaw);
+    CoTaskMemFree(desktopRaw);
 
     filesystem::create_directories(desktop / folderA);
     filesystem::create_directories(desktop / folderB);
