@@ -41,6 +41,7 @@ C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/DiscoveryDecisio
 C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/PostconditionContractTest.dir
 C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/RecoveryGuidanceTest.dir
 C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/ArtifactDependencyTest.dir
+C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/MultiScopeDiscoveryTest.dir
 C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/test.dir
 C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/edit_cache.dir
 C:/Users/shour/Desktop/Nova/build-runtime-supervisor/CMakeFiles/rebuild_cache.dir

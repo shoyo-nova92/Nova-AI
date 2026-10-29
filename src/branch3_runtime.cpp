@@ -4,6 +4,7 @@
 #include "artifact_binding.hpp"
 #include "semantic_evidence.hpp"
 #include "predicate_registry.hpp"
+#include "discovery_scope.hpp"
 #include "filesystem_path_policy.hpp"
 #include "filesystem_location_resolver.hpp"
 #include "primitive_registry.hpp"
@@ -53,14 +54,7 @@ std::vector<wf::Step> workflowSteps(const MultiStepPlan& plan) {
             auto proof=json::parse(source.semanticPostconditionJson);std::string error;
             // Known-folder clues are resolved by the host, not reconstructed by a planner.
             if(proof.value("source",std::string{})=="filesystem") {
-                auto bindRoot=[&](json& object) {
-                    if(object.contains("search_root")) {
-                        const auto root=artifactParent(object["search_root"].get<std::string>());
-                        if(root.empty())throw std::invalid_argument("Cannot resolve search root for "+source.id);
-                        object["search_root"]=Utf8::path(root);
-                    }
-                };
-                bindRoot(proof);if(proof.contains("match"))bindRoot(proof["match"]);
+                proof=DiscoveryScope::bind(std::move(proof));
             }
             step.postconditions=SemanticEvidence::compile(proof,error);
             if(step.postconditions.empty())throw std::invalid_argument("Invalid postcondition for "+source.id+": "+error);
@@ -79,6 +73,10 @@ std::vector<wf::Step> workflowSteps(const MultiStepPlan& plan) {
         steps.push_back(std::move(step));
     }
     return steps;
+}
+json discoveryScope(const wf::Step* step) {
+    if(step)for(const auto& post:step->postconditions)if(post.kind==wf::PredicateKind::SEMANTIC && post.value.value("source",std::string{})=="filesystem" && PredicateRegistry::kindOf(post.value)=="search_result_matches")return PredicateRegistry::constraints(post.value);
+    return json::object();
 }
 const MultiStepAction& originalStep(const MultiStepPlan& plan,const std::string& id) {
     for(const auto& step:plan.steps)if(step.id==id)return step;
@@ -467,6 +465,12 @@ Branch3RuntimeResult Branch3Runtime::answerUser(const std::string& questionId,co
         }else {const auto field=action=="ADD_LOCATION_HINT"?"value":"information";keys.insert(field);valid=resolution.contains(field) && resolution[field].is_string() && !resolution[field].get<std::string>().empty() && resolution[field].get<std::string>().size()<=4096;}
         for(const auto& [key,value]:resolution.items())if(!keys.contains(key))valid=false;
         if(!valid){s.result.message="That answer did not produce valid structured guidance; the active question is retained.";return s.result;}
+        if(action=="ADD_LOCATION_HINT") {
+            const auto clue=resolution["value"].get<std::string>();const auto scope=discoveryScope(s.kernel->graph.find(pending.stepId));
+            if(DiscoveryScope::malformed(clue) || DiscoveryScope::required(scope) && !DiscoveryScope::roots(scope).empty() && !DiscoveryScope::permits(scope,DiscoveryScope::resolve(clue))) {
+                s.result.message="That location is malformed or outside the required discovery scope. The active question is retained.";return s.result;
+            }
+        }
         if(unavailable) {
             beginEpisode({{"decision",action}});recoveryTransition(pending.stepId,"FAILED","unsupported_capability");
             s.result.message="The suggested method requires an unregistered capability. It was not executed. Suggest a method using the available registry or provide another clue.";return s.result;
@@ -560,6 +564,34 @@ Branch3RuntimeResult Branch3Runtime::advanceImpl() {
         }
         return evidence;
     };
+    // Enumerate declared safe alternatives within the same READY step. Retain
+    // the registered search shape; only its canonical location changes.
+    auto nextScopeDecision=[&](const std::string& id,bool allowInitial=false)->std::optional<NextActionDecision> {
+        const auto scope=discoveryScope(kernel.graph.find(id));
+        auto roots=DiscoveryScope::roots(scope);auto& recovery=s.strategies[id];
+        if(recovery.attempts.size()>=recoveryPolicy_.totalAttempts)return {};
+        if(!DiscoveryScope::required(scope))for(const auto& hint:recovery.hints)
+            if(hint.value("decision",std::string{})=="ADD_LOCATION_HINT")roots.push_back(hint.at("value"));
+        std::optional<NextActionDecision> prior;
+        for(const auto& fact:kernel.facts.all())if(fact.stepId==id && fact.operation=="filesystem.search" && s.searchDecisions.contains(fact.id))prior=s.searchDecisions.at(fact.id);
+        if(!prior && allowInitial && scope.contains("query") && roots.size()>1) {
+            json parameters=json::object();
+            for(const auto field:{"query","entry_type","extension","modified_within_days"})if(scope.contains(field))parameters[field]=scope[field];
+            prior=NextActionDecision{};prior->operationJson=json{{"name","filesystem.search"},{"parameters",parameters}}.dump();
+        }
+        if(!prior)return {};
+        for(const auto& root:roots) {
+            const auto path=DiscoveryScope::resolve(root.get<std::string>());if(path.empty())continue;
+            bool tried=false;
+            for(const auto& attempt:recovery.attempts)if(attempt.value("strategy",std::string{})=="filesystem.search" && attempt.contains("clues"))
+                tried |= SemanticEvidence::samePath(DiscoveryScope::resolve(attempt["clues"].value("location",std::string{})),path);
+            if(tried)continue;
+            auto operation=json::parse(prior->operationJson);operation["parameters"]["location"]=path;
+            prior->operationJson=operation.dump();prior->status="operation";prior->stepId=id;
+            prior->message="Try the next retained discovery scope";return prior;
+        }
+        return {};
+    };
     enum class DeclaredState { WAITING_FOR_OPERATION, VERIFIED, EVIDENCE_UNAVAILABLE };
     auto evaluateDeclared=[&](const std::string& id) {
         const auto* step=kernel.graph.find(id);
@@ -589,7 +621,7 @@ Branch3RuntimeResult Branch3Runtime::advanceImpl() {
         bool emptySearch=false;
         for(const auto& fact:kernel.facts.all())if(fact.current && fact.stepId==id && fact.operation=="filesystem.search" && fact.facts.contains("results") && fact.facts["results"].is_array())emptySearch=fact.facts["results"].empty();
         if(recovery.active && recovery.goalClass=="filesystem_discovery" && emptySearch) {
-            if(recovery.canTry(recoveryPolicy_))return DeclaredState::WAITING_FOR_OPERATION;
+            if(recovery.canTry(recoveryPolicy_) || nextScopeDecision(id))return DeclaredState::WAITING_FOR_OPERATION;
             askStrategyGuidance(id,"no_confident_search_candidate");return DeclaredState::EVIDENCE_UNAVAILABLE;
         }
         kernel.recordFailure(id,{RuntimeCause::EVIDENCE_UNAVAILABLE,"declared_postcondition_unmet",error,true});
@@ -675,10 +707,11 @@ Branch3RuntimeResult Branch3Runtime::advanceImpl() {
         const auto declared=evaluateDeclared(id);
         if(declared==DeclaredState::VERIFIED){announce();continue;}
         if(declared==DeclaredState::EVIDENCE_UNAVAILABLE)return result;
-        if(s.strategies[id].active && !s.strategies[id].canTry(recoveryPolicy_))return askStrategyGuidance(id,"strategy_budget_exhausted");
-        auto decision=s.resumeDecision?*s.resumeDecision:planner_.choose(s.goal,result.decomposedPlan,s.state.render()+ledger(kernel)+"\nSTRATEGY_RECOVERY_CONTEXT:\n"+Utf8::dump(s.strategies[id].context(recoveryPolicy_),"strategy.context"),catalog,id);
+        const auto scopeDecision=nextScopeDecision(id);
+        if(s.strategies[id].active && !s.strategies[id].canTry(recoveryPolicy_) && !scopeDecision)return askStrategyGuidance(id,"strategy_budget_exhausted");
+        auto decision=s.resumeDecision?*s.resumeDecision:scopeDecision?*scopeDecision:planner_.choose(s.goal,result.decomposedPlan,s.state.render()+ledger(kernel)+"\nDISCOVERY_SCOPE:\n"+discoveryScope(selected).dump()+"\nSTRATEGY_RECOVERY_CONTEXT:\n"+Utf8::dump(s.strategies[id].context(recoveryPolicy_),"strategy.context"),catalog,id);
         s.resumeDecision.reset();
-        if(transient(decision.failureCategory))decision=planner_.choose(s.goal,result.decomposedPlan,s.state.render()+ledger(kernel)+"\nSTRATEGY_RECOVERY_CONTEXT:\n"+Utf8::dump(s.strategies[id].context(recoveryPolicy_),"strategy.context"),catalog,id);
+        if(transient(decision.failureCategory))decision=planner_.choose(s.goal,result.decomposedPlan,s.state.render()+ledger(kernel)+"\nDISCOVERY_SCOPE:\n"+discoveryScope(selected).dump()+"\nSTRATEGY_RECOVERY_CONTEXT:\n"+Utf8::dump(s.strategies[id].context(recoveryPolicy_),"strategy.context"),catalog,id);
         if(decision.failureCategory!=LLMFailureCategory::NONE) {
             kernel.recordFailure(id,{dependencyCause(decision.failureCategory),llmFailureName(decision.failureCategory),decision.message,true});
             return finish(RuntimeOutcome::EXTERNAL_UNAVAILABLE,dependencyCause(decision.failureCategory),decision.message);
@@ -689,6 +722,7 @@ Branch3RuntimeResult Branch3Runtime::advanceImpl() {
             if(++s.invalidDecisions[id]>=3){kernel.recordFailure(id,{RuntimeCause::VALIDATION_ERROR,"invalid_planner_decision",message,true});return true;}return false;
         };
         if(decision.status=="ask_user" || decision.status=="blocked") {
+            if(auto alternative=nextScopeDecision(id,true)) {s.resumeDecision=*alternative;continue;}
             auto& recovery=s.strategies[id];
             if(recovery.active) {
                 if(recovery.attempts.size()<2 && recovery.canTry(recoveryPolicy_) && ++recovery.rejectedPlans<2) {
@@ -752,6 +786,15 @@ Branch3RuntimeResult Branch3Runtime::advanceImpl() {
             if(s.strategies[id].active)return askStrategyGuidance(id,"unsupported_strategy");
             kernel.recordFailure(id,{RuntimeCause::UNSUPPORTED_CAPABILITY,"unsupported_capability",message,false});
             return finish(RuntimeOutcome::NEEDS_USER,RuntimeCause::UNSUPPORTED_CAPABILITY,message);
+        }
+        if(proposed.is_object() && (proposed.value("name",std::string{})=="filesystem.search" || proposed.value("name",std::string{})=="filesystem.list_directory") && proposed.contains("parameters") && proposed["parameters"].contains("location") && proposed["parameters"]["location"].is_string()) {
+            const auto location=DiscoveryScope::resolve(proposed["parameters"]["location"].get<std::string>());
+            const auto scope=discoveryScope(selected);
+            if(location.empty() || !DiscoveryScope::permits(scope,location)) {
+                const std::string message="Discovery operation needs a resolved location within the declared required scope.";
+                if(reject(message))return askStrategyGuidance(id,"discovery_scope_unresolved_or_disallowed");continue;
+            }
+            proposed["parameters"]["location"]=location;decision.operationJson=proposed.dump();
         }
         auto mapped=mapper_.mapStep(source,decision.operationJson);
         if(!mapped.valid || mapped.steps.empty() || mapped.steps.front().operations.size()!=1) {
@@ -951,7 +994,7 @@ Branch3RuntimeResult Branch3Runtime::advanceImpl() {
         }
         const auto declaredAfterOperation=evaluateDeclared(id);
         if(declaredAfterOperation==DeclaredState::EVIDENCE_UNAVAILABLE)return result;
-        if(declaredAfterOperation!=DeclaredState::VERIFIED && recovery.active && !recovery.canTry(recoveryPolicy_))return askStrategyGuidance(id,recovery.blocker);
+        if(declaredAfterOperation!=DeclaredState::VERIFIED && recovery.active && !recovery.canTry(recoveryPolicy_) && !nextScopeDecision(id))return askStrategyGuidance(id,recovery.blocker);
         announce();
     }
     if(const auto* step=kernel.next())return askStrategyGuidance(step->id,"planning_budget_exhausted");

@@ -14,7 +14,7 @@ inline const std::set<std::string> filesystemKinds={"path_exists","path_missing"
 inline const std::set<std::string> applicationKinds={"process_exists","window_exists","window_visible","window_title_contains","target_observed","foreground"};
 inline const std::set<std::string> artifactKinds={"directory_exists","file_content"};
 inline const std::map<std::string,std::string> browserFields={{"role","string"},{"text","string"},{"accessible_name","string"},{"href","string"},{"value","scalar"},{"enabled","boolean"},{"visible","boolean"}};
-inline const std::map<std::string,std::string> filesystemFields={{"path","string"},{"name","string"},{"name_contains","string"},{"extension","string"},{"entry_type","string"},{"parent_path","string"},{"search_root","string"},{"query","string"},{"search_complete","boolean"},{"modified_within_days","number"}};
+inline const std::map<std::string,std::string> filesystemFields={{"path","string"},{"name","string"},{"name_contains","string"},{"extension","string"},{"entry_type","string"},{"parent_path","string"},{"search_root","string"},{"search_roots","array"},{"root_semantics","string"},{"scope_strength","string"},{"scope_provenance","string"},{"query","string"},{"search_complete","boolean"},{"modified_within_days","number"}};
 inline const std::map<std::string,std::string> applicationFields={{"process_id","integer"},{"process_name","string"},{"window_handle","string"},{"target_path","string"}};
 inline std::string kindOf(const json& proof) {
     auto kind=proof.value("kind",std::string{});const auto prefix=proof.value("source",std::string{})+".";
@@ -45,9 +45,16 @@ inline bool validateSemantic(const json& proof,std::string& error) {
     for(const auto& [key,value]:match.items()) {
         if(!supported.contains(key))return invalid("Unsupported semantic match field: "+key);
         const auto type=supported.at(key);
-        if(type=="string"?!value.is_string():type=="boolean"?!value.is_boolean():type=="integer"?!value.is_number_integer():type=="number"?!value.is_number():!value.is_primitive())return invalid("Invalid typed semantic match field: "+key);
+        if(type=="array"?!value.is_array():type=="string"?!value.is_string():type=="boolean"?!value.is_boolean():type=="integer"?!value.is_number_integer():type=="number"?!value.is_number():!value.is_primitive())return invalid("Invalid typed semantic match field: "+key);
         if(proof.contains("match") && proof["match"].contains(key) && proof.contains(key) && proof["match"][key]!=proof[key])return invalid("Conflicting semantic match field: "+key);
         if(key=="modified_within_days" && (!std::isfinite(value.get<double>()) || value.get<double>()<0 || value.get<double>()>36500))return invalid("modified_within_days must be from 0 to 36500");
+        if(key=="search_roots") {
+            if(value.empty() || value.size()>16)return invalid("search_roots requires 1 to 16 individually declared roots");
+            for(const auto& root:value)if(!root.is_string() || root.get<std::string>().empty())return invalid("Each search root must be a non-empty string");
+        }
+        if(key=="root_semantics" && value!="ANY")return invalid("Only ANY root semantics is supported");
+        if(key=="scope_strength" && value!="REQUIRED" && value!="PREFERRED")return invalid("Invalid discovery scope strength");
+        if(key=="scope_provenance" && value!="USER_CONSTRAINT" && value!="USER_HINT" && value!="INFERRED")return invalid("Invalid discovery scope provenance");
         if(key=="entry_type" && value!="file" && value!="directory" && value!="other")return invalid("Invalid filesystem entry_type");
     }
     if(scalarKind(source,kind) && (!proof.contains("value") || !proof["value"].is_string() || proof["value"].get<std::string>().empty()))return invalid("Predicate requires a non-empty string value");
@@ -60,6 +67,9 @@ inline bool validateSemantic(const json& proof,std::string& error) {
             if(match.size()!=1 || !match.contains("path") || match["path"].get<std::string>().empty())return invalid("Filesystem path predicate requires only exact path");
         }else if(kind=="search_has_results" && !match.empty())return invalid("search_has_results accepts no additional constraints");
         else if(kind=="search_result_matches" && match.empty())return invalid("Search result predicate requires stable constraints");
+        if(match.contains("search_root") && match.contains("search_roots"))return invalid("Use search_root or search_roots, not both");
+        if(match.contains("search_roots") && match.value("root_semantics",std::string{})!="ANY")return invalid("search_roots requires root_semantics ANY");
+        if((match.contains("root_semantics") || match.contains("scope_strength") || match.contains("scope_provenance")) && !match.contains("search_root") && !match.contains("search_roots"))return invalid("Scope metadata requires discovery roots");
         if(match.contains("query") && match["query"].get<std::string>().empty())return invalid("query cannot be empty");
     }
     return true;
@@ -98,6 +108,10 @@ inline json catalog() {
                 if(kind=="path_exists" || kind=="path_missing")props={{"path",{{"type","string"},{"minLength",1}}}};
                 else if(kind=="search_has_results")props=json::object();
                 else {
+                    props["search_roots"]={{"type","array"},{"minItems",1},{"maxItems",16},{"items",{{"type","string"},{"minLength",1}}}};
+                    props["root_semantics"]={{"const","ANY"}};
+                    props["scope_strength"]={{"enum",json::array({"REQUIRED","PREFERRED"})},{"default","REQUIRED"}};
+                    props["scope_provenance"]={{"enum",json::array({"USER_CONSTRAINT","USER_HINT","INFERRED"})}};
                     props["modified_within_days"]={{"type","number"},{"minimum",0},{"maximum",36500}};
                     props["query"]={{"type","string"},{"minLength",1}};
                     props["entry_type"]={{"enum",json::array({"file","directory","other"})}};

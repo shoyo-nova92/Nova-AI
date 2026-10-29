@@ -38,3 +38,5 @@ add_test("FilesystemCreationOffline" "C:/Users/shour/Desktop/Nova/build-discover
 set_tests_properties("FilesystemCreationOffline" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/shour/Desktop/Nova/CMakeLists.txt;498;add_test;C:/Users/shour/Desktop/Nova/CMakeLists.txt;0;")
 add_test("FilesystemManipulationOffline" "C:/Users/shour/Desktop/Nova/build-discovery-decision/FilesystemManipulationGroupTest.exe" "--offline")
 set_tests_properties("FilesystemManipulationOffline" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/shour/Desktop/Nova/CMakeLists.txt;499;add_test;C:/Users/shour/Desktop/Nova/CMakeLists.txt;0;")
+add_test("MultiScopeDiscovery" "C:/Users/shour/Desktop/Nova/build-discovery-decision/MultiScopeDiscoveryTest.exe")
+set_tests_properties("MultiScopeDiscovery" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/shour/Desktop/Nova/CMakeLists.txt;505;add_test;C:/Users/shour/Desktop/Nova/CMakeLists.txt;0;")

@@ -88,13 +88,21 @@ bool underRoot(const std::string& path,const std::string& root) {
 bool searchMatches(const json& facts,const json& expected,std::string& error) {
     auto fail=[&](const std::string& reason){error=reason;return false;};
     // These constraints describe the enclosing search, not a candidate row.
-    for(const auto field:{"query","search_root","search_complete"})if(expected.contains(field)) {
+    for(const auto field:{"query","search_complete"})if(expected.contains(field)) {
         if(!facts.contains(field))return fail(std::string("Missing search metadata: ")+field);
         if(std::string(field)=="query") {
             if(!facts[field].is_string() || FilesystemRanking::tokens(facts[field].get<std::string>())!=FilesystemRanking::tokens(expected[field].get<std::string>()))return fail("Search query does not match the declared query");
-        }else if(std::string(field)=="search_root") {
-            if(!facts[field].is_string() || !sameFilesystemPath(facts[field].get<std::string>(),expected[field].get<std::string>()))return fail("Search root does not match the declared root");
         }else if(!facts[field].is_boolean() || facts[field]!=expected[field])return fail("Search completeness does not satisfy the declared constraint");
+    }
+    const bool scoped=expected.contains("search_root") || expected.contains("search_roots");
+    if(scoped) {
+        if(!facts.contains("search_root") || !facts["search_root"].is_string())return fail("Missing canonical search root metadata");
+        if(expected.value("scope_strength",std::string("REQUIRED"))=="REQUIRED") {
+            const auto roots=expected.contains("search_roots")?expected["search_roots"]:json::array({expected["search_root"]});
+            bool allowed=false;
+            for(const auto& root:roots)allowed |= sameFilesystemPath(facts["search_root"].get<std::string>(),root.get<std::string>()) || underRoot(facts["search_root"].get<std::string>(),root.get<std::string>());
+            if(!allowed)return fail("Search root is outside the declared required scope");
+        }
     }
     if(!facts.contains("results") || !facts["results"].is_array() || facts["results"].empty())return fail("Search has no structured candidate results");
     std::string mismatch="No candidate satisfies every declared result constraint";
@@ -102,10 +110,11 @@ bool searchMatches(const json& facts,const json& expected,std::string& error) {
         if(!row.is_object()){mismatch="Search candidate is not a structured record";continue;}
         bool okay=true;
         for(const auto& [key,value]:expected.items()) {
+            if(key=="root_semantics" || key=="scope_strength" || key=="scope_provenance")continue;
             if(key=="query") {
                 okay=row.contains("match_score") && row["match_score"].is_number() && std::isfinite(row["match_score"].get<double>()) && row["match_score"].get<double>()>=FilesystemRanking::minimumScore;
             }else if(key=="search_complete")continue;
-            else if(key=="search_root") {
+            else if(key=="search_root" || key=="search_roots") {
                 okay=row.contains("path") && row["path"].is_string() && underRoot(row["path"].get<std::string>(),facts["search_root"].get<std::string>());
             }else if(key=="modified_within_days") {
                 okay=row.contains("modified_age_days") && row["modified_age_days"].is_number() && std::isfinite(row["modified_age_days"].get<double>()) && row["modified_age_days"].get<double>()>=0 && row["modified_age_days"].get<double>()<=value.get<double>();
@@ -130,6 +139,8 @@ bool searchMatches(const json& facts,const json& expected,std::string& error) {
 }
 }
 namespace SemanticEvidence {
+bool samePath(const std::string& a,const std::string& b) {return sameFilesystemPath(a,b);}
+bool withinRoot(const std::string& path,const std::string& root) {return underRoot(path,root);}
 wf::Evidence browserObservation(const std::string& step,const std::string& raw) {
     wf::Evidence evidence;evidence.stepId=step;evidence.operation="browser.observe";evidence.category=wf::EvidenceCategory::BROWSER_OBSERVATION;
     evidence.facts=BrowserState::snapshot(raw);if(!evidence.facts.is_object())evidence.facts=json::object();

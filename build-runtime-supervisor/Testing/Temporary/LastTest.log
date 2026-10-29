@@ -1,10 +1,10 @@
-Start testing: Oct 29 22:34 India Standard Time
+Start testing: Oct 29 23:08 India Standard Time
 ----------------------------------------------------------
-1/17 Testing: RuntimeReliability
-1/17 Test: RuntimeReliability
+1/18 Testing: RuntimeReliability
+1/18 Test: RuntimeReliability
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/RuntimeReliabilityTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"RuntimeReliability" start time: Oct 29 22:34 India Standard Time
+"RuntimeReliability" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 VERIFIED_GOAL_COMPLETES_WITHOUT_FINAL_LLM: PASS
@@ -80,15 +80,15 @@ Passed: 68 Failed: 0
 Test time =   1.03 sec
 ----------------------------------------------------------
 Test Passed.
-"RuntimeReliability" end time: Oct 29 22:34 India Standard Time
+"RuntimeReliability" end time: Oct 29 23:08 India Standard Time
 "RuntimeReliability" time elapsed: 00:00:01
 ----------------------------------------------------------
 
-2/17 Testing: Branch3RuntimeIntegration
-2/17 Test: Branch3RuntimeIntegration
+2/18 Testing: Branch3RuntimeIntegration
+2/18 Test: Branch3RuntimeIntegration
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/Branch3RuntimeIntegrationTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"Branch3RuntimeIntegration" start time: Oct 29 22:34 India Standard Time
+"Branch3RuntimeIntegration" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 [01_RUNTIME_SUCCEEDED] PASS
@@ -124,18 +124,18 @@ Passed: 27
 Failed: 0
 RESULT: PASS
 <end of output>
-Test time =   0.18 sec
+Test time =   0.21 sec
 ----------------------------------------------------------
 Test Passed.
-"Branch3RuntimeIntegration" end time: Oct 29 22:34 India Standard Time
+"Branch3RuntimeIntegration" end time: Oct 29 23:08 India Standard Time
 "Branch3RuntimeIntegration" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/17 Testing: ReliabilityRegression
-3/17 Test: ReliabilityRegression
+3/18 Testing: ReliabilityRegression
+3/18 Test: ReliabilityRegression
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/ReliabilityRegressionTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"ReliabilityRegression" start time: Oct 29 22:34 India Standard Time
+"ReliabilityRegression" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 UTF8_BOUNDARY_240_0: PASS
@@ -223,34 +223,34 @@ APPLICATION_DISPATCH_REJECTED_THEN_OBSERVED_PROOF_ACCEPTED: PASS
 UNOBSERVABLE_DOCUMENT_ASSOCIATION_REMAINS_EXPLICITLY_UNSUPPORTED: PASS
 Checks: 83 Failures: 0
 <end of output>
-Test time =   0.45 sec
+Test time =   0.49 sec
 ----------------------------------------------------------
 Test Passed.
-"ReliabilityRegression" end time: Oct 29 22:34 India Standard Time
+"ReliabilityRegression" end time: Oct 29 23:08 India Standard Time
 "ReliabilityRegression" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-4/17 Testing: WorkflowKernel
-4/17 Test: WorkflowKernel
+4/18 Testing: WorkflowKernel
+4/18 Test: WorkflowKernel
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/WorkflowKernelTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"WorkflowKernel" start time: Oct 29 22:34 India Standard Time
+"WorkflowKernel" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 Generated DAG cases: 250; Checks: 29439; Failures: 0
 <end of output>
-Test time =   0.28 sec
+Test time =   0.31 sec
 ----------------------------------------------------------
 Test Passed.
-"WorkflowKernel" end time: Oct 29 22:34 India Standard Time
+"WorkflowKernel" end time: Oct 29 23:08 India Standard Time
 "WorkflowKernel" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-5/17 Testing: SemanticEvidence
-5/17 Test: SemanticEvidence
+5/18 Testing: SemanticEvidence
+5/18 Test: SemanticEvidence
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/SemanticEvidenceTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"SemanticEvidence" start time: Oct 29 22:34 India Standard Time
+"SemanticEvidence" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 url_equals: PASS
@@ -318,18 +318,18 @@ PLANNER_INTERACTION_IDS_REMAIN: PASS
 TAIL_ELEMENT_CAN_BE_VERIFIED: PASS
 Semantic evidence checks: 63 Failures: 0
 <end of output>
-Test time =   0.03 sec
+Test time =   0.32 sec
 ----------------------------------------------------------
 Test Passed.
-"SemanticEvidence" end time: Oct 29 22:34 India Standard Time
+"SemanticEvidence" end time: Oct 29 23:08 India Standard Time
 "SemanticEvidence" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/17 Testing: WorkflowAcceptance
-6/17 Test: WorkflowAcceptance
+6/18 Testing: WorkflowAcceptance
+6/18 Test: WorkflowAcceptance
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/WorkflowAcceptanceTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"WorkflowAcceptance" start time: Oct 29 22:34 India Standard Time
+"WorkflowAcceptance" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 01_create_populated_file: PASS
@@ -349,18 +349,18 @@ Output:
 15_exact_literal_payload: PASS
 Fixed acceptance scenarios: 15; Failures: 0. Browser/application adapters simulated; filesystem effects real. No network or LLM.
 <end of output>
-Test time =   0.31 sec
+Test time =   0.37 sec
 ----------------------------------------------------------
 Test Passed.
-"WorkflowAcceptance" end time: Oct 29 22:34 India Standard Time
+"WorkflowAcceptance" end time: Oct 29 23:08 India Standard Time
 "WorkflowAcceptance" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-7/17 Testing: DiscoveryDecision
-7/17 Test: DiscoveryDecision
+7/18 Testing: DiscoveryDecision
+7/18 Test: DiscoveryDecision
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/DiscoveryDecisionTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"DiscoveryDecision" start time: Oct 29 22:34 India Standard Time
+"DiscoveryDecision" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 token_order_independent: PASS
@@ -401,18 +401,18 @@ actual_backend_evidence_verifies_undotted_extension_and_root_separator: PASS
 generic_type_and_recency_search: PASS
 Failures: 0
 <end of output>
-Test time =   0.15 sec
+Test time =   0.18 sec
 ----------------------------------------------------------
 Test Passed.
-"DiscoveryDecision" end time: Oct 29 22:34 India Standard Time
+"DiscoveryDecision" end time: Oct 29 23:08 India Standard Time
 "DiscoveryDecision" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-8/17 Testing: PostconditionContract
-8/17 Test: PostconditionContract
+8/18 Testing: PostconditionContract
+8/18 Test: PostconditionContract
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/PostconditionContractTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"PostconditionContract" start time: Oct 29 22:34 India Standard Time
+"PostconditionContract" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 decomposition_receives_canonical_schema: PASS
@@ -465,18 +465,18 @@ declared_contract_never_weakens_to_search_success_3: PASS
 declared_contract_never_weakens_to_search_success_4: PASS
 Failures: 0
 <end of output>
-Test time =   0.23 sec
+Test time =   0.27 sec
 ----------------------------------------------------------
 Test Passed.
-"PostconditionContract" end time: Oct 29 22:34 India Standard Time
+"PostconditionContract" end time: Oct 29 23:08 India Standard Time
 "PostconditionContract" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-9/17 Testing: GoalDecomposerContract
-9/17 Test: GoalDecomposerContract
+9/18 Testing: GoalDecomposerContract
+9/18 Test: GoalDecomposerContract
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/GoalDecomposerContractTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"GoalDecomposerContract" start time: Oct 29 22:34 India Standard Time
+"GoalDecomposerContract" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 [PROMPT_ONLY_LOGICAL_DECOMPOSITION] PASS
@@ -499,18 +499,18 @@ GOAL DECOMPOSER CONTRACT TEST
 Passed: 15
 Failed: 0
 <end of output>
-Test time =   0.07 sec
+Test time =   0.31 sec
 ----------------------------------------------------------
 Test Passed.
-"GoalDecomposerContract" end time: Oct 29 22:34 India Standard Time
+"GoalDecomposerContract" end time: Oct 29 23:08 India Standard Time
 "GoalDecomposerContract" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-10/17 Testing: RecoveryGuidance
-10/17 Test: RecoveryGuidance
+10/18 Testing: RecoveryGuidance
+10/18 Test: RecoveryGuidance
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/RecoveryGuidanceTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"RecoveryGuidance" start time: Oct 29 22:34 India Standard Time
+"RecoveryGuidance" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 autonomous_alternatives_precede_guidance: PASS
@@ -551,18 +551,18 @@ learning_log_failure_does_not_change_verifier_or_workflow: PASS
 local_recovery_log_rotates_at_bounded_size: PASS
 Failures: 0
 <end of output>
-Test time =   0.61 sec
+Test time =   0.86 sec
 ----------------------------------------------------------
 Test Passed.
-"RecoveryGuidance" end time: Oct 29 22:34 India Standard Time
+"RecoveryGuidance" end time: Oct 29 23:08 India Standard Time
 "RecoveryGuidance" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-11/17 Testing: ArtifactDependency
-11/17 Test: ArtifactDependency
+11/18 Testing: ArtifactDependency
+11/18 Test: ArtifactDependency
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/ArtifactDependencyTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"ArtifactDependency" start time: Oct 29 22:34 India Standard Time
+"ArtifactDependency" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 bare_new_directory_reference_is_not_an_environment_lookup: PASS
@@ -590,18 +590,18 @@ real_strategy_guidance_still_advertises_answer: PASS
 valid_guidance_accepts_free_form_answer_on_retained_graph: PASS
 Failures: 0
 <end of output>
-Test time =   0.18 sec
+Test time =   0.27 sec
 ----------------------------------------------------------
 Test Passed.
-"ArtifactDependency" end time: Oct 29 22:34 India Standard Time
+"ArtifactDependency" end time: Oct 29 23:08 India Standard Time
 "ArtifactDependency" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-12/17 Testing: PrimitiveMapperContract
-12/17 Test: PrimitiveMapperContract
+12/18 Testing: PrimitiveMapperContract
+12/18 Test: PrimitiveMapperContract
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/PrimitiveMapperContractTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"PrimitiveMapperContract" start time: Oct 29 22:34 India Standard Time
+"PrimitiveMapperContract" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 [LLM_CALLED_EXACTLY_ONCE] PASS
@@ -624,18 +624,18 @@ PRIMITIVE MAPPER CONTRACT TEST
 Passed: 15
 Failed: 0
 <end of output>
-Test time =   0.07 sec
+Test time =   0.08 sec
 ----------------------------------------------------------
 Test Passed.
-"PrimitiveMapperContract" end time: Oct 29 22:34 India Standard Time
+"PrimitiveMapperContract" end time: Oct 29 23:08 India Standard Time
 "PrimitiveMapperContract" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-13/17 Testing: FilesystemPathPolicy
-13/17 Test: FilesystemPathPolicy
+13/18 Testing: FilesystemPathPolicy
+13/18 Test: FilesystemPathPolicy
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemPathPolicyTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"FilesystemPathPolicy" start time: Oct 29 22:34 India Standard Time
+"FilesystemPathPolicy" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 [KNOWN_DESKTOP_RESOLVES] PASS
@@ -645,18 +645,18 @@ Output:
 [WINDOWS_WRITE_REJECTED] PASS
 Passed: 5 Failed: 0
 <end of output>
-Test time =   0.02 sec
+Test time =   0.11 sec
 ----------------------------------------------------------
 Test Passed.
-"FilesystemPathPolicy" end time: Oct 29 22:34 India Standard Time
+"FilesystemPathPolicy" end time: Oct 29 23:08 India Standard Time
 "FilesystemPathPolicy" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-14/17 Testing: FilesystemLocationResolver
-14/17 Test: FilesystemLocationResolver
+14/18 Testing: FilesystemLocationResolver
+14/18 Test: FilesystemLocationResolver
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemLocationResolverTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"FilesystemLocationResolver" start time: Oct 29 22:34 India Standard Time
+"FilesystemLocationResolver" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 [KEYWORDS_RESOLVE_CONTEXTUAL_FOLDER] PASS
@@ -664,34 +664,34 @@ Output:
 [AMBIGUOUS_KEYWORDS_ARE_NOT_GUESSED] PASS
 [MISSING_KEYWORDS_ARE_REPORTED] PASS
 <end of output>
-Test time =   0.04 sec
+Test time =   0.13 sec
 ----------------------------------------------------------
 Test Passed.
-"FilesystemLocationResolver" end time: Oct 29 22:34 India Standard Time
+"FilesystemLocationResolver" end time: Oct 29 23:08 India Standard Time
 "FilesystemLocationResolver" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-15/17 Testing: FilesystemDiscovery
-15/17 Test: FilesystemDiscovery
+15/18 Testing: FilesystemDiscovery
+15/18 Test: FilesystemDiscovery
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemDiscoveryGroupTest.exe"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"FilesystemDiscovery" start time: Oct 29 22:34 India Standard Time
+"FilesystemDiscovery" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 RESULT: PASS
 <end of output>
-Test time =   0.10 sec
+Test time =   0.44 sec
 ----------------------------------------------------------
 Test Passed.
-"FilesystemDiscovery" end time: Oct 29 22:34 India Standard Time
+"FilesystemDiscovery" end time: Oct 29 23:08 India Standard Time
 "FilesystemDiscovery" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-16/17 Testing: FilesystemCreationOffline
-16/17 Test: FilesystemCreationOffline
+16/18 Testing: FilesystemCreationOffline
+16/18 Test: FilesystemCreationOffline
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemCreationGroupTest.exe" "--offline"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"FilesystemCreationOffline" start time: Oct 29 22:34 India Standard Time
+"FilesystemCreationOffline" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 === GROUP 1: FILESYSTEM CREATION TEST ===
@@ -721,18 +721,18 @@ Passed: 19
 Failed: 0
 RESULT: PASS
 <end of output>
-Test time =   0.06 sec
+Test time =   0.08 sec
 ----------------------------------------------------------
 Test Passed.
-"FilesystemCreationOffline" end time: Oct 29 22:34 India Standard Time
+"FilesystemCreationOffline" end time: Oct 29 23:08 India Standard Time
 "FilesystemCreationOffline" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-17/17 Testing: FilesystemManipulationOffline
-17/17 Test: FilesystemManipulationOffline
+17/18 Testing: FilesystemManipulationOffline
+17/18 Test: FilesystemManipulationOffline
 Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemManipulationGroupTest.exe" "--offline"
 Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
-"FilesystemManipulationOffline" start time: Oct 29 22:34 India Standard Time
+"FilesystemManipulationOffline" start time: Oct 29 23:08 India Standard Time
 Output:
 ----------------------------------------------------------
 === GROUP 2: CHAINED FILESYSTEM INTEGRATION TEST ===
@@ -776,11 +776,57 @@ Passed: 34
 Failed: 0
 RESULT: PASS
 <end of output>
-Test time =   0.07 sec
+Test time =   0.11 sec
 ----------------------------------------------------------
 Test Passed.
-"FilesystemManipulationOffline" end time: Oct 29 22:34 India Standard Time
+"FilesystemManipulationOffline" end time: Oct 29 23:08 India Standard Time
 "FilesystemManipulationOffline" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Oct 29 22:34 India Standard Time
+18/18 Testing: MultiScopeDiscovery
+18/18 Test: MultiScopeDiscovery
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/MultiScopeDiscoveryTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"MultiScopeDiscovery" start time: Oct 29 23:08 India Standard Time
+Output:
+----------------------------------------------------------
+PREFERRED_multiple_roots_admitted_without_redecomposition: PASS
+PREFERRED_empty_first_root_then_second_root_same_step: PASS
+PREFERRED_search_verified_before_confirmation: PASS
+PREFERRED_canonical_selected_resource_flows_to_open: PASS
+REQUIRED_multiple_roots_admitted_without_redecomposition: PASS
+REQUIRED_empty_first_root_then_second_root_same_step: PASS
+REQUIRED_search_verified_before_confirmation: PASS
+REQUIRED_canonical_selected_resource_flows_to_open: PASS
+required_any_accepts_second_root: PASS
+required_single_rejects_other_root: PASS
+preferred_roots_permit_compatible_broadening: PASS
+preferred_still_requires_candidate_beneath_actual_root: PASS
+required_any_preserves_component_boundary: PASS
+verification_does_not_mutate_evidence: PASS
+equivalent_roots_deduplicate: PASS
+unresolved_preferred_known_folder_alias_is_retained: PASS
+unrepresentable_required_resource_rejected: PASS
+malformed_actual_path_rejected_even_if_preferred: PASS
+logical_roots_resolved_individually: PASS
+schema_rejects_wrong_type_search_roots: PASS
+schema_rejects_wrong_type_root_semantics: PASS
+schema_rejects_wrong_type_scope_strength: PASS
+schema_rejects_wrong_type_scope_provenance: PASS
+cheap_stated_roots_precede_question_and_extend_soft_budget: PASS
+required_scope_cannot_silently_broaden_before_execution: PASS
+malformed_path_rejected_during_graph_admission: PASS
+unresolved_preference_does_not_prevent_graph_admission: PASS
+exhausted_scopes_reach_guidance_not_invalid_plan: PASS
+question_derived_from_both_scope_attempts: PASS
+new_location_guidance_resumes_same_workflow: PASS
+successful_guidance_emits_verified_recovery_episode: PASS
+<end of output>
+Test time =   0.42 sec
+----------------------------------------------------------
+Test Passed.
+"MultiScopeDiscovery" end time: Oct 29 23:08 India Standard Time
+"MultiScopeDiscovery" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 29 23:08 India Standard Time

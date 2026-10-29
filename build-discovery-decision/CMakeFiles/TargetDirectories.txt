@@ -41,6 +41,7 @@ C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/DiscoveryDecisio
 C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/PostconditionContractTest.dir
 C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/RecoveryGuidanceTest.dir
 C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/ArtifactDependencyTest.dir
+C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/MultiScopeDiscoveryTest.dir
 C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/test.dir
 C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/edit_cache.dir
 C:/Users/shour/Desktop/Nova/build-discovery-decision/CMakeFiles/rebuild_cache.dir

@@ -3054,7 +3054,7 @@ build WorkflowAcceptanceTest.exe: CXX_EXECUTABLE_LINKER__WorkflowAcceptanceTest_
 #############################################
 # Utility command for check-workflow
 
-build check-workflow: phony CMakeFiles/check-workflow ArtifactDependencyTest.exe Branch3RuntimeIntegrationTest.exe DiscoveryDecisionTest.exe FilesystemCreationGroupTest.exe FilesystemDiscoveryGroupTest.exe FilesystemLocationResolverTest.exe FilesystemManipulationGroupTest.exe FilesystemPathPolicyTest.exe GoalDecomposerContractTest.exe PostconditionContractTest.exe PrimitiveMapperContractTest.exe RecoveryGuidanceTest.exe ReliabilityRegressionTest.exe RuntimeReliabilityTest.exe SemanticEvidenceTest.exe WorkflowAcceptanceTest.exe WorkflowKernelTest.exe
+build check-workflow: phony CMakeFiles/check-workflow ArtifactDependencyTest.exe Branch3RuntimeIntegrationTest.exe DiscoveryDecisionTest.exe FilesystemCreationGroupTest.exe FilesystemDiscoveryGroupTest.exe FilesystemLocationResolverTest.exe FilesystemManipulationGroupTest.exe FilesystemPathPolicyTest.exe GoalDecomposerContractTest.exe MultiScopeDiscoveryTest.exe PostconditionContractTest.exe PrimitiveMapperContractTest.exe RecoveryGuidanceTest.exe ReliabilityRegressionTest.exe RuntimeReliabilityTest.exe SemanticEvidenceTest.exe WorkflowAcceptanceTest.exe WorkflowKernelTest.exe
 
 # =============================================================================
 # Object build statements for EXECUTABLE target DiscoveryDecisionTest
@@ -3631,6 +3631,143 @@ build ArtifactDependencyTest.exe: CXX_EXECUTABLE_LINKER__ArtifactDependencyTest_
   TARGET_PDB = ArtifactDependencyTest.exe.dbg
   TARGET_SUPPORT_DIR = CMakeFiles\ArtifactDependencyTest.dir
 
+# =============================================================================
+# Object build statements for EXECUTABLE target MultiScopeDiscoveryTest
+
+
+#############################################
+# Order-only phony target for MultiScopeDiscoveryTest
+
+build cmake_object_order_depends_target_MultiScopeDiscoveryTest: phony || cmake_object_order_depends_target_WorkflowKernel
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/multiscope_discovery_test.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/multiscope_discovery_test.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\multiscope_discovery_test.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/branch3_runtime.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/branch3_runtime.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\branch3_runtime.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/next_action_planner.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/next_action_planner.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\next_action_planner.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/state_manager.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/state_manager.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\state_manager.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/goal_decomposer.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/goal_decomposer.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\goal_decomposer.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/primitive_mapper.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/primitive_mapper.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\primitive_mapper.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/primitive_registry.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/primitive_registry.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\primitive_registry.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/primitive_execution_engine.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/primitive_execution_engine.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\primitive_execution_engine.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/filesystem_path_policy.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/filesystem_path_policy.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\filesystem_path_policy.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/filesystem_location_resolver.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/filesystem_location_resolver.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\filesystem_location_resolver.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/application_resolver.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/application_resolver.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\application_resolver.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+build CMakeFiles/MultiScopeDiscoveryTest.dir/src/llm_client.cpp.obj: CXX_COMPILER__MultiScopeDiscoveryTest_unscanned_Debug C$:/Users/shour/Desktop/Nova/src/llm_client.cpp || cmake_object_order_depends_target_MultiScopeDiscoveryTest
+  CONFIG = Debug
+  DEP_FILE = CMakeFiles\MultiScopeDiscoveryTest.dir\src\llm_client.cpp.obj.d
+  FLAGS = -g -std=c++20
+  INCLUDES = -IC:/Users/shour/Desktop/Nova/src
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  OBJECT_FILE_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target MultiScopeDiscoveryTest
+
+
+#############################################
+# Link the executable MultiScopeDiscoveryTest.exe
+
+build MultiScopeDiscoveryTest.exe: CXX_EXECUTABLE_LINKER__MultiScopeDiscoveryTest_Debug CMakeFiles/MultiScopeDiscoveryTest.dir/src/multiscope_discovery_test.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/branch3_runtime.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/next_action_planner.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/state_manager.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/goal_decomposer.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/primitive_mapper.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/primitive_registry.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/primitive_execution_engine.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/filesystem_path_policy.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/filesystem_location_resolver.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/application_resolver.cpp.obj CMakeFiles/MultiScopeDiscoveryTest.dir/src/llm_client.cpp.obj | libWorkflowKernel.a C$:/msys64/ucrt64/lib/libcurl.dll.a || libWorkflowKernel.a
+  CONFIG = Debug
+  FLAGS = -g
+  LINK_LIBRARIES = libWorkflowKernel.a  C:/msys64/ucrt64/lib/libcurl.dll.a  -lshell32  -lole32  -loleaut32  -lpsapi  -luser32  -lwinhttp  -luuid  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  OBJECT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = MultiScopeDiscoveryTest.exe
+  TARGET_IMPLIB = libMultiScopeDiscoveryTest.dll.a
+  TARGET_PDB = MultiScopeDiscoveryTest.exe.dbg
+  TARGET_SUPPORT_DIR = CMakeFiles\MultiScopeDiscoveryTest.dir
+
 
 #############################################
 # Utility command for test
@@ -3670,7 +3807,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Custom command for CMakeFiles\check-workflow
 
-build CMakeFiles/check-workflow | ${cmake_ninja_workdir}CMakeFiles/check-workflow: CUSTOM_COMMAND WorkflowKernelTest.exe WorkflowAcceptanceTest.exe RuntimeReliabilityTest.exe Branch3RuntimeIntegrationTest.exe ReliabilityRegressionTest.exe SemanticEvidenceTest.exe || ArtifactDependencyTest.exe Branch3RuntimeIntegrationTest.exe DiscoveryDecisionTest.exe FilesystemCreationGroupTest.exe FilesystemDiscoveryGroupTest.exe FilesystemLocationResolverTest.exe FilesystemManipulationGroupTest.exe FilesystemPathPolicyTest.exe GoalDecomposerContractTest.exe PostconditionContractTest.exe PrimitiveMapperContractTest.exe RecoveryGuidanceTest.exe ReliabilityRegressionTest.exe RuntimeReliabilityTest.exe SemanticEvidenceTest.exe WorkflowAcceptanceTest.exe WorkflowKernelTest.exe libWorkflowKernel.a
+build CMakeFiles/check-workflow | ${cmake_ninja_workdir}CMakeFiles/check-workflow: CUSTOM_COMMAND WorkflowKernelTest.exe WorkflowAcceptanceTest.exe RuntimeReliabilityTest.exe Branch3RuntimeIntegrationTest.exe ReliabilityRegressionTest.exe SemanticEvidenceTest.exe || ArtifactDependencyTest.exe Branch3RuntimeIntegrationTest.exe DiscoveryDecisionTest.exe FilesystemCreationGroupTest.exe FilesystemDiscoveryGroupTest.exe FilesystemLocationResolverTest.exe FilesystemManipulationGroupTest.exe FilesystemPathPolicyTest.exe GoalDecomposerContractTest.exe MultiScopeDiscoveryTest.exe PostconditionContractTest.exe PrimitiveMapperContractTest.exe RecoveryGuidanceTest.exe ReliabilityRegressionTest.exe RuntimeReliabilityTest.exe SemanticEvidenceTest.exe WorkflowAcceptanceTest.exe WorkflowKernelTest.exe libWorkflowKernel.a
   COMMAND = C:\windows\system32\cmd.exe /C "cd /D C:\Users\shour\Desktop\Nova\build-runtime-supervisor && C:\msys64\ucrt64\bin\ctest.exe --output-on-failure"
   pool = console
 
@@ -3725,6 +3862,8 @@ build InputNormalizerTest: phony InputNormalizerTest.exe
 
 build MouseGroupTest: phony MouseGroupTest.exe
 
+build MultiScopeDiscoveryTest: phony MultiScopeDiscoveryTest.exe
+
 build MultiStepIntegrationTest: phony MultiStepIntegrationTest.exe
 
 build MultiStepPipelineTest: phony MultiStepPipelineTest.exe
@@ -3769,7 +3908,7 @@ build WorkflowKernelTest: phony WorkflowKernelTest.exe
 #############################################
 # Folder: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
 
-build all: phony Nova.exe ExecutionEngineTest.exe ActionParserTest.exe InputNormalizerTest.exe RequestClassifierTest.exe CapabilityResolverTest.exe SingleActionPipelineTest.exe ApplicationResolverTest.exe ParameterResolverTest.exe ActionValidatorTest.exe ExecutionPlanBuilderTest.exe Branch2Benchmark.exe GoalDecomposerTest.exe DependencyResolverTest.exe ActionPrimitiveResolverTest.exe PrimitiveRegistryTest.exe FilesystemPathPolicyTest.exe FilesystemLocationResolverTest.exe ContextResolverTest.exe MultiStepPipelineTest.exe PrimitiveExecutionEngineTest.exe MultiStepIntegrationTest.exe GoalDecomposerContractTest.exe PrimitiveMapperContractTest.exe Branch3LivePlanningTest.exe FilesystemCreationGroupTest.exe FilesystemManipulationGroupTest.exe FilesystemDiscoveryGroupTest.exe ApplicationLifecycleGroupTest.exe TextKeyboardGroupTest.exe MouseGroupTest.exe Branch3RuntimeIntegrationTest.exe RuntimeReliabilityTest.exe ReliabilityRegressionTest.exe libWorkflowKernel.a WorkflowKernelTest.exe SemanticEvidenceTest.exe WorkflowAcceptanceTest.exe DiscoveryDecisionTest.exe PostconditionContractTest.exe RecoveryGuidanceTest.exe ArtifactDependencyTest.exe
+build all: phony Nova.exe ExecutionEngineTest.exe ActionParserTest.exe InputNormalizerTest.exe RequestClassifierTest.exe CapabilityResolverTest.exe SingleActionPipelineTest.exe ApplicationResolverTest.exe ParameterResolverTest.exe ActionValidatorTest.exe ExecutionPlanBuilderTest.exe Branch2Benchmark.exe GoalDecomposerTest.exe DependencyResolverTest.exe ActionPrimitiveResolverTest.exe PrimitiveRegistryTest.exe FilesystemPathPolicyTest.exe FilesystemLocationResolverTest.exe ContextResolverTest.exe MultiStepPipelineTest.exe PrimitiveExecutionEngineTest.exe MultiStepIntegrationTest.exe GoalDecomposerContractTest.exe PrimitiveMapperContractTest.exe Branch3LivePlanningTest.exe FilesystemCreationGroupTest.exe FilesystemManipulationGroupTest.exe FilesystemDiscoveryGroupTest.exe ApplicationLifecycleGroupTest.exe TextKeyboardGroupTest.exe MouseGroupTest.exe Branch3RuntimeIntegrationTest.exe RuntimeReliabilityTest.exe ReliabilityRegressionTest.exe libWorkflowKernel.a WorkflowKernelTest.exe SemanticEvidenceTest.exe WorkflowAcceptanceTest.exe DiscoveryDecisionTest.exe PostconditionContractTest.exe RecoveryGuidanceTest.exe ArtifactDependencyTest.exe MultiScopeDiscoveryTest.exe
 
 # =============================================================================
 # Built-in targets

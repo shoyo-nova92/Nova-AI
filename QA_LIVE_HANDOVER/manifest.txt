@@ -1,2 +1,0 @@
-Docs\README.txt
-Archive\README-backup.txt
