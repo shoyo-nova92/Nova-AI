@@ -1,653 +1,97 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "input_normalizer.hpp"
 #include "logger.hpp"
 #include "input_coordinator.hpp"
 #include "request_classifier.hpp"
 #include "conversation_handler.hpp"
-#include "single_action_pipeline.hpp"
-#include "multistep_pipeline.hpp"
-#include "multi_step_executor.hpp"
 #include "branch3_runtime.hpp"
-
+#include "runtime_supervisor.hpp"
+#include "utf8_text.hpp"
 #include <filesystem>
 #include <iostream>
 #include <string>
-
-using namespace std;
-
-namespace
-{
-    string requestTypeToString(RequestType type)
-    {
-        switch (type)
-        {
-            case RequestType::CONVERSATION:
-                return "CONVERSATION";
-
+namespace {
+TaskResult processOneRequest(const InputEvent& input, Logger& logger, Branch3Runtime& runtime) {
+    TaskResult result;
+    try {
+        result.blockedStage="Input normalization";
+        const auto normalized=InputNormalizer{}.normalize(input.rawText);
+        if (!normalized.success) { result.message=normalized.message; result.outcome=RuntimeOutcome::NEEDS_USER; return result; }
+        logger.log("INFO","INPUT_READY",input.rawText,"SUCCESS");
+        std::cout << "\n[INPUT PRESERVED]\n" << normalized.normalizedText << '\n';
+        result.blockedStage="Root routing";
+        const auto classified=RequestClassifier{}.classify(normalized.normalizedText);
+        if (!classified.success) {
+            result.outcome=RuntimeOutcome::EXTERNAL_UNAVAILABLE; result.cause=dependencyCause(classified.failureCategory);
+            result.message=classified.message; return result;
+        }
+        switch (classified.type) {
             case RequestType::SINGLE_ACTION:
-                return "SINGLE_ACTION";
-
-            case RequestType::MULTI_STEP_GOAL:
-                return "MULTI_STEP_GOAL";
-
-            case RequestType::EXISTING_WORKFLOW:
-                return "EXISTING_WORKFLOW";
-
-            case RequestType::CLARIFICATION_REQUIRED:
-                return "CLARIFICATION_REQUIRED";
-
-            case RequestType::UNSUPPORTED:
-                return "UNSUPPORTED";
-        }
-
-        return "UNKNOWN";
-    }
-}
-
-int main()
-{
-    cout << unitbuf;
-
-    namespace fs = filesystem;
-
-    fs::create_directories("logs");
-
-    Logger logger(
-        "logs/runtime.log"
-    );
-
-    if (!logger.isReady())
-    {
-        cerr
-            << "[ERROR] Logger initialization failed."
-            << endl;
-
-        return 1;
-    }
-
-    logger.log(
-        "INFO",
-        "RUNTIME_START",
-        "Nova runtime started.",
-        "SUCCESS"
-    );
-
-    // --------------------------------------------------------
-    // UNIFIED INPUT
-    // --------------------------------------------------------
-
-    logger.log(
-        "INFO",
-        "INPUT_COORDINATOR_START",
-        "Starting unified input coordinator.",
-        "STARTED"
-    );
-
-    InputCoordinator inputCoordinator;
-
-    InputEvent inputEvent =
-        inputCoordinator.waitForInput();
-
-    if (inputEvent.rawText.empty())
-    {
-        logger.log(
-            "ERROR",
-            "INPUT_FAILURE",
-            "Input coordinator returned empty input.",
-            "FAILURE"
-        );
-
-        cerr
-            << "[INPUT FAILURE] "
-            << "No input received."
-            << endl;
-
-        return 1;
-    }
-
-    // --------------------------------------------------------
-    // INPUT SOURCE
-    // --------------------------------------------------------
-
-    string sourceName;
-
-    if (
-        inputEvent.source ==
-        InputSource::SPEECH
-    )
-    {
-        sourceName = "SPEECH";
-    }
-    else
-    {
-        sourceName = "KEYBOARD";
-    }
-
-    logger.log(
-        "INFO",
-        "INPUT_SOURCE",
-        "Input source: " + sourceName,
-        "SUCCESS"
-    );
-
-    // --------------------------------------------------------
-    // UNIFIED RAW INPUT
-    // --------------------------------------------------------
-
-    cout << endl;
-    cout << "[RAW TEXT]" << endl;
-    cout << inputEvent.rawText << endl;
-
-    logger.log(
-        "INFO",
-        "INPUT_READY",
-        "Unified input received: "
-            + inputEvent.rawText,
-        "SUCCESS"
-    );
-
-    // --------------------------------------------------------
-    // PART B — LLM INPUT NORMALIZATION
-    // --------------------------------------------------------
-
-    logger.log(
-        "INFO",
-        "INPUT_NORMALIZATION",
-        "Starting LLM input normalization.",
-        "STARTED"
-    );
-
-    InputNormalizer normalizer;
-
-    NormalizedInput normalized =
-        normalizer.normalize(
-            inputEvent.rawText
-        );
-
-    if (!normalized.success)
-    {
-        logger.log(
-            "ERROR",
-            "INPUT_NORMALIZATION",
-            normalized.message,
-            "FAILURE"
-        );
-
-        cerr
-            << "[NORMALIZATION FAILURE] "
-            << normalized.message
-            << endl;
-
-        return 1;
-    }
-
-    cout << endl;
-    cout << "[NORMALIZED TEXT]" << endl;
-    cout << normalized.normalizedText << endl;
-
-    logger.log(
-        "INFO",
-        "INPUT_NORMALIZED",
-        "LLM normalized input: "
-            + normalized.normalizedText,
-        "SUCCESS"
-    );
-
-    // --------------------------------------------------------
-    // PART B — LLM ROOT ROUTER
-    // --------------------------------------------------------
-
-    logger.log(
-        "INFO",
-        "ROOT_ROUTER",
-        "Starting LLM root routing.",
-        "STARTED"
-    );
-
-    RequestClassifier classifier;
-
-    ClassificationResult classification =
-        classifier.classify(
-            normalized.normalizedText
-        );
-
-    if (!classification.success)
-    {
-        logger.log(
-            "ERROR",
-            "ROOT_ROUTER",
-            classification.message,
-            "FAILURE"
-        );
-
-        cerr
-            << "[ROOT ROUTER FAILURE] "
-            << classification.message
-            << endl;
-
-        return 1;
-    }
-
-    string requestType =
-        requestTypeToString(
-            classification.type
-        );
-
-    cout << endl;
-    cout << "[REQUEST TYPE]" << endl;
-    cout << requestType << endl;
-
-    logger.log(
-        "INFO",
-        "ROOT_ROUTER",
-        "Request classified as: "
-            + requestType,
-        "SUCCESS"
-    );
-
-    // --------------------------------------------------------
-    // BRANCH 1 — CONVERSATION
-    // --------------------------------------------------------
-
-    if (
-        classification.type ==
-        RequestType::CONVERSATION
-    )
-    {
-        logger.log(
-            "INFO",
-            "CONVERSATION_HANDLER",
-            "Routing request to Conversation Handler.",
-            "STARTED"
-        );
-
-        ConversationHandler conversationHandler;
-
-        LLMResponse llmResponse =
-            conversationHandler.handle(
-                normalized.normalizedText
-            );
-
-        if (!llmResponse.success)
-        {
-            logger.log(
-                "ERROR",
-                "CONVERSATION_HANDLER",
-                llmResponse.message,
-                "FAILURE"
-            );
-
-            cerr
-                << "[CONVERSATION FAILURE] "
-                << llmResponse.message
-                << endl;
-
-            return 1;
-        }
-
-        cout << endl;
-        cout << "[LLM RESPONSE]" << endl;
-        cout << llmResponse.content << endl;
-
-        logger.log(
-            "INFO",
-            "CONVERSATION_COMPLETE",
-            "Conversation response received from LLM.",
-            "SUCCESS"
-        );
-    }
-
-    // --------------------------------------------------------
-    // BRANCH 2 — SINGLE ACTION
-    // --------------------------------------------------------
-
-    if (
-        classification.type ==
-        RequestType::SINGLE_ACTION
-    )
-    {
-        logger.log(
-            "INFO",
-            "SINGLE_ACTION_PIPELINE",
-            "Routing request to Single Action Pipeline.",
-            "STARTED"
-        );
-
-        SingleActionPipeline singleActionPipeline;
-
-        SingleActionResult actionResult =
-            singleActionPipeline.process(
-                normalized.normalizedText
-            );
-
-        // ----------------------------------------------------
-        // PIPELINE FAILURE
-        // ----------------------------------------------------
-
-        if (!actionResult.success)
-        {
-            logger.log(
-                "ERROR",
-                "SINGLE_ACTION_PIPELINE",
-                actionResult.message,
-                "FAILURE"
-            );
-
-            cerr
-                << "[SINGLE ACTION FAILURE] "
-                << actionResult.message
-                << endl;
-
-            return 1;
-        }
-
-        // ----------------------------------------------------
-        // ACTION PARSER
-        // ----------------------------------------------------
-
-        cout << endl;
-        cout << "[ACTION PARSER]" << endl;
-        cout << "Action: "
-            << actionResult.action.name
-            << endl;
-
-        logger.log(
-            "INFO",
-            "ACTION_PARSER",
-            "Action identified: "
-                + actionResult.action.name,
-            "SUCCESS"
-        );
-
-        // ----------------------------------------------------
-        // CAPABILITY RESOLVER
-        // ----------------------------------------------------
-
-        cout << endl;
-        cout << "[CAPABILITY RESOLVER]" << endl;
-        cout << "Capability: "
-            << actionResult.capability.name
-            << endl;
-
-        logger.log(
-            "INFO",
-            "CAPABILITY_RESOLVER",
-            "Capability resolved: "
-                + actionResult.capability.name,
-            "SUCCESS"
-        );
-
-        // ----------------------------------------------------
-        // PARAMETER RESOLVER
-        // ----------------------------------------------------
-
-        cout << endl;
-        cout << "[PARAMETER RESOLVER]" << endl;
-
-        cout << "Name: "
-            << (actionResult.parameters.name.type == ParameterValueType::NONE
-                    ? "[none]"
-                    : actionResult.parameters.name.value)
-            << endl;
-
-        cout << "Location: "
-            << (actionResult.parameters.location.type == ParameterValueType::NONE
-                    ? "[none]"
-                    : actionResult.parameters.location.value)
-            << endl;
-
-        cout << "Application: "
-            << (actionResult.parameters.application.type == ParameterValueType::NONE
-                    ? "[none]"
-                    : actionResult.parameters.application.value)
-            << endl;
-
-        logger.log(
-            "INFO",
-            "PARAMETER_RESOLVER",
-            "Action parameters resolved.",
-            "SUCCESS"
-        );
-
-        // ----------------------------------------------------
-        // ACTION VALIDATOR
-        // ----------------------------------------------------
-
-        cout << endl;
-        cout << "[ACTION VALIDATOR]" << endl;
-
-        cout << "Valid: "
-            << (
-                    actionResult.validation.valid
-                    ? "true"
-                    : "false"
-                )
-            << endl;
-
-        logger.log(
-            "INFO",
-            "ACTION_VALIDATOR",
-            actionResult.validation.message,
-            actionResult.validation.valid
-                ? "SUCCESS"
-                : "FAILURE"
-        );
-
-        // ----------------------------------------------------
-        // EXECUTION PLAN
-        // ----------------------------------------------------
-
-        cout << endl;
-        cout << "[EXECUTION PLAN]" << endl;
-
-        cout << "Valid: "
-            << (
-                    actionResult.executionPlan.valid
-                    ? "true"
-                    : "false"
-                )
-            << endl;
-
-        cout << "Type: "
-            << actionResult.executionPlan.type
-            << endl;
-
-        cout << "Action: "
-            << actionResult.executionPlan.action.name
-            << endl;
-
-        cout << "Capability: "
-            << actionResult.executionPlan.capability.name
-            << endl;
-
-        logger.log(
-            "INFO",
-            "EXECUTION_PLAN",
-            "Single action execution plan created.",
-            actionResult.executionPlan.valid
-                ? "SUCCESS"
-                : "FAILURE"
-        );
-        // ----------------------------------------------------
-        // EXECUTION RESULT
-        // ----------------------------------------------------
-
-        cout << endl;
-        cout << "[EXECUTION RESULT]" << endl;
-
-        cout << "Status: "
-            << static_cast<int>(
-                actionResult.executionResult.status
-            )
-            << endl;
-
-        cout << "Reason: "
-            << static_cast<int>(
-                actionResult.executionResult.reason
-            )
-            << endl;
-
-        cout << "Action: "
-            << actionResult.executionResult.action
-            << endl;
-
-        cout << "Confidence: "
-            << actionResult.executionResult.confidence
-            << endl;
-
-        cout << "Target Resolved: "
-            << (
-                actionResult.executionResult.targetResolved
-                ? "true"
-                : "false"
-            )
-            << endl;
-
-        cout << "Execution Mechanism Resolved: "
-            << (
-                actionResult.executionResult.executionMechanismResolved
-                ? "true"
-                : "false"
-            )
-            << endl;
-
-        cout << "Message: "
-            << actionResult.executionResult.message
-            << endl;
-
-        logger.log(
-            "INFO",
-            "EXECUTION_RESULT",
-            actionResult.executionResult.message,
-            actionResult.executionResult.status
-                == ExecutionStatus::SUCCESS
-                ? "SUCCESS"
-                : "FAILURE"
-        );
-
-        cout << endl;
-        cout << "[SINGLE ACTION PIPELINE COMPLETE]"
-            << endl;
-
-        logger.log(
-            "INFO",
-            "SINGLE_ACTION_PIPELINE",
-            "Single action execution completed successfully.",
-            "SUCCESS"
-        );
-    }
-
-    // --------------------------------------------------------
-    // BRANCH 3 — MULTI-STEP GOAL (Branch 3 planner + mapper)
-    // Branch 2 single-action routing above is intentionally unchanged.
-    // --------------------------------------------------------
-
-    if (classification.type == RequestType::MULTI_STEP_GOAL)
-    {
-        cout << endl << "[BRANCH 3]" << endl;
-        cout << "MULTI_STEP_GOAL" << endl;
-        logger.log("INFO", "BRANCH3_RUNTIME", "Branch 3 runtime selected.", "STARTED");
-
-        Branch3Runtime runtime;
-        const Branch3RuntimeResult runtimeResult = runtime.run(normalized.normalizedText);
-
-        cout << "\n[GOAL DECOMPOSITION]\n";
-        cout << "Valid: " << boolalpha << runtimeResult.decomposedPlan.valid << "\n";
-        cout << "Steps: " << runtimeResult.decomposedPlan.steps.size() << "\n";
-        if (runtimeResult.decomposedPlan.valid) {
-            for (const auto& step : runtimeResult.decomposedPlan.steps)
-                cout << "  " << step.id << ": " << step.description << "\n";
-        }
-
-        cout << "\n[PRIMITIVE MAPPING]\n";
-        cout << "Valid: " << boolalpha << runtimeResult.mappedPlan.valid << "\n";
-        if (runtimeResult.mappedPlan.valid) {
-            for (const auto& step : runtimeResult.mappedPlan.steps) {
-                cout << "  " << step.id << "\n";
-                for (const auto& operation : step.operations)
-                    cout << "    -> " << operation.name << "\n";
+            case RequestType::MULTI_STEP_GOAL: {
+                result.blockedStage="Goal execution";
+                // Literal user input is authoritative; never route through legacy phrase parsers.
+                const auto branch=runtime.start(input.rawText);
+
+                logger.log("INFO","GOAL_RUNTIME",branch.message,outcomeName(branch.outcome));
+                return branch;
             }
+            case RequestType::CONVERSATION: {
+                result.blockedStage="Conversation";
+                const auto response=ConversationHandler{}.handle(input.rawText);
+                if (response.success) {
+                    std::cout << "\n[NOVA] " << response.content << '\n';
+                    result.outcome=RuntimeOutcome::COMPLETED; result.cause=RuntimeCause::NONE; result.blockedStage.clear();
+                } else { result.outcome=RuntimeOutcome::EXTERNAL_UNAVAILABLE; result.cause=dependencyCause(response.failureCategory); }
+                result.message=response.message; return result;
+            }
+            case RequestType::CLARIFICATION_REQUIRED:
+                result.outcome=RuntimeOutcome::NEEDS_USER;
+                result.message="Please specify the target, location and intended result so I can act without guessing."; return result;
+            case RequestType::EXISTING_WORKFLOW:
+                result.outcome=RuntimeOutcome::NEEDS_USER;
+                result.message="No saved workflow definition is available. Describe its steps or provide its definition."; return result;
+            case RequestType::UNSUPPORTED:
+                result.outcome=RuntimeOutcome::NEEDS_USER;
+                result.message="This request needs a capability or connection unavailable in the current registry. Please provide the missing integration or an alternative task."; return result;
         }
+    } catch (const Utf8::Error& error) { result.cause=RuntimeCause::INVALID_UTF8; result.message=error.what(); }
+    catch (const std::exception& error) { result.cause=RuntimeCause::VALIDATION_ERROR; result.message=error.what(); }
+    return result;
+}
+}
+int main(int argc, char** argv) {
+#ifdef _WIN32
+    SetConsoleCP(CP_UTF8); SetConsoleOutputCP(CP_UTF8);
+#endif
+    std::cout << std::unitbuf;
+    std::filesystem::create_directories("logs");
+    Logger logger("logs/runtime.log");
+    if (!logger.isReady()) { std::cerr << "Logger initialization failed.\n"; return 1; }
+    logger.log("INFO","RUNTIME_START","Nova runtime started.","SUCCESS");
+    bool keyboard=argc>1 && std::string(argv[1])=="--text";
+    InputCoordinator input;
+    Branch3Runtime runtime;
+    runtime.setEventSink([](const std::string& event){std::cout << event;});
+    RuntimeSupervisor supervisor(runtime);
+    while (supervisor.running()) {
+        const auto event=input.waitForInput(keyboard);
+        if (event.rawText=="q" || event.rawText=="Q" || event.rawText=="quit") break;
+        auto result=processOneRequest(event,logger,runtime);
+        while (supervisor.running()) {
+            const auto control=supervisor.readControl(std::cin,std::cout,result);
+            if (control==SupervisorAction::QUIT) break;
+            if (control==SupervisorAction::NEW_REQUEST) { keyboard=true; break; }
+            try {
+                const auto resumed=control==SupervisorAction::ANSWER ? runtime.answerUser(supervisor.questionId(),supervisor.answer()) : control==SupervisorAction::RETRY ? runtime.retryBlockedDependency() : runtime.continueSession();
 
-        cout << "\n[STATE-AWARE LOOP LOG]\n";
-        cout << runtimeResult.stateLog << "\n";
-
-        cout << "\n[BRANCH 3 EXECUTION]\n";
-        for (const auto& item : runtimeResult.operationResults) {
-            cout << item.stepId << " / operation " << (item.operationIndex + 1)
-                 << " / " << item.execution.action << " : "
-                 << (item.execution.status == ExecutionStatus::SUCCESS ? "SUCCESS" : "FAILED")
-                 << "\n  " << item.execution.message << "\n";
+                result=resumed;
+                logger.log("INFO","RUNTIME_RESUME",resumed.message,outcomeName(resumed.outcome));
+            } catch (const Utf8::Error& error) { result.outcome=RuntimeOutcome::FAILED; result.cause=RuntimeCause::INVALID_UTF8; result.message=error.what(); }
+            catch (const std::exception& error) { result.outcome=RuntimeOutcome::FAILED; result.cause=RuntimeCause::VALIDATION_ERROR; result.message=error.what(); }
         }
-        cout << "[BRANCH 3 RESULT] " << (runtimeResult.success ? "SUCCESS" : "FAILED")
-             << "\n" << runtimeResult.message << "\n";
-
-        logger.log(runtimeResult.success ? "INFO" : "ERROR", "BRANCH3_RUNTIME",
-                   runtimeResult.message, runtimeResult.success ? "SUCCESS" : "FAILURE");
-        return runtimeResult.success ? 0 : 1;
     }
-
-    // --------------------------------------------------------
-    // BRANCH 4 — EXISTING WORKFLOW
-    // --------------------------------------------------------
-
-    if (
-        classification.type ==
-        RequestType::EXISTING_WORKFLOW
-    )
-    {
-        cout << endl;
-        cout << "[BRANCH 4]" << endl;
-        cout << "EXISTING_WORKFLOW" << endl;
-
-        logger.log(
-            "INFO",
-            "EXISTING_WORKFLOW",
-            "Existing workflow branch selected.",
-            "SUCCESS"
-        );
-    }
-
-    // --------------------------------------------------------
-    // BRANCH 5 — CLARIFICATION REQUIRED
-    // --------------------------------------------------------
-
-    if (
-        classification.type ==
-        RequestType::CLARIFICATION_REQUIRED
-    )
-    {
-        cout << endl;
-        cout << "[BRANCH 5]" << endl;
-        cout << "CLARIFICATION_REQUIRED" << endl;
-
-        logger.log(
-            "INFO",
-            "CLARIFICATION_REQUIRED",
-            "Clarification branch selected.",
-            "SUCCESS"
-        );
-    }
-
-    // --------------------------------------------------------
-    // BRANCH 6 — UNSUPPORTED
-    // --------------------------------------------------------
-
-    if (
-        classification.type ==
-        RequestType::UNSUPPORTED
-    )
-    {
-        cout << endl;
-        cout << "[BRANCH 6]" << endl;
-        cout << "UNSUPPORTED" << endl;
-
-        logger.log(
-            "INFO",
-            "UNSUPPORTED",
-            "Unsupported request branch selected.",
-            "SUCCESS"
-        );
-    }
-
+    logger.log("INFO","RUNTIME_STOP","Nova shut down.","SUCCESS");
     return 0;
 }

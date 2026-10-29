@@ -9,7 +9,8 @@ enum class PrimitiveOperationType {
     FILESYSTEM_LIST_DIRECTORY, FILESYSTEM_SEARCH, FILESYSTEM_INSPECT,
     APPLICATION_LAUNCH, APPLICATION_CLOSE, APPLICATION_FOCUS,
     TEXT_WRITE, KEYBOARD_PRESS, KEYBOARD_TYPE, MOUSE_CLICK, MOUSE_MOVE,
-    BROWSER_NAVIGATE, BROWSER_WAIT_FOR, BROWSER_OBSERVE, BROWSER_CLICK, BROWSER_TYPE
+    BROWSER_NAVIGATE, BROWSER_WAIT_FOR, BROWSER_OBSERVE, BROWSER_CLICK, BROWSER_TYPE,
+    ENVIRONMENT_OBSERVE, BROWSER_DOWNLOAD, BROWSER_TABS, BROWSER_SELECT_TAB, APPLICATION_OBSERVE
 };
 
 struct PrimitiveOperation {
@@ -21,6 +22,7 @@ struct PrimitiveOperation {
 
 inline string primitiveOperationTypeToString(PrimitiveOperationType type) {
     switch (type) {
+        case PrimitiveOperationType::APPLICATION_OBSERVE: return "application.observe";
         case PrimitiveOperationType::FILESYSTEM_CREATE: return "filesystem.create";
         case PrimitiveOperationType::FILESYSTEM_CREATE_FILE: return "filesystem.create_file";
         case PrimitiveOperationType::FILESYSTEM_DELETE: return "filesystem.delete";
@@ -43,6 +45,10 @@ inline string primitiveOperationTypeToString(PrimitiveOperationType type) {
         case PrimitiveOperationType::BROWSER_OBSERVE: return "browser.observe";
         case PrimitiveOperationType::BROWSER_CLICK: return "browser.click";
         case PrimitiveOperationType::BROWSER_TYPE: return "browser.type";
+        case PrimitiveOperationType::ENVIRONMENT_OBSERVE: return "environment.observe";
+        case PrimitiveOperationType::BROWSER_DOWNLOAD: return "browser.download";
+        case PrimitiveOperationType::BROWSER_TABS: return "browser.tabs";
+        case PrimitiveOperationType::BROWSER_SELECT_TAB: return "browser.select_tab";
     }
     return "unknown";
 }

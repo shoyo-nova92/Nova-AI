@@ -1,4 +1,5 @@
 #include "filesystem_location_resolver.hpp"
+#include "utf8_text.hpp"
 
 #include <windows.h>
 #include <shlobj.h>
@@ -64,7 +65,7 @@ bool pathContains(const fs::path& child, const fs::path& parent) {
 }
 
 bool samePath(const fs::path& left, const fs::path& right) {
-    return lower(left.lexically_normal().string()) == lower(right.lexically_normal().string());
+    return lower(Utf8::path(left.lexically_normal())) == lower(Utf8::path(right.lexically_normal()));
 }
 
 fs::path queryKnownFolder(REFKNOWNFOLDERID id) {
@@ -99,7 +100,7 @@ fs::path knownFolder(REFKNOWNFOLDERID id) {
 }
 
 bool skipDirectoryTree(const fs::path& path) {
-    const std::string name = lower(path.filename().string());
+    const std::string name = lower(Utf8::path(path.filename()));
     static const std::set<std::string> skipped = {
         "$recycle.bin", "appdata", "application data",
         "config.msi", "program files", "program files (x86)", "programdata",
@@ -110,8 +111,8 @@ bool skipDirectoryTree(const fs::path& path) {
 }
 
 int scoreDirectory(const fs::path& directory, const std::vector<std::string>& clues) {
-    const auto nameWords = words(directory.filename().string());
-    const auto pathWords = words(directory.string());
+    const auto nameWords = words(Utf8::path(directory.filename()));
+    const auto pathWords = words(Utf8::path(directory));
     int score = 0;
     for (const auto& clue : clues) {
         const bool nameMatch = std::any_of(nameWords.begin(), nameWords.end(), [&](const std::string& word) {
@@ -175,7 +176,7 @@ FilesystemLocationResult FilesystemLocationResolver::resolve(
         if (error) continue;
         const bool scanningVolumeRoot = (root == root.root_path());
         const int rootScore = scoreDirectory(root, clueWords);
-        if (rootScore > 0) matches[root.string()] = {root, rootScore};
+        if (rootScore > 0) matches[Utf8::path(root)] = {root, rootScore};
 
         std::size_t visited = 0;
         fs::recursive_directory_iterator iterator(root, fs::directory_options::skip_permission_denied, error);
@@ -199,7 +200,7 @@ FilesystemLocationResult FilesystemLocationResolver::resolve(
                     const int score = scoreDirectory(entryPath, clueWords);
                     if (score > 0) {
                         const fs::path canonical = fs::weakly_canonical(entryPath, error);
-                        if (!error) matches[canonical.string()] = {canonical, score};
+                        if (!error) matches[Utf8::path(canonical)] = {canonical, score};
                         error.clear();
                     }
                 }
@@ -217,7 +218,7 @@ FilesystemLocationResult FilesystemLocationResolver::resolve(
             const bool scanningProfile = !profile.empty() && samePath(root, profile);
             const bool hasDesktopCandidate = std::any_of(matches.begin(), matches.end(),
                 [](const auto& item) {
-                    const auto pathWords = words(item.second.path.string());
+                    const auto pathWords = words(Utf8::path(item.second.path));
                     return std::any_of(pathWords.begin(), pathWords.end(),
                         [](const std::string& word) { return wordMatches(word, "desktop"); });
                 });
@@ -228,7 +229,7 @@ FilesystemLocationResult FilesystemLocationResolver::resolve(
     for (const auto& [_, candidate] : matches) result.candidates.push_back(candidate);
     std::sort(result.candidates.begin(), result.candidates.end(), [](const auto& left, const auto& right) {
         if (left.score != right.score) return left.score > right.score;
-        return lower(left.path.string()) < lower(right.path.string());
+        return lower(Utf8::path(left.path)) < lower(Utf8::path(right.path));
     });
     if (result.candidates.size() > kMaximumCandidates) result.candidates.resize(kMaximumCandidates);
 
@@ -257,7 +258,7 @@ FilesystemLocationResult FilesystemLocationResolver::resolve(
     }
     result.status = FilesystemLocationResolution::RESOLVED;
     result.path = best.path;
-    result.message = "Resolved directory from keyword search: " + best.path.string();
+    result.message = "Resolved directory from keyword search: " + Utf8::path(best.path);
     return result;
 }
 

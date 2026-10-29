@@ -23,5 +23,6 @@ public:
     MultiStepPlan decompose(const string& goal);
 
 private:
+    MultiStepPlan decomposeOnce(const string& goal, const string& feedback);
     GoalDecomposerLLM generator_;
 };

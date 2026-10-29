@@ -7,7 +7,7 @@ struct PrimitiveParameters {
     string name, location, application, target, content;
     // Filesystem-specific
     string source, destination, newName, recursive, overwrite;
-    string query, maxResults, entryType;
+    string query, maxResults, entryType, extension, modifiedWithinDays;
     // Keyboard-specific
     string key, modifiers, repeatCount;
     // Mouse-specific
@@ -15,4 +15,5 @@ struct PrimitiveParameters {
     // Browser automation
     string url, readyCondition, selector, timeoutMs;
     string role, text, elementId, submit;
+    string processId, windowHandle;
 };

@@ -1,0 +1,42 @@
+[2026-10-29 22:34:59] [INFO] [RUNTIME_START] [status=SUCCESS] Nova runtime started.
+
+NOVA
+[V] Type a request  [S] Voice input  [Q] Quit
+> 
+[NOVA INPUT]
+> [2026-10-29 22:34:59] [INFO] [INPUT_READY] [status=SUCCESS] Create a folder called NovaRecoveryQA on my Desktop and create hello.txt inside it containing "hello nova".
+
+[INPUT PRESERVED]
+Create a folder called NovaRecoveryQA on my Desktop and create hello.txt inside it containing "hello nova".
+[LLM] role=router model=nvidia/nemotron-3-ultra-550b-a55b:free request_bytes=6201 response_bytes=3473 latency_ms=9778 http=200 category=NONE
+[LLM] role=decomposer model=nvidia/nemotron-3-ultra-550b-a55b:free request_bytes=30481 response_bytes=3934 latency_ms=13221 http=200 category=NONE
+[GUIDE] 
+WORKFLOW_STATE:
+[{"dependencies":[],"evidence_ids":[],"id":"step_1","postconditions":[{"kind":"directory_exists","name":"","parent_from_step":"","path":"C:\\Users\\shour\\Desktop\\NovaRecoveryQA","source":"artifact"}],"status":"PENDING"},{"dependencies":["step_1"],"evidence_ids":[],"id":"step_2","postconditions":[{"kind":"file_content","name":"hello.txt","parent_from_step":"step_1","path":"","source":"artifact"}],"status":"PENDING"}]
+STRUCTURED_EVIDENCE:
+[]
+[LLM] role=planner model=nvidia/nemotron-3-ultra-550b-a55b:free request_bytes=57178 response_bytes=2652 latency_ms=28172 http=200 category=NONE
+[PLANNER] ready=step_1 operation: Create the NovaRecoveryQA folder on the Desktop as requested in step 1
+[OPERATION] step=step_1 filesystem.create {"name":"filesystem.create","parameters":{"location":"desktop","name":"NovaRecoveryQA"}}
+[EXECUTION] filesystem.create : SUCCESS evidence=evidence_1
+[VERIFIED] step_1: VERIFIED — Create a folder called NovaRecoveryQA on the Desktop
+[LLM] role=planner model=nvidia/nemotron-3-ultra-550b-a55b:free request_bytes=57562 response_bytes=2989 latency_ms=9793 http=200 category=NONE
+[PLANNER] ready=step_2 operation: Create hello.txt with required content inside the verified NovaRecoveryQA folder
+[OPERATION] step=step_2 filesystem.create_file {"name":"filesystem.create_file","parameters":{"content":"hello nova","location":"C:\\Users\\shour\\Desktop\\NovaRecoveryQA","name":"hello.txt"}}
+[EXECUTION] filesystem.create_file : SUCCESS evidence=evidence_2
+[VERIFIED] step_2: VERIFIED — Create hello.txt inside NovaRecoveryQA containing "hello nova"
+[2026-10-29 22:36:00] [INFO] [GOAL_RUNTIME] [status=COMPLETED] All required workflow steps are verified or validly skipped.
+
+[NOVA RESULT]
+Status: COMPLETED
+Cause: NONE
+Task completed.
+Verified progress:
+- step_1: VERIFIED — Create a folder called NovaRecoveryQA on the Desktop
+- step_2: VERIFIED — Create hello.txt inside NovaRecoveryQA containing "hello nova"
+Reason: All required workflow steps are verified or validly skipped.
+
+[NOVA]
+All required workflow steps are verified or validly skipped.
+[V] New request  [Q] Quit
+[2026-10-29 22:36:00] [INFO] [RUNTIME_STOP] [status=SUCCESS] Nova shut down.

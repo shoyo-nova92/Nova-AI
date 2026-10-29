@@ -10,7 +10,7 @@ using namespace std;
 
 Logger::Logger(const filesystem::path& logFile)
 {
-    logFileStream.open(logFile);
+    logFileStream.open(logFile, ios::app);
 }
 
 bool Logger::isReady() const

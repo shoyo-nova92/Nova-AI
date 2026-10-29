@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "llm_client.hpp"
 
 using namespace std;
 
@@ -19,4 +20,5 @@ struct ClassificationResult
     RequestType type;
     bool success;
     string message;
+    LLMFailureCategory failureCategory = LLMFailureCategory::NONE;
 };

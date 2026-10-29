@@ -26,6 +26,7 @@ int main() {
         {"filesystem.search",PrimitiveOperationType::FILESYSTEM_SEARCH},
         {"filesystem.inspect",PrimitiveOperationType::FILESYSTEM_INSPECT},
         {"application.launch",PrimitiveOperationType::APPLICATION_LAUNCH},
+        {"application.observe",PrimitiveOperationType::APPLICATION_OBSERVE},
         {"application.close",PrimitiveOperationType::APPLICATION_CLOSE},
         {"application.focus",PrimitiveOperationType::APPLICATION_FOCUS},
         {"text.write",PrimitiveOperationType::TEXT_WRITE},
@@ -37,11 +38,15 @@ int main() {
         {"browser.wait_for",PrimitiveOperationType::BROWSER_WAIT_FOR},
         {"browser.observe",PrimitiveOperationType::BROWSER_OBSERVE},
         {"browser.click",PrimitiveOperationType::BROWSER_CLICK},
-        {"browser.type",PrimitiveOperationType::BROWSER_TYPE}
+        {"browser.type",PrimitiveOperationType::BROWSER_TYPE},
+        {"environment.observe",PrimitiveOperationType::ENVIRONMENT_OBSERVE},
+        {"browser.download",PrimitiveOperationType::BROWSER_DOWNLOAD},
+        {"browser.tabs",PrimitiveOperationType::BROWSER_TABS},
+        {"browser.select_tab",PrimitiveOperationType::BROWSER_SELECT_TAB}
     };
 
     const auto names=PrimitiveRegistry::getSupportedNames();
-    check("EXPECTED_PRIMITIVE_COUNT",names.size()==22);
+    check("EXPECTED_PRIMITIVE_COUNT",names.size()==expected.size());
     check("STABLE_SORTED_NAMES",is_sorted(names.begin(),names.end()));
 
     bool types=true, schemas=true, metadata=true, uniqueFields=true, outputs=true;
@@ -55,7 +60,7 @@ int main() {
         if (!found) { types=schemas=metadata=outputs=false; continue; }
         types=types && actual==expectedType && def.type==expectedType;
         metadata=metadata && !def.description.empty() && !def.capability.empty();
-        schemas=schemas && def.parameters.has_value() && !def.parameters->fields.empty();
+        schemas=schemas && def.parameters.has_value();
         outputs=outputs && !def.outputs.empty();
         if (def.parameters) {
             set<string> seen;

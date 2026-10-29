@@ -1,0 +1,18 @@
+RuntimeReliability 50 0.020672
+Branch3RuntimeIntegration 49 0.00369622
+ReliabilityRegression 44 0.0101362
+WorkflowKernel 36 0.00789808
+WorkflowAcceptance 35 0.00877008
+SemanticEvidence 31 0.000985371
+DiscoveryDecision 25 0.00580178
+PostconditionContract 15 0.0153402
+GoalDecomposerContract 17 0.00397402
+RecoveryGuidance 11 0.0550957
+ArtifactDependency 4 0.0459013
+PrimitiveMapperContract 3 0.0222084
+FilesystemPathPolicy 3 0.0081116
+FilesystemLocationResolver 3 0.0135921
+FilesystemDiscovery 3 0.0332053
+FilesystemCreationOffline 2 0.0301468
+FilesystemManipulationOffline 3 0.0235919
+---

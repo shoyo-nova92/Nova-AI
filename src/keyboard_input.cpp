@@ -15,7 +15,16 @@ InputEvent KeyboardInput::waitForInput()
     cout << "[NOVA INPUT]" << endl;
     cout << "> ";
 
-    getline(cin, event.rawText);
+    if (!getline(cin, event.rawText)) event.rawText = "quit";
+    if (event.rawText == ":paste") {
+        cout << "Paste your request. Finish with :end on a line by itself.\n";
+        event.rawText.clear();
+        string line;
+        while (getline(cin,line) && line != ":end") {
+            if (!event.rawText.empty()) event.rawText += '\n';
+            event.rawText += line;
+        }
+    }
 
     return event;
 }

@@ -3,6 +3,11 @@ import time
 import numpy as np
 import sounddevice as sd
 from openwakeword.model import Model
+from wakeword_config import (
+    WAKEWORD_MODEL_KEY,
+    WAKEWORD_MODEL_PATH,
+    WAKEWORD_THRESHOLD,
+)
 
 
 SAMPLE_RATE = 16000
@@ -13,24 +18,21 @@ CHUNK_SIZE = int(
     SAMPLE_RATE * CHUNK_DURATION
 )
 
-WAKEWORD_THRESHOLD = 0.4
-
-
 print("Loading OpenWakeWord...")
 
 model = Model(
-    wakeword_models=["hey_jarvis_v0.1"],
+    wakeword_models=[str(WAKEWORD_MODEL_PATH)],
     inference_framework="onnx"
 )
 
 print("OpenWakeWord loaded successfully.")
-print(f"Wake word: Hey Jarvis")
+print("Wake word: Hey Nova (hey-No-Va)")
 print(f"Threshold: {WAKEWORD_THRESHOLD}")
 print()
 print("Test:")
 print("1. Stay silent for a few seconds.")
 print("2. Speak normal sentences without saying the wake word.")
-print("3. Say 'Hey Jarvis' quietly.")
+print("3. Say 'Hey Nova' (hey-No-Va) quietly.")
 print("4. Repeat several times.")
 print()
 print("Press Ctrl+C to stop.")
@@ -65,7 +67,7 @@ with sd.InputStream(
 
         score = float(
             prediction.get(
-                "hey_jarvis_v0.1",
+                WAKEWORD_MODEL_KEY,
                 0.0
             )
         )
@@ -90,7 +92,7 @@ with sd.InputStream(
 
             print()
             print("========================================")
-            print("[WAKE DETECTED] Hey Jarvis")
+            print("[WAKE DETECTED] Hey Nova")
             print(f"Confidence: {score:.4f}")
             print(f"Max score: {max_score:.4f}")
             print("========================================")

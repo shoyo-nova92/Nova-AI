@@ -1,0 +1,2273 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,6 +14,7 @@
+ 
+ add_executable(Nova
+     src/main.cpp
++    src/runtime_supervisor.cpp
+     src/logger.cpp
+     src/input_normalizer.cpp
+     src/part_a_bridge.cpp
+@@ -425,3 +426,13 @@
+     nlohmann_json::nlohmann_json
+     shell32 ole32 psapi user32 winhttp
+ )
++
++# Offline supervisor/recovery coverage shares the production Branch 3 sources.
++get_target_property(RUNTIME_TEST_SOURCES Branch3RuntimeIntegrationTest SOURCES)
++list(REMOVE_ITEM RUNTIME_TEST_SOURCES src/branch3_runtime_test.cpp)
++add_executable(RuntimeReliabilityTest src/runtime_reliability_test.cpp src/runtime_supervisor.cpp ${RUNTIME_TEST_SOURCES})
++target_include_directories(RuntimeReliabilityTest PRIVATE src)
++target_link_libraries(RuntimeReliabilityTest PRIVATE CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 psapi user32 winhttp)
++enable_testing()
++add_test(NAME RuntimeReliability COMMAND RuntimeReliabilityTest)
++add_test(NAME Branch3RuntimeIntegration COMMAND Branch3RuntimeIntegrationTest)
+diff --git a/python/browser_agent.py b/python/browser_agent.py
+--- a/python/browser_agent.py
++++ b/python/browser_agent.py
+@@ -25,6 +25,23 @@
+ _playwright = None
+ _import_error = None
+ _observation_token = ""
++
++
++class StaleElementError(ValueError):
++    pass
++
++
++def failure_category(exc):
++    if isinstance(exc, StaleElementError):
++        return "stale_element"
++    # Playwright is loaded lazily; importing this module must work without it.
++    try:
++        from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
++        if isinstance(exc, PlaywrightTimeoutError):
++            return "browser_timeout"
++    except ImportError:
++        pass
++    return "invalid_plan" if isinstance(exc, ValueError) else "browser_unavailable"
+ 
+ 
+ def validate_url(value: str) -> str:
+@@ -273,12 +290,12 @@
+             # Resolve the exact node tagged by the latest observation. Never
+             # reinterpret an observed ID as an index in a newly enumerated list.
+             if not re.fullmatch(r"[0-9a-f]{32}-[1-9][0-9]*", element_id):
+-                raise ValueError("element_id is invalid or stale; observe again.")
++                raise StaleElementError("element_id is invalid or stale; observe again.")
+             locator = _page.locator(f'[data-nova-observation-token="{element_id}"]')
+             if locator.count() != 1:
+-                raise ValueError("Observed element ID is stale or no longer unique; observe again.")
++                raise StaleElementError("Observed element ID is stale or no longer unique; observe again.")
+             if not locator.is_visible():
+-                raise ValueError("Observed target is no longer visible; observe again.")
++                raise StaleElementError("Observed target is no longer visible; observe again.")
+         else:
+             if not role or not text:
+                 raise ValueError("Provide element_id or both role and text.")
+@@ -347,7 +364,7 @@
+             result = execute(payload)
+             self.send_json(200, result)
+         except Exception as exc:
+-            self.send_json(500, {"success": False, "error": str(exc)})
++            self.send_json(500, {"success": False, "error": str(exc), "failure_category": failure_category(exc)})
+ 
+ 
+ def main():
+diff --git a/python/browser_agent_test.py b/python/browser_agent_test.py
+--- a/python/browser_agent_test.py
++++ b/python/browser_agent_test.py
+@@ -1,8 +1,12 @@
+ import unittest
+-from browser_agent import validate_url, validate_timeout, classify_page
++from browser_agent import validate_url, validate_timeout, classify_page, failure_category, StaleElementError
+ 
+ 
+ class BrowserAgentValidationTests(unittest.TestCase):
++    def test_machine_readable_stale_failure(self):
++        self.assertEqual(failure_category(StaleElementError("any diagnostic")), "stale_element")
++        self.assertEqual(failure_category(ValueError("stale in prose is not a category")), "invalid_plan")
++
+     def test_accepts_http_and_https(self):
+         self.assertEqual(validate_url("https://web.whatsapp.com"), "https://web.whatsapp.com")
+         self.assertEqual(validate_url("http://localhost:8080/app"), "http://localhost:8080/app")
+diff --git a/src/branch3_runtime.cpp b/src/branch3_runtime.cpp
+--- a/src/branch3_runtime.cpp
++++ b/src/branch3_runtime.cpp
+@@ -2,6 +2,11 @@
+ #include "primitive_registry.hpp"
+ #include "next_action_planner.hpp"
+ #include "state_manager.hpp"
++#include "browser_state.hpp"
++#include <filesystem>
++#include <set>
++#include <fstream>
++#include <cstdlib>
+ #include <nlohmann/json.hpp>
+ #include <exception>
+ #include <algorithm>
+@@ -29,38 +34,10 @@
+     for (const auto& step : plan.steps) if (step.id == id) return &step;
+     return nullptr;
+ }
+-std::string snapshotSignature(const std::string& observationMessage) {
+-    const std::string marker = "Browser observation: ";
+-    const auto markerPos = observationMessage.find(marker);
+-    if (markerPos == std::string::npos) return observationMessage;
+-    const std::string payload = observationMessage.substr(markerPos + marker.size());
+-    try {
+-        const auto snapshot = nlohmann::json::parse(payload);
+-        nlohmann::json stable = nlohmann::json::object();
+-        for (const char* key : {"url", "title", "page_kind", "visible_text", "elements", "focus"})
+-            if (snapshot.contains(key)) stable[key] = snapshot[key];
+-        return stable.dump();
+-    } catch (...) {
+-        return observationMessage;
+-    }
+-}
+-
+ std::string lower(std::string value) {
+     std::transform(value.begin(), value.end(), value.begin(),
+         [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+     return value;
+-}
+-
+-bool browserObservationNeeded(const MultiStepPlan& guide) {
+-    for (const auto& step : guide.steps) {
+-        const std::string description = lower(step.description);
+-        if (description.find("browser") != std::string::npos ||
+-            description.find("website") != std::string::npos ||
+-            description.find("web page") != std::string::npos ||
+-            description.find("http://") != std::string::npos ||
+-            description.find("https://") != std::string::npos) return true;
+-    }
+-    return false;
+ }
+ 
+ std::string expectedCreatedFolderName(const std::string& description) {
+@@ -186,189 +163,345 @@
+ }
+ }
+ 
+-Branch3Runtime::Branch3Runtime() = default;
+-Branch3Runtime::Branch3Runtime(GoalDecomposerLLM decomposerGenerator, PrimitiveMapperLLM mapperGenerator, NextActionLLM plannerGenerator)
+-    : decomposer_(std::move(decomposerGenerator)), mapper_(std::move(mapperGenerator)),
++
++struct Branch3Runtime::Session {
++    explicit Session(std::string goal) : goal(std::move(goal)), state(this->goal) {}
++    std::string goal;
++    StateManager state;
++    Branch3RuntimeResult result;
++    std::set<std::string> verifiedSteps;
++    std::set<std::string> staleReferences;
++    bool browserActive = false;
++    bool unrepairedValidation = false;
++    bool unresolvedExecutionFailure = false;
++    unsigned validationFailures = 0;
++    unsigned browserRecoveries = 0;
++    unsigned noChange = 0;
++    std::string lastBrowserAction;
++    std::string snapshotBeforeAction;
++    bool readinessTimedOut = false;
++    bool pendingNavigation = false;
++    std::string pendingTypedContent;
++};
++
++namespace {
++RuntimeCause llmCause(LLMFailureCategory failure) {
++    switch (failure) {
++        case LLMFailureCategory::TIMEOUT: return RuntimeCause::LLM_TIMEOUT;
++        case LLMFailureCategory::RATE_LIMIT: return RuntimeCause::LLM_RATE_LIMIT;
++        case LLMFailureCategory::AUTH_ERROR: return RuntimeCause::LLM_AUTH_ERROR;
++        case LLMFailureCategory::INVALID_RESPONSE: return RuntimeCause::LLM_INVALID_RESPONSE;
++        default: return RuntimeCause::LLM_PROVIDER_ERROR;
++    }
++}
++bool transient(LLMFailureCategory failure) {
++    return failure == LLMFailureCategory::TIMEOUT || failure == LLMFailureCategory::RATE_LIMIT ||
++        failure == LLMFailureCategory::PROVIDER_ERROR || failure == LLMFailureCategory::CONNECTION_ERROR;
++}
++RuntimeCause executionCause(const std::string& category) {
++    if (category == "stale_element") return RuntimeCause::STALE_ELEMENT;
++    if (category == "browser_timeout") return RuntimeCause::BROWSER_TIMEOUT;
++    if (category == "auth_required") return RuntimeCause::AUTH_REQUIRED;
++    if (category == "target_not_found" || category == "not_found") return RuntimeCause::TARGET_NOT_FOUND;
++    if (category == "already_exists") return RuntimeCause::ALREADY_EXISTS;
++    if (category == "access_denied" || category == "protected_location") return RuntimeCause::ACCESS_DENIED;
++    return RuntimeCause::UNKNOWN;
++}
++bool matchesPostcondition(const MultiStepAction& step, const PrimitiveOperation& operation,
++                          const ExecutionResult& evidence) {
++    if (step.postconditionKind.empty() || !evidence.postconditionVerified ||
++        step.postconditionKind != evidence.verifiedKind || evidence.resolvedPath.empty()) return false;
++    if (step.postconditionKind == "directory_exists" && operation.name != "filesystem.create") return false;
++    if (step.postconditionKind == "file_content" && operation.name != "filesystem.create_file") return false;
++    if (step.contentRequirement == "required" &&
++        operation.parameters.content.find_first_not_of(" \t\r\n") == std::string::npos) return false;
++    auto path = std::filesystem::path(evidence.resolvedPath);
++    if (path.filename().empty()) path = path.parent_path();
++    if (lower(path.filename().string()) != lower(step.artifactName)) return false;
++    // Reuse the existing destination-clue guard; no new path resolution here.
++    return locationContainsExpectedTokens(path.parent_path().string(),
++        expectedParentLocationTokens("artifact at " + step.artifactLocation + "/" + step.artifactName));
++}
++}
++
++Branch3Runtime::Branch3Runtime() : executor_([](const PrimitiveOperation& op) { return PrimitiveExecutionEngine{}.execute(op); }) {}
++Branch3Runtime::~Branch3Runtime() = default;
++Branch3Runtime::Branch3Runtime(GoalDecomposerLLM decomposerGenerator, PrimitiveMapperLLM mapperGenerator,
++    NextActionLLM plannerGenerator, std::function<ExecutionResult(const PrimitiveOperation&)> executor)
++    : executor_(executor ? std::move(executor) : [](const PrimitiveOperation& op) { return PrimitiveExecutionEngine{}.execute(op); }),
++      decomposer_(std::move(decomposerGenerator)), mapper_(std::move(mapperGenerator)),
+       planner_(plannerGenerator ? NextActionPlanner(std::move(plannerGenerator)) : NextActionPlanner()) {}
+-
+-Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
+-    Branch3RuntimeResult result;
+-    if (goal.find_first_not_of(" \t\r\n") == std::string::npos) { result.message = "Goal is empty."; return result; }
++bool Branch3Runtime::hasActiveSession() const { return session_ != nullptr; }
++void Branch3Runtime::abandonSession() { session_.reset(); }
++Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) { return start(goal); }
++Branch3RuntimeResult Branch3Runtime::start(const std::string& goal) {
++    session_ = std::make_unique<Session>(goal);
++    auto& result = session_->result;
++    result.blockedStage = "Goal decomposition";
++    if (goal.find_first_not_of(" \t\r\n") == std::string::npos) {
++        result.message = "Goal is empty."; result.cause = RuntimeCause::INVALID_PLAN; return result;
++    }
+     try { result.decomposedPlan = decomposer_.decompose(goal); }
+-    catch (const std::exception& e) { result.message = std::string("Goal decomposition failed: ") + e.what(); return result; }
+-    catch (...) { result.message = "Goal decomposition failed with an unknown exception."; return result; }
++    catch (const std::exception& e) { result.message = std::string("Goal decomposition failed: ") + e.what(); result.cause = RuntimeCause::INVALID_PLAN; return result; }
++    catch (...) { result.message = "Goal decomposition failed."; result.cause = RuntimeCause::INVALID_PLAN; return result; }
+     if (!result.decomposedPlan.valid || result.decomposedPlan.steps.empty()) {
+-        result.message = "Goal decomposition failed: " + result.decomposedPlan.message; return result;
+-    }
+-
+-    StateManager state(goal);
+-    PrimitiveExecutionEngine engine;
++        result.message = "Goal decomposition failed: " + result.decomposedPlan.message;
++        result.cause = RuntimeCause::INVALID_PLAN; return result;
++    }
+     result.mappedPlan = result.decomposedPlan;
+     result.mappedPlan.valid = true;
+     result.mappedPlan.steps.clear();
+     result.planningSuccess = true;
+     result.executionStarted = true;
+-    constexpr unsigned MAX_ITERATIONS = 12;
++    return advance();
++}
++Branch3RuntimeResult Branch3Runtime::continueSession() {
++    if (!session_) { Branch3RuntimeResult out; out.message = "No active goal to continue."; out.cause = RuntimeCause::INVALID_PLAN; return out; }
++    if (!session_->result.decomposedPlan.valid) {
++        const auto goal = session_->goal;
++        return start(goal);
++    }
++    if (session_->result.outcome == RuntimeOutcome::COMPLETED) return session_->result;
++    // A user continuation grants a fresh bounded attempt budget, preserving progress.
++    session_->validationFailures = 0;
++    session_->browserRecoveries = 0;
++    session_->noChange = 0;
++    session_->lastBrowserAction.clear();
++    session_->staleReferences.clear();
++    session_->state.addHistory("User requested continuation; re-observe the environment and resolve the outstanding stage.");
++    return advance();
++}
++Branch3RuntimeResult Branch3Runtime::retryBlockedDependency() { return continueSession(); }
++Branch3RuntimeResult Branch3Runtime::advance() {
++    auto& s = *session_;
++    auto& result = s.result;
++    auto& state = s.state;
+     const std::string catalog = liveCatalog();
+-    const bool observeBrowser = browserObservationNeeded(result.decomposedPlan);
+-    unsigned validationFailures = 0;
+-    bool unrepairedValidation = false;
+-    bool unresolvedExecutionFailure = false;
+-    std::string lastBrowserAction;
+-    std::string snapshotBeforeLastBrowserAction;
+-
+-    for (unsigned iteration = 0; iteration < MAX_ITERATIONS; ++iteration) {
++    auto finish = [&](RuntimeOutcome outcome, RuntimeCause cause, std::string message) {
++        result.outcome = outcome; result.cause = cause;
++        result.success = outcome == RuntimeOutcome::COMPLETED;
++        result.message = std::move(message);
++        if (result.success) result.blockedStage.clear();
++        return result;
++    };
++    auto allVerified = [&]() {
++        return !result.decomposedPlan.steps.empty() && std::all_of(result.decomposedPlan.steps.begin(), result.decomposedPlan.steps.end(),
++            [&](const MultiStepAction& step) { return !step.postconditionKind.empty() && s.verifiedSteps.contains(step.id); });
++    };
++    auto progress = [&](std::string evidence) {
++        if (std::find(result.verifiedProgress.begin(), result.verifiedProgress.end(), evidence) == result.verifiedProgress.end())
++            result.verifiedProgress.push_back(std::move(evidence));
++    };
++    auto execute = [&](const PrimitiveOperation& operation) {
++        auto execution = executor_(operation);
++        if (!execution.browserData.empty()) {
++            if (const char* debug = std::getenv("NOVA_BROWSER_DEBUG_LOG")) {
++                std::ofstream log(debug, std::ios::app);
++                log << operation.name << " " << execution.browserData << '\n';
++            }
++        }
++        return execution;
++    };
++    for (unsigned attempt = 0; attempt < 12; ++attempt) {
++        if (allVerified()) return finish(RuntimeOutcome::COMPLETED, RuntimeCause::NONE, "All requested postconditions verified.");
+         state.nextIteration();
+-        std::string observed;
+         std::string currentSnapshot;
+-        if (observeBrowser) {
+-            // Browser operations require a fresh live DOM observation. Filesystem
+-            // goals instead use explicit inspect/list/search evidence.
++        if (s.browserActive) {
+             PrimitiveOperation observe{};
+             observe.name = "browser.observe"; observe.type = PrimitiveOperationType::BROWSER_OBSERVE; observe.resolved = true;
+-            auto observation = engine.execute(observe);
+-            observed = observation.message;
+-            if (observation.status != ExecutionStatus::SUCCESS) observed = "Browser observation unavailable: " + observation.message;
+-            state.setObservation(observed);
+-            currentSnapshot = snapshotSignature(observed);
+-        } else {
+-            observed = "No automatic filesystem observation. Use filesystem.inspect, filesystem.list_directory, or filesystem.search when location evidence is needed.";
+-            state.setObservation(observed);
+-        }
+-        result.stateLog += state.render() + "\n";
+-
+-        if (!lastBrowserAction.empty()) {
+-            if (currentSnapshot == snapshotBeforeLastBrowserAction) {
+-                const std::string diagnostic = "No observable state change after " + lastBrowserAction +
+-                    "; stopping to prevent repeated blind browser actions.";
+-                state.addHistory(diagnostic);
+-                result.stateLog += "[PROGRESS CHECK] " + diagnostic + "\n";
+-                result.message = "Branch 3 stopped: " + diagnostic;
+-                return result;
+-            }
+-            // The prior action changed the observed page; a new action may now be planned.
+-            lastBrowserAction.clear();
+-            snapshotBeforeLastBrowserAction.clear();
+-        }
+-
+-        NextActionDecision decision = planner_.choose(goal, result.decomposedPlan, state.render(), catalog);
+-        result.stateLog += "[PLANNER] " + decision.status + ": " + decision.message + "\n";
++            result.blockedStage = "Fresh browser observation";
++            auto observation = execute(observe);
++            if (observation.status != ExecutionStatus::SUCCESS)
++                return finish(RuntimeOutcome::EXTERNAL_UNAVAILABLE, executionCause(observation.failureCategory), observation.message);
++            const std::string raw = observation.browserData.empty() ? observation.message : observation.browserData;
++            state.setObservation(raw);
++            currentSnapshot = BrowserState::fingerprint(raw);
++            const auto snapshot = BrowserState::snapshot(raw);
++            if (snapshot.value("auth_required", false))
++                return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::AUTH_REQUIRED, "Complete authentication in the controlled browser, then continue.");
++            if (s.pendingNavigation && !snapshot.value("url", std::string{}).empty()) {
++                progress("Browser page observed: " + snapshot.value("url", std::string{}).substr(0, 512));
++                s.pendingNavigation = false;
++            }
++            if (!s.pendingTypedContent.empty()) {
++                bool found = snapshot.contains("focus") && snapshot["focus"].is_object() &&
++                    snapshot["focus"].value("value", std::string{}) == s.pendingTypedContent;
++                if (snapshot.contains("elements") && snapshot["elements"].is_array())
++                    for (const auto& element : snapshot["elements"])
++                        found = found || (element.value("editable", false) && element.value("value", std::string{}) == s.pendingTypedContent);
++                if (found) progress("Requested input text observed in an editable browser control.");
++                s.pendingTypedContent.clear();
++            }
++            if (!s.lastBrowserAction.empty()) {
++                if (!currentSnapshot.empty() && currentSnapshot == s.snapshotBeforeAction) {
++                    state.addHistory("No semantic state change after " + s.lastBrowserAction + "; inspect and choose a different action.");
++                    if (++s.noChange >= 2)
++                        return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::NO_STATE_CHANGE, "Browser actions produced no meaningful state change twice.");
++                } else if (!currentSnapshot.empty()) {
++                    s.noChange = 0;
++                    if (s.lastBrowserAction == "browser.click") progress("Browser action followed by an observed semantic page transition.");
++                    if (s.readinessTimedOut) {
++                        s.unresolvedExecutionFailure = false;
++                        result.recovery = "Readiness timed out; fresh observation confirms a semantic page transition. Replan from the current DOM.";
++                        state.addHistory(result.recovery);
++                    }
++                }
++                s.lastBrowserAction.clear();
++                s.readinessTimedOut = false;
++            }
++        } else state.setObservation("Use explicit filesystem inspect/list/search for location evidence. The controlled browser is not active; browser.navigate can activate it.");
++
++        result.blockedStage = "Next-action planning";
++        for (const auto& pending : result.decomposedPlan.steps) {
++            if (!pending.postconditionKind.empty() && !s.verifiedSteps.contains(pending.id)) {
++                result.blockedStage += " for " + pending.id + ": " + pending.description;
++                break;
++            }
++        }
++        auto decision = planner_.choose(s.goal, result.decomposedPlan, state.render(), catalog);
++        if (transient(decision.failureCategory)) {
++            result.stateLog += "[PLANNER] retry 1/1 after transient dependency failure\n";
++            // Same observed state. Never execute again merely because a planner call failed.
++            decision = planner_.choose(s.goal, result.decomposedPlan, state.render(), catalog);
++        }
++        if (decision.failureCategory != LLMFailureCategory::NONE)
++            return finish(RuntimeOutcome::EXTERNAL_UNAVAILABLE, llmCause(decision.failureCategory), decision.message);
++        result.stateLog += "[PLANNER] " + decision.status + ": " + BrowserState::summary(decision.message) + "\n";
+         if (decision.status == "done") {
+-            if (unrepairedValidation || unresolvedExecutionFailure) {
+-                result.message = "Branch 3 blocked: planner claimed completion with an unrepaired rejected operation.";
+-                return result;
+-            }
+-            for (const auto& required : result.decomposedPlan.steps) {
+-                if (required.contentRequirement != "required") continue;
+-                const bool fulfilled = std::any_of(result.mappedPlan.steps.begin(), result.mappedPlan.steps.end(),
+-                    [&](const MultiStepAction& step) {
+-                        return step.id == required.id && std::any_of(step.operations.begin(), step.operations.end(),
+-                            [](const PrimitiveOperation& op) {
+-                                return (op.name == "filesystem.create_file" || op.name == "text.write") &&
+-                                    op.parameters.content.find_first_not_of(" \t\r\n") != std::string::npos;
+-                            });
+-                    });
+-                if (!fulfilled) {
+-                    result.message = "Branch 3 blocked: requested content has not been written and verified for " + required.id;
+-                    return result;
+-                }
+-            }
+-            result.success = true;
+-            result.message = "Branch 3 goal reported complete by planner after fresh environment observation: " + decision.message;
+-            return result;
+-        }
+-        if (decision.status == "ask_user" || decision.status == "blocked") {
+-            result.message = (decision.status == "ask_user" ? "Needs user input: " : "Branch 3 blocked: ") + decision.message;
+-            return result;
+-        }
+-        if (decision.status != "operation") { result.message = "Branch 3 blocked: planner returned no actionable decision."; return result; }
+-        const MultiStepAction* sourceStep = findStep(result.decomposedPlan, decision.stepId);
+-        if (!sourceStep) { result.message = "Branch 3 blocked: planner selected an unknown guide step ID '" + decision.stepId + "'."; return result; }
++            if (s.unrepairedValidation || s.unresolvedExecutionFailure)
++                return finish(RuntimeOutcome::PARTIAL_SUCCESS, RuntimeCause::VALIDATION_ERROR, "Completion rejected: an operation remains unresolved.");
++            for (const auto& step : result.decomposedPlan.steps) {
++                if (!step.postconditionKind.empty() && !s.verifiedSteps.contains(step.id))
++                    return finish(RuntimeOutcome::PARTIAL_SUCCESS, RuntimeCause::VALIDATION_ERROR, "Completion rejected: missing verified postcondition for " + step.id);
++                if (step.contentRequirement == "required" && !s.verifiedSteps.contains(step.id))
++                    return finish(RuntimeOutcome::PARTIAL_SUCCESS, RuntimeCause::VALIDATION_ERROR, "Completion rejected: requested content has not been verified for " + step.id);
++            }
++            if (!s.browserActive && result.operationResults.empty())
++                return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::NO_STATE_CHANGE, "Completion has no execution or environment evidence.");
++            // Non-artifact goals still need a fresh observation, not primitive success alone.
++            if (s.browserActive && currentSnapshot.empty())
++                return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::NO_STATE_CHANGE, "Completion requires a usable browser observation.");
++            return finish(RuntimeOutcome::COMPLETED, RuntimeCause::NONE, "Planner verified the remaining goal from current environment evidence: " + decision.message);
++        }
++        if (decision.status == "ask_user") return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::UNKNOWN, decision.message);
++        if (decision.status != "operation") return finish(RuntimeOutcome::PARTIAL_SUCCESS, RuntimeCause::UNKNOWN, decision.message);
++        const auto* sourceStep = findStep(result.decomposedPlan, decision.stepId);
++        if (!sourceStep) return finish(RuntimeOutcome::FAILED, RuntimeCause::INVALID_PLAN, "Planner selected an unknown guide step.");
+         try {
+             const auto raw = nlohmann::json::parse(decision.operationJson);
+             if (raw.value("name", std::string{}) == "filesystem.create_file") {
+                 const auto& params = raw.at("parameters");
+                 result.stateLog += "[PLANNER CONTENT] source=planner_json present=" +
+-                    std::string(params.contains("content") ? "true" : "false") +
+-                    " bytes=" + std::to_string(params.contains("content") && params["content"].is_string()
+-                        ? params["content"].get<std::string>().size() : 0) + "\n";
+-            }
+-        } catch (...) { /* Mapper reports malformed operations below. */ }
+-        MultiStepPlan mapped = mapper_.mapStep(*sourceStep, decision.operationJson);
++                    std::string(params.contains("content") ? "true" : "false") + " bytes=" +
++                    std::to_string(params.contains("content") && params["content"].is_string() ?
++                        params["content"].get<std::string>().size() : 0) + "\n";
++            }
++        } catch (...) { /* Schema validation below produces the actionable error. */ }
++        auto mapped = mapper_.mapStep(*sourceStep, decision.operationJson);
++        auto reject = [&](const std::string& message) {
++            state.addHistory("Rejected operation: " + message + ". Repair with complete parameters; do not claim done.");
++            result.stateLog += "[VALIDATION] " + BrowserState::summary(message) + "\n";
++            s.unrepairedValidation = true;
++            return ++s.validationFailures > 1;
++        };
+         if (!mapped.valid || mapped.steps.empty() || mapped.steps.front().operations.size() != 1) {
+-            state.addHistory("Rejected planner operation: " + mapped.message);
+-            result.stateLog += "[VALIDATION] rejected: " + mapped.message + "\n";
+-            unrepairedValidation = true;
+-            if (++validationFailures > 1) {
+-                result.message = "Planner operation failed registry/schema validation after one repair attempt: " + mapped.message;
+-                return result;
+-            }
+-            state.addHistory("Repair the rejected operation with complete parameters. One validation repair attempt remains; do not claim done.");
++            if (reject(mapped.message)) return finish(RuntimeOutcome::FAILED, RuntimeCause::VALIDATION_ERROR, mapped.message);
+             continue;
+         }
+-        unrepairedValidation = false;
+-        const PrimitiveOperation& operation = mapped.steps.front().operations.front();
+-
+-        // A missing destination is not permission to manufacture its ancestors.
+-        // The create target must match the folder explicitly requested by the
+-        // selected logical step; location path segments are not new targets.
+-        if (operation.type == PrimitiveOperationType::FILESYSTEM_CREATE &&
+-            operation.name == "filesystem.create") {
+-            const std::string expected = expectedCreatedFolderName(sourceStep->description);
+-            const auto expectedParent = expectedParentLocationTokens(sourceStep->description);
+-            const bool targetMismatch = !expected.empty() &&
+-                lower(expected) != lower(operation.parameters.name);
+-            const bool locationMismatch = !expectedParent.empty() &&
+-                !locationContainsExpectedTokens(operation.parameters.location, expectedParent);
+-            if (targetMismatch || locationMismatch) {
+-                const std::string category = "planner_target_mismatch";
+-                state.recordFailure(operationSignature(operation, category));
+-                std::string diagnostic = "Rejected filesystem.create for '" +
+-                    operation.parameters.name + "' at '" + operation.parameters.location + "'.";
+-                if (targetMismatch)
+-                    diagnostic += " The selected step requests folder '" + expected + "'.";
+-                if (locationMismatch)
+-                    diagnostic += " The destination does not contain the parent-location clues from the selected step.";
+-                diagnostic += " Resolve the existing destination; do not create missing path ancestors.";
+-                state.addHistory(diagnostic);
+-                result.stateLog += "[VALIDATION] rejected: " + diagnostic + "\n";
++        const auto& operation = mapped.steps.front().operations.front();
++        if (operation.name.starts_with("browser.")) {
++            if (!s.browserActive && operation.name != "browser.navigate" && operation.name != "browser.observe") {
++                s.browserActive = true;
++                state.addHistory("Browser activated; fresh observation required before choosing a DOM target.");
+                 continue;
+             }
+-        }
+-
+-        if (state.repeatedFailure(operationKey(operation))) {
+-            result.message = "Branch 3 blocked: the same operation with the same normalized arguments and failure category failed three times consecutively."; return result;
+-        }
+-        if (operation.name == "browser.click" || operation.name == "browser.type") {
+-            lastBrowserAction = operation.name;
+-            snapshotBeforeLastBrowserAction = currentSnapshot;
+-        }
+-
+-        Branch3OperationResult operationResult;
+-        operationResult.stepId = sourceStep->id;
+-        operationResult.operationIndex = 0;
+-        operationResult.execution = engine.execute(operation);
+-        result.operationResults.push_back(operationResult);
+-        if (operationResult.execution.status == ExecutionStatus::SUCCESS) {
+-            unresolvedExecutionFailure = false;
++            s.browserActive = true;
++        }
++        if (sourceStep->postconditionKind == "file_content" && operation.name == "text.write") {
++            if (reject("This step requests a new artifact. Use filesystem.create_file; do not overwrite an existing collision through text.write."))
++                return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::ALREADY_EXISTS, "Creating a new artifact cannot overwrite an existing file without a separate explicit write request.");
++            continue;
++        }
++        if (s.browserActive && operation.name.starts_with("keyboard.")) {
++            if (reject("Global keyboard input is not valid in the controlled browser. Use an observed DOM control."))
++                return finish(RuntimeOutcome::FAILED, RuntimeCause::VALIDATION_ERROR, "Repeated global keyboard action rejected.");
++            continue;
++        }
++        if (!operation.parameters.elementId.empty() && s.staleReferences.contains(operation.parameters.elementId)) {
++            if (reject("The same stale DOM reference was proposed again. Choose from the fresh observation."))
++                return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::STALE_ELEMENT, "Repeated stale browser reference rejected.");
++            continue;
++        }
++        if (operation.name == "filesystem.create") {
++            const auto expected = expectedCreatedFolderName(sourceStep->description);
++            const auto parent = expectedParentLocationTokens(sourceStep->description);
++            if ((!expected.empty() && lower(expected) != lower(operation.parameters.name)) ||
++                (!parent.empty() && !locationContainsExpectedTokens(operation.parameters.location, parent))) {
++                if (reject("Resolve the requested existing destination; do not create path ancestors."))
++                    return finish(RuntimeOutcome::FAILED, RuntimeCause::VALIDATION_ERROR, "Requested directory target mismatch.");
++                continue;
++            }
++        }
++        const bool mutation = operation.name == "filesystem.create" || operation.name == "filesystem.create_file";
++        if (mutation) {
++            bool missingDependency = false;
++            for (const auto& dep : sourceStep->dependencies) {
++                const auto* required = findStep(result.decomposedPlan, dep);
++                if (required && !required->postconditionKind.empty() && !s.verifiedSteps.contains(dep)) missingDependency = true;
++            }
++            if (missingDependency) {
++                if (reject("The requested prerequisite has not been verified. Complete it before this mutation."))
++                    return finish(RuntimeOutcome::FAILED, RuntimeCause::INVALID_PLAN, "Unverified artifact dependency.");
++                continue;
++            }
++        }
++        if (state.repeatedFailure(operationKey(operation)))
++            return finish(RuntimeOutcome::NEEDS_USER, RuntimeCause::UNKNOWN, "The same operation failed three times; user intervention required.");
++        s.unrepairedValidation = false;
++        result.blockedStage = sourceStep->id + ": " + sourceStep->description;
++        auto execution = execute(operation);
++        const bool satisfied = matchesPostcondition(*sourceStep, operation, execution);
++        const bool existingDirectory = satisfied && operation.name == "filesystem.create" && execution.failureCategory == "already_exists";
++        result.operationResults.push_back({sourceStep->id, 0, execution});
++        result.operationResults.back().execution.browserData.clear();
++        const std::string evidence = BrowserState::summary(resultEvidence(execution));
++        if (execution.status == ExecutionStatus::SUCCESS || existingDirectory) {
+             state.recordSuccess();
+-            const std::string evidence = resultEvidence(operationResult.execution);
+-            state.addHistory("Succeeded " + operation.name + ": " + evidence);
+-            state.setObservation("Filesystem/action result: " + evidence);
++            state.addHistory(operation.name + " succeeded: " + evidence);
+             result.mappedPlan.steps.push_back(mapped.steps.front());
+-            result.stateLog += "[EXECUTION] success " + operation.name + ": " + evidence + "\n";
++            result.stateLog += "[EXECUTION] " + operation.name + (existingDirectory ? " : SATISFIED (already exists)\n" : " : SUCCESS\n");
++            if (satisfied || (sourceStep->postconditionKind.empty() && sourceStep->contentRequirement == "required" &&
++                execution.postconditionVerified && execution.verifiedKind == "file_content")) {
++                s.verifiedSteps.insert(sourceStep->id);
++                result.verifiedProgress.push_back(sourceStep->id + ": " + evidence);
++                s.unresolvedExecutionFailure = false;
++            }
++            if (operation.name == "browser.navigate") s.pendingNavigation = true;
++            if (operation.name == "browser.type") s.pendingTypedContent = operation.parameters.content;
++            if (operation.name == "browser.click" || operation.name == "browser.type") {
++                s.lastBrowserAction = operation.name;
++                s.snapshotBeforeAction = currentSnapshot;
++            }
+         } else {
+-            unresolvedExecutionFailure = true;
+-            const std::string failureSignature = operationSignature(operation,
+-                operationResult.execution.failureCategory);
+-            state.recordFailure(failureSignature);
+-            const std::string evidence = resultEvidence(operationResult.execution);
+-            state.addHistory("Failed " + operation.name + " [" +
+-                operationResult.execution.failureCategory + "]: " + evidence);
+-            state.setObservation("Filesystem/action failure: " + evidence);
+-            result.stateLog += "[EXECUTION] failed " + operation.name + ": " + evidence + "\n";
+-        }
+-    }
+-    result.message = "Branch 3 stopped after reaching the maximum of 12 observe-plan-execute iterations without verified completion.";
+-    return result;
+-}
++            s.unresolvedExecutionFailure = true;
++            result.lastExecutionIssue = operation.name + " [" + execution.failureCategory + "]: " + evidence;
++            state.recordFailure(operationSignature(operation, execution.failureCategory));
++            state.addHistory(result.lastExecutionIssue);
++            result.stateLog += "[EXECUTION] " + operation.name + " : FAILED [" + execution.failureCategory + "]\n";
++            if (execution.failureCategory == "stale_element" || execution.failureCategory == "browser_timeout") {
++                if (++s.browserRecoveries > 2)
++                    return finish(RuntimeOutcome::NEEDS_USER, executionCause(execution.failureCategory), "Browser recovery budget exhausted; continue after checking the page.");
++                if (!operation.parameters.elementId.empty()) s.staleReferences.insert(operation.parameters.elementId);
++                s.lastBrowserAction = operation.name;
++                s.snapshotBeforeAction = currentSnapshot;
++                s.readinessTimedOut = execution.failureCategory == "browser_timeout";
++                result.recovery = "Fresh browser observation required; discard the previous DOM reference and replan.";
++                result.stateLog += "[RECOVERY] " + result.recovery + "\n";
++                if (execution.failureCategory == "stale_element") s.unresolvedExecutionFailure = false;
++            }
++        }
++        if (!s.browserActive) state.setObservation(evidence);
++        if (allVerified()) return finish(RuntimeOutcome::COMPLETED, RuntimeCause::NONE, "All requested postconditions verified.");
++    }
++    return finish(RuntimeOutcome::PARTIAL_SUCCESS, RuntimeCause::ITERATION_LIMIT, "Reached the bounded limit of 12 iterations. Continue to re-observe and resume the same goal.");
++}
+diff --git a/src/branch3_runtime.hpp b/src/branch3_runtime.hpp
+--- a/src/branch3_runtime.hpp
++++ b/src/branch3_runtime.hpp
+@@ -6,6 +6,9 @@
+ #include "next_action_planner.hpp"
+ #include <string>
+ #include <vector>
++#include <memory>
++#include <functional>
++#include "runtime_outcome.hpp"
+ 
+ struct Branch3OperationResult {
+     std::string stepId;
+@@ -13,11 +16,10 @@
+     ExecutionResult execution;
+ };
+ 
+-struct Branch3RuntimeResult {
+-    bool success = false;
++struct Branch3RuntimeResult : TaskResult {
++    bool success = false; // Compatibility view, set only from outcome == COMPLETED.
+     bool planningSuccess = false;
+     bool executionStarted = false;
+-    std::string message;
+     MultiStepPlan decomposedPlan{};
+     MultiStepPlan mappedPlan{};
+     std::vector<Branch3OperationResult> operationResults;
+@@ -29,12 +31,23 @@
+     Branch3Runtime();
+     Branch3Runtime(GoalDecomposerLLM decomposerGenerator,
+                    PrimitiveMapperLLM mapperGenerator,
+-                   NextActionLLM plannerGenerator = {});
++                   NextActionLLM plannerGenerator = {},
++                   std::function<ExecutionResult(const PrimitiveOperation&)> executor = {});
++    ~Branch3Runtime();
++    Branch3RuntimeResult start(const std::string& goal);
++    Branch3RuntimeResult continueSession();
++    Branch3RuntimeResult retryBlockedDependency();
++    bool hasActiveSession() const;
++    void abandonSession();
+ 
+     // Decomposes once, then repeatedly observes, plans one operation, validates, and executes.
+     Branch3RuntimeResult run(const std::string& goal);
+ 
+ private:
++    struct Session;
++    std::unique_ptr<Session> session_;
++    Branch3RuntimeResult advance();
++    std::function<ExecutionResult(const PrimitiveOperation&)> executor_;
+     GoalDecomposer decomposer_;
+     PrimitiveMapper mapper_;
+     NextActionPlanner planner_;
+diff --git a/src/browser_state.hpp b/src/browser_state.hpp
+new file mode 100644
+--- /dev/null
++++ b/src/browser_state.hpp
+@@ -0,0 +1,68 @@
++#pragma once
++#include <nlohmann/json.hpp>
++#include <algorithm>
++#include <string>
++
++namespace BrowserState {
++using nlohmann::json;
++inline json snapshot(const std::string& raw) {
++    try {
++        const std::string marker = "Browser DOM result: ";
++        const auto start = raw.find(marker);
++        auto parsed = json::parse(start == std::string::npos ? raw : raw.substr(start + marker.size()));
++        if (parsed.contains("post_action_observation")) return parsed["post_action_observation"];
++        return parsed;
++    } catch (...) { return json::object(); }
++}
++inline json project(const json& source, bool withIds) {
++    json out = json::object();
++    for (const char* key : {"url", "title", "page_kind", "ready_state", "auth_required", "browser_ready"})
++        if (source.contains(key)) {
++            out[key] = source[key];
++            if (out[key].is_string()) out[key] = out[key].get<std::string>().substr(0, 2048);
++        }
++    if (source.contains("visible_text") && source["visible_text"].is_string())
++        out["visible_text"] = source["visible_text"].get<std::string>().substr(0, 2000);
++    auto element = [&](const json& item) {
++        json e = json::object();
++        for (const char* key : {"role", "accessible_name", "label", "text", "value", "editable", "enabled", "focused", "present"})
++            if (item.contains(key)) {
++                e[key] = item[key];
++                if (e[key].is_string()) e[key] = e[key].get<std::string>().substr(0, 240);
++            }
++        if (withIds && item.contains("element_id")) e["element_id"] = item["element_id"];
++        if (withIds && item.contains("id")) e["id"] = item["id"];
++        return e;
++    };
++    if (source.contains("focus") && source["focus"].is_object()) out["focus"] = element(source["focus"]);
++    out["elements"] = json::array();
++    if (source.contains("elements") && source["elements"].is_array()) {
++        // Put focused and editable controls first; retain only actionable semantics.
++        auto elements = source["elements"].get<std::vector<json>>();
++        std::stable_sort(elements.begin(), elements.end(), [](const json& a, const json& b) {
++            auto rank = [](const json& e) { return e.value("focused", false) ? 2 : e.value("editable", false) ? 1 : 0; };
++            return rank(a) > rank(b);
++        });
++        for (const auto& item : elements) {
++            auto e = element(item);
++            if (!withIds) e.erase("focused");
++            if (out["elements"].size() >= 24) break;
++            if (out.dump().size() + e.dump().size() > 15000) break;
++            out["elements"].push_back(std::move(e));
++        }
++    }
++    return out;
++}
++inline std::string compact(const std::string& raw) {
++    const auto parsed = snapshot(raw);
++    return parsed.empty() ? raw.substr(0, 16000) : project(parsed, true).dump();
++}
++inline std::string fingerprint(const std::string& raw) {
++    const auto parsed = snapshot(raw);
++    return parsed.empty() ? std::string{} : project(parsed, false).dump();
++}
++inline std::string summary(const std::string& raw) {
++    const auto pos = raw.find("Browser DOM result:");
++    return raw.substr(0, std::min(pos == std::string::npos ? raw.size() : pos, std::size_t(768)));
++}
++}
+diff --git a/src/execution_result.hpp b/src/execution_result.hpp
+--- a/src/execution_result.hpp
++++ b/src/execution_result.hpp
+@@ -40,4 +40,8 @@
+     // File operations populate the normalized, policy-checked physical target.
+     string resolvedPath;
+     vector<string> discoveredPaths;
++    // Structured wire data is kept out of normal terminal messages/history.
++    string browserData;
++    bool postconditionVerified = false;
++    string verifiedKind;
+ };
+diff --git a/src/goal_decomposer.cpp b/src/goal_decomposer.cpp
+--- a/src/goal_decomposer.cpp
++++ b/src/goal_decomposer.cpp
+@@ -102,6 +102,7 @@
+ }
+ 
+ Rules:
++- For a logical step whose full intent is ensuring a new directory or new file with requested contents exists, include postcondition: {"kind":"directory_exists" or "file_content", "name":"exact requested leaf name", "location":"requested parent location"}. Preserve names and location clues. This must express the entire step, not a subtask. Omit for browser or other tasks; do not invent postconditions. File contents are specified by the step description and content_requirement.
+ - For every file creation step include content_requirement: "required" if the user requests contents, or "empty_allowed" if no contents are requested (including explicitly empty files). Use "unspecified" for unrelated steps.
+ - Keep creation and requested population of a new file in ONE logical step. Preserve the complete content requirements in its description. Do not split creating a blank file from writing its requested contents.
+ - Step IDs must be unique.
+@@ -232,7 +233,7 @@
+             const json& item = steps[i];
+ 
+             if (!item.is_object() ||
+-                !hasOnlyKeys(item, {"id", "description", "depends_on", "content_requirement"}) ||
++                !hasOnlyKeys(item, {"id", "description", "depends_on", "content_requirement", "postcondition"}) ||
+                 !item.contains("id") ||
+                 !item["id"].is_string() ||
+                 !item.contains("description") ||
+@@ -265,7 +266,21 @@
+             step.id = id;
+             step.description = description;
+             step.resolved = false;
+-            step.contentRequirement = item.value("content_requirement", string("unspecified"));
++            if (item.contains("postcondition")) {
++                const auto& post = item["postcondition"];
++                if (!post.is_object() || !hasOnlyKeys(post, {"kind", "name", "location"}) ||
++                    !post.contains("kind") || !post.contains("name") || !post.contains("location")) {
++                    plan.message = "Invalid artifact postcondition."; plan.steps.clear(); return plan;
++                }
++                step.postconditionKind = post.at("kind").get<string>();
++                step.artifactName = post.at("name").get<string>();
++                step.artifactLocation = post.at("location").get<string>();
++                if ((step.postconditionKind != "directory_exists" && step.postconditionKind != "file_content") ||
++                    !isNonBlank(step.artifactName) || !isNonBlank(step.artifactLocation)) {
++                    plan.message = "Invalid artifact postcondition values."; plan.steps.clear(); return plan;
++                }
++            }
++            step.contentRequirement = item.value("content_requirement", step.postconditionKind == "file_content" ? string("required") : string("unspecified"));
+             if (step.contentRequirement != "unspecified" && step.contentRequirement != "required" &&
+                 step.contentRequirement != "empty_allowed") {
+                 plan.message = "Invalid content_requirement.";
+diff --git a/src/llm_client.cpp b/src/llm_client.cpp
+--- a/src/llm_client.cpp
++++ b/src/llm_client.cpp
+@@ -33,6 +33,15 @@
+     }
+ }
+ 
++LLMFailureCategory classifyLLMFailure(int curlCode, long status) {
++    if (curlCode == CURLE_OPERATION_TIMEDOUT) return LLMFailureCategory::TIMEOUT;
++    if (curlCode != CURLE_OK) return LLMFailureCategory::CONNECTION_ERROR;
++    if (status == 401 || status == 403) return LLMFailureCategory::AUTH_ERROR;
++    if (status == 429) return LLMFailureCategory::RATE_LIMIT;
++    if (status < 200 || status >= 300) return LLMFailureCategory::PROVIDER_ERROR;
++    return LLMFailureCategory::NONE;
++}
++
+ LLMResponse LLMClient::generate(
+     const string& prompt
+ )
+@@ -51,6 +60,7 @@
+     LLMResponse result;
+ 
+     result.success = false;
++    result.failureCategory = LLMFailureCategory::CONFIGURATION_ERROR;
+     result.content = "";
+     result.message = "";
+ 
+@@ -216,6 +226,7 @@
+         curlResult != CURLE_OK
+     )
+     {
++        result.failureCategory = classifyLLMFailure(curlResult, 0);
+         result.message =
+             "OpenRouter request failed: "
+             + string(
+@@ -242,6 +253,8 @@
+         &httpStatus
+     );
+ 
++    result.httpStatus = httpStatus;
++    result.failureCategory = classifyLLMFailure(CURLE_OK, httpStatus);
+     if (
+         httpStatus < 200 ||
+         httpStatus >= 300
+@@ -273,6 +286,7 @@
+     // --------------------------------------------------------
+ 
+     
++    result.failureCategory = LLMFailureCategory::INVALID_RESPONSE;
+     try
+     {
+         json response = json::parse(responseBody);
+@@ -334,7 +348,7 @@
+                 {
+                     result.content = message["content"].get<string>();
+ 
+-                    if (result.content.empty())
++                    if (result.content.find_first_not_of(" \t\r\n") == string::npos)
+                     {
+                         result.message =
+                             "OpenRouter returned an empty text response.";
+@@ -342,6 +356,7 @@
+                     else
+                     {
+                         result.success = true;
++                        result.failureCategory = LLMFailureCategory::NONE;
+                         result.message = "LLM response received.";
+                     }
+                 }
+diff --git a/src/llm_client.hpp b/src/llm_client.hpp
+--- a/src/llm_client.hpp
++++ b/src/llm_client.hpp
+@@ -4,11 +4,17 @@
+ 
+ using namespace std;
+ 
++enum class LLMFailureCategory { NONE, TIMEOUT, CONNECTION_ERROR, AUTH_ERROR, RATE_LIMIT,
++    PROVIDER_ERROR, INVALID_RESPONSE, CONFIGURATION_ERROR };
++// Transport classification is independent of human-readable diagnostics.
++LLMFailureCategory classifyLLMFailure(int curlCode, long httpStatus);
+ struct LLMResponse
+ {
+-    bool success;
++    bool success = false;
+     string content;
+     string message;
++    LLMFailureCategory failureCategory = LLMFailureCategory::NONE;
++    long httpStatus = 0;
+ };
+ 
+ class LLMClient
+diff --git a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -4,650 +4,82 @@
+ #include "request_classifier.hpp"
+ #include "conversation_handler.hpp"
+ #include "single_action_pipeline.hpp"
+-#include "multistep_pipeline.hpp"
+-#include "multi_step_executor.hpp"
+ #include "branch3_runtime.hpp"
+-
++#include "runtime_supervisor.hpp"
+ #include <filesystem>
+ #include <iostream>
+ #include <string>
+ 
+-using namespace std;
+-
+-namespace
+-{
+-    string requestTypeToString(RequestType type)
+-    {
+-        switch (type)
+-        {
+-            case RequestType::CONVERSATION:
+-                return "CONVERSATION";
+-
+-            case RequestType::SINGLE_ACTION:
+-                return "SINGLE_ACTION";
+-
+-            case RequestType::MULTI_STEP_GOAL:
+-                return "MULTI_STEP_GOAL";
+-
+-            case RequestType::EXISTING_WORKFLOW:
+-                return "EXISTING_WORKFLOW";
+-
+-            case RequestType::CLARIFICATION_REQUIRED:
+-                return "CLARIFICATION_REQUIRED";
+-
+-            case RequestType::UNSUPPORTED:
+-                return "UNSUPPORTED";
++namespace {
++TaskResult processOneRequest(const InputEvent& input, Logger& logger, Branch3Runtime& runtime) {
++    TaskResult result;
++    if (input.rawText.empty()) { result.message = "No input received."; return result; }
++    logger.log("INFO", "INPUT_READY", input.rawText, "SUCCESS");
++    auto normalized = InputNormalizer{}.normalize(input.rawText);
++    if (!normalized.success) { result.message = normalized.message; result.blockedStage = "Input normalization"; return result; }
++    std::cout << "\n[NORMALIZED TEXT]\n" << normalized.normalizedText << "\n";
++    auto classified = RequestClassifier{}.classify(normalized.normalizedText);
++    if (!classified.success) { result.message = classified.message; result.blockedStage = "Root routing"; return result; }
++    switch (classified.type) {
++        case RequestType::MULTI_STEP_GOAL: {
++            const auto branch = runtime.start(normalized.normalizedText);
++            std::cout << branch.stateLog;
++            logger.log("INFO", "BRANCH3_RUNTIME", branch.message, outcomeName(branch.outcome));
++            return branch;
+         }
+-
+-        return "UNKNOWN";
++        case RequestType::CONVERSATION: {
++            const auto response = ConversationHandler{}.handle(normalized.normalizedText);
++            if (response.success) {
++                std::cout << "\n[NOVA] " << response.content << "\n";
++                result.outcome = RuntimeOutcome::COMPLETED; result.cause = RuntimeCause::NONE;
++            }
++            result.message = response.message;
++            return result;
++        }
++        case RequestType::SINGLE_ACTION: {
++            const auto action = SingleActionPipeline{}.process(normalized.normalizedText);
++            const bool completed = action.success && action.executionResult.status == ExecutionStatus::SUCCESS;
++            result.outcome = completed ? RuntimeOutcome::COMPLETED : RuntimeOutcome::FAILED;
++            result.cause = completed ? RuntimeCause::NONE : RuntimeCause::UNKNOWN;
++            result.message = action.success ? action.executionResult.message : action.message;
++            return result;
++        }
++        case RequestType::CLARIFICATION_REQUIRED:
++            result.outcome = RuntimeOutcome::NEEDS_USER; result.message = "Please clarify the request in a new input."; return result;
++        case RequestType::EXISTING_WORKFLOW:
++            result.message = "Existing workflow execution is not implemented."; return result;
++        case RequestType::UNSUPPORTED:
++            result.message = "This request is unsupported."; return result;
+     }
++    result.message = "Unknown routing outcome.";
++    return result;
+ }
+-
+-int main()
+-{
+-    cout << unitbuf;
+-
+-    namespace fs = filesystem;
+-
+-    fs::create_directories("logs");
+-
+-    Logger logger(
+-        "logs/runtime.log"
+-    );
+-
+-    if (!logger.isReady())
+-    {
+-        cerr
+-            << "[ERROR] Logger initialization failed."
+-            << endl;
+-
+-        return 1;
++}
++int main() {
++    std::cout << std::unitbuf;
++    std::filesystem::create_directories("logs");
++    Logger logger("logs/runtime.log");
++    if (!logger.isReady()) { std::cerr << "Logger initialization failed.\n"; return 1; }
++    logger.log("INFO", "RUNTIME_START", "Nova runtime started.", "SUCCESS");
++    InputCoordinator input;
++    Branch3Runtime runtime;
++    RuntimeSupervisor supervisor(runtime);
++    while (supervisor.running()) {
++        const auto event = input.waitForInput();
++        if (event.rawText == "q" || event.rawText == "Q" || event.rawText == "quit") break;
++        TaskResult result;
++        try { result = processOneRequest(event, logger, runtime); }
++        catch (const std::exception& error) { result.message = error.what(); }
++        while (supervisor.running()) {
++            const auto control = supervisor.readControl(std::cin, std::cout, result);
++            if (control == SupervisorAction::QUIT || control == SupervisorAction::NEW_REQUEST) break;
++            try {
++                const auto resumed = control == SupervisorAction::RETRY ? runtime.retryBlockedDependency() : runtime.continueSession();
++                result = resumed;
++                logger.log("INFO", "RUNTIME_RESUME", resumed.message, outcomeName(resumed.outcome));
++            } catch (const std::exception& error) { result.outcome = RuntimeOutcome::FAILED; result.message = error.what(); }
++        }
+     }
+-
+-    logger.log(
+-        "INFO",
+-        "RUNTIME_START",
+-        "Nova runtime started.",
+-        "SUCCESS"
+-    );
+-
+-    // --------------------------------------------------------
+-    // UNIFIED INPUT
+-    // --------------------------------------------------------
+-
+-    logger.log(
+-        "INFO",
+-        "INPUT_COORDINATOR_START",
+-        "Starting unified input coordinator.",
+-        "STARTED"
+-    );
+-
+-    InputCoordinator inputCoordinator;
+-
+-    InputEvent inputEvent =
+-        inputCoordinator.waitForInput();
+-
+-    if (inputEvent.rawText.empty())
+-    {
+-        logger.log(
+-            "ERROR",
+-            "INPUT_FAILURE",
+-            "Input coordinator returned empty input.",
+-            "FAILURE"
+-        );
+-
+-        cerr
+-            << "[INPUT FAILURE] "
+-            << "No input received."
+-            << endl;
+-
+-        return 1;
+-    }
+-
+-    // --------------------------------------------------------
+-    // INPUT SOURCE
+-    // --------------------------------------------------------
+-
+-    string sourceName;
+-
+-    if (
+-        inputEvent.source ==
+-        InputSource::SPEECH
+-    )
+-    {
+-        sourceName = "SPEECH";
+-    }
+-    else
+-    {
+-        sourceName = "KEYBOARD";
+-    }
+-
+-    logger.log(
+-        "INFO",
+-        "INPUT_SOURCE",
+-        "Input source: " + sourceName,
+-        "SUCCESS"
+-    );
+-
+-    // --------------------------------------------------------
+-    // UNIFIED RAW INPUT
+-    // --------------------------------------------------------
+-
+-    cout << endl;
+-    cout << "[RAW TEXT]" << endl;
+-    cout << inputEvent.rawText << endl;
+-
+-    logger.log(
+-        "INFO",
+-        "INPUT_READY",
+-        "Unified input received: "
+-            + inputEvent.rawText,
+-        "SUCCESS"
+-    );
+-
+-    // --------------------------------------------------------
+-    // PART B â€” LLM INPUT NORMALIZATION
+-    // --------------------------------------------------------
+-
+-    logger.log(
+-        "INFO",
+-        "INPUT_NORMALIZATION",
+-        "Starting LLM input normalization.",
+-        "STARTED"
+-    );
+-
+-    InputNormalizer normalizer;
+-
+-    NormalizedInput normalized =
+-        normalizer.normalize(
+-            inputEvent.rawText
+-        );
+-
+-    if (!normalized.success)
+-    {
+-        logger.log(
+-            "ERROR",
+-            "INPUT_NORMALIZATION",
+-            normalized.message,
+-            "FAILURE"
+-        );
+-
+-        cerr
+-            << "[NORMALIZATION FAILURE] "
+-            << normalized.message
+-            << endl;
+-
+-        return 1;
+-    }
+-
+-    cout << endl;
+-    cout << "[NORMALIZED TEXT]" << endl;
+-    cout << normalized.normalizedText << endl;
+-
+-    logger.log(
+-        "INFO",
+-        "INPUT_NORMALIZED",
+-        "LLM normalized input: "
+-            + normalized.normalizedText,
+-        "SUCCESS"
+-    );
+-
+-    // --------------------------------------------------------
+-    // PART B â€” LLM ROOT ROUTER
+-    // --------------------------------------------------------
+-
+-    logger.log(
+-        "INFO",
+-        "ROOT_ROUTER",
+-        "Starting LLM root routing.",
+-        "STARTED"
+-    );
+-
+-    RequestClassifier classifier;
+-
+-    ClassificationResult classification =
+-        classifier.classify(
+-            normalized.normalizedText
+-        );
+-
+-    if (!classification.success)
+-    {
+-        logger.log(
+-            "ERROR",
+-            "ROOT_ROUTER",
+-            classification.message,
+-            "FAILURE"
+-        );
+-
+-        cerr
+-            << "[ROOT ROUTER FAILURE] "
+-            << classification.message
+-            << endl;
+-
+-        return 1;
+-    }
+-
+-    string requestType =
+-        requestTypeToString(
+-            classification.type
+-        );
+-
+-    cout << endl;
+-    cout << "[REQUEST TYPE]" << endl;
+-    cout << requestType << endl;
+-
+-    logger.log(
+-        "INFO",
+-        "ROOT_ROUTER",
+-        "Request classified as: "
+-            + requestType,
+-        "SUCCESS"
+-    );
+-
+-    // --------------------------------------------------------
+-    // BRANCH 1 â€” CONVERSATION
+-    // --------------------------------------------------------
+-
+-    if (
+-        classification.type ==
+-        RequestType::CONVERSATION
+-    )
+-    {
+-        logger.log(
+-            "INFO",
+-            "CONVERSATION_HANDLER",
+-            "Routing request to Conversation Handler.",
+-            "STARTED"
+-        );
+-
+-        ConversationHandler conversationHandler;
+-
+-        LLMResponse llmResponse =
+-            conversationHandler.handle(
+-                normalized.normalizedText
+-            );
+-
+-        if (!llmResponse.success)
+-        {
+-            logger.log(
+-                "ERROR",
+-                "CONVERSATION_HANDLER",
+-                llmResponse.message,
+-                "FAILURE"
+-            );
+-
+-            cerr
+-                << "[CONVERSATION FAILURE] "
+-                << llmResponse.message
+-                << endl;
+-
+-            return 1;
+-        }
+-
+-        cout << endl;
+-        cout << "[LLM RESPONSE]" << endl;
+-        cout << llmResponse.content << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "CONVERSATION_COMPLETE",
+-            "Conversation response received from LLM.",
+-            "SUCCESS"
+-        );
+-    }
+-
+-    // --------------------------------------------------------
+-    // BRANCH 2 â€” SINGLE ACTION
+-    // --------------------------------------------------------
+-
+-    if (
+-        classification.type ==
+-        RequestType::SINGLE_ACTION
+-    )
+-    {
+-        logger.log(
+-            "INFO",
+-            "SINGLE_ACTION_PIPELINE",
+-            "Routing request to Single Action Pipeline.",
+-            "STARTED"
+-        );
+-
+-        SingleActionPipeline singleActionPipeline;
+-
+-        SingleActionResult actionResult =
+-            singleActionPipeline.process(
+-                normalized.normalizedText
+-            );
+-
+-        // ----------------------------------------------------
+-        // PIPELINE FAILURE
+-        // ----------------------------------------------------
+-
+-        if (!actionResult.success)
+-        {
+-            logger.log(
+-                "ERROR",
+-                "SINGLE_ACTION_PIPELINE",
+-                actionResult.message,
+-                "FAILURE"
+-            );
+-
+-            cerr
+-                << "[SINGLE ACTION FAILURE] "
+-                << actionResult.message
+-                << endl;
+-
+-            return 1;
+-        }
+-
+-        // ----------------------------------------------------
+-        // ACTION PARSER
+-        // ----------------------------------------------------
+-
+-        cout << endl;
+-        cout << "[ACTION PARSER]" << endl;
+-        cout << "Action: "
+-            << actionResult.action.name
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "ACTION_PARSER",
+-            "Action identified: "
+-                + actionResult.action.name,
+-            "SUCCESS"
+-        );
+-
+-        // ----------------------------------------------------
+-        // CAPABILITY RESOLVER
+-        // ----------------------------------------------------
+-
+-        cout << endl;
+-        cout << "[CAPABILITY RESOLVER]" << endl;
+-        cout << "Capability: "
+-            << actionResult.capability.name
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "CAPABILITY_RESOLVER",
+-            "Capability resolved: "
+-                + actionResult.capability.name,
+-            "SUCCESS"
+-        );
+-
+-        // ----------------------------------------------------
+-        // PARAMETER RESOLVER
+-        // ----------------------------------------------------
+-
+-        cout << endl;
+-        cout << "[PARAMETER RESOLVER]" << endl;
+-
+-        cout << "Name: "
+-            << (actionResult.parameters.name.type == ParameterValueType::NONE
+-                    ? "[none]"
+-                    : actionResult.parameters.name.value)
+-            << endl;
+-
+-        cout << "Location: "
+-            << (actionResult.parameters.location.type == ParameterValueType::NONE
+-                    ? "[none]"
+-                    : actionResult.parameters.location.value)
+-            << endl;
+-
+-        cout << "Application: "
+-            << (actionResult.parameters.application.type == ParameterValueType::NONE
+-                    ? "[none]"
+-                    : actionResult.parameters.application.value)
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "PARAMETER_RESOLVER",
+-            "Action parameters resolved.",
+-            "SUCCESS"
+-        );
+-
+-        // ----------------------------------------------------
+-        // ACTION VALIDATOR
+-        // ----------------------------------------------------
+-
+-        cout << endl;
+-        cout << "[ACTION VALIDATOR]" << endl;
+-
+-        cout << "Valid: "
+-            << (
+-                    actionResult.validation.valid
+-                    ? "true"
+-                    : "false"
+-                )
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "ACTION_VALIDATOR",
+-            actionResult.validation.message,
+-            actionResult.validation.valid
+-                ? "SUCCESS"
+-                : "FAILURE"
+-        );
+-
+-        // ----------------------------------------------------
+-        // EXECUTION PLAN
+-        // ----------------------------------------------------
+-
+-        cout << endl;
+-        cout << "[EXECUTION PLAN]" << endl;
+-
+-        cout << "Valid: "
+-            << (
+-                    actionResult.executionPlan.valid
+-                    ? "true"
+-                    : "false"
+-                )
+-            << endl;
+-
+-        cout << "Type: "
+-            << actionResult.executionPlan.type
+-            << endl;
+-
+-        cout << "Action: "
+-            << actionResult.executionPlan.action.name
+-            << endl;
+-
+-        cout << "Capability: "
+-            << actionResult.executionPlan.capability.name
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "EXECUTION_PLAN",
+-            "Single action execution plan created.",
+-            actionResult.executionPlan.valid
+-                ? "SUCCESS"
+-                : "FAILURE"
+-        );
+-        // ----------------------------------------------------
+-        // EXECUTION RESULT
+-        // ----------------------------------------------------
+-
+-        cout << endl;
+-        cout << "[EXECUTION RESULT]" << endl;
+-
+-        cout << "Status: "
+-            << static_cast<int>(
+-                actionResult.executionResult.status
+-            )
+-            << endl;
+-
+-        cout << "Reason: "
+-            << static_cast<int>(
+-                actionResult.executionResult.reason
+-            )
+-            << endl;
+-
+-        cout << "Action: "
+-            << actionResult.executionResult.action
+-            << endl;
+-
+-        cout << "Confidence: "
+-            << actionResult.executionResult.confidence
+-            << endl;
+-
+-        cout << "Target Resolved: "
+-            << (
+-                actionResult.executionResult.targetResolved
+-                ? "true"
+-                : "false"
+-            )
+-            << endl;
+-
+-        cout << "Execution Mechanism Resolved: "
+-            << (
+-                actionResult.executionResult.executionMechanismResolved
+-                ? "true"
+-                : "false"
+-            )
+-            << endl;
+-
+-        cout << "Message: "
+-            << actionResult.executionResult.message
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "EXECUTION_RESULT",
+-            actionResult.executionResult.message,
+-            actionResult.executionResult.status
+-                == ExecutionStatus::SUCCESS
+-                ? "SUCCESS"
+-                : "FAILURE"
+-        );
+-
+-        cout << endl;
+-        cout << "[SINGLE ACTION PIPELINE COMPLETE]"
+-            << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "SINGLE_ACTION_PIPELINE",
+-            "Single action execution completed successfully.",
+-            "SUCCESS"
+-        );
+-    }
+-
+-    // --------------------------------------------------------
+-    // BRANCH 3 â€” MULTI-STEP GOAL (Branch 3 planner + mapper)
+-    // Branch 2 single-action routing above is intentionally unchanged.
+-    // --------------------------------------------------------
+-
+-    if (classification.type == RequestType::MULTI_STEP_GOAL)
+-    {
+-        cout << endl << "[BRANCH 3]" << endl;
+-        cout << "MULTI_STEP_GOAL" << endl;
+-        logger.log("INFO", "BRANCH3_RUNTIME", "Branch 3 runtime selected.", "STARTED");
+-
+-        Branch3Runtime runtime;
+-        const Branch3RuntimeResult runtimeResult = runtime.run(normalized.normalizedText);
+-
+-        cout << "\n[GOAL DECOMPOSITION]\n";
+-        cout << "Valid: " << boolalpha << runtimeResult.decomposedPlan.valid << "\n";
+-        cout << "Steps: " << runtimeResult.decomposedPlan.steps.size() << "\n";
+-        if (runtimeResult.decomposedPlan.valid) {
+-            for (const auto& step : runtimeResult.decomposedPlan.steps)
+-                cout << "  " << step.id << ": " << step.description << "\n";
+-        }
+-
+-        cout << "\n[PRIMITIVE MAPPING]\n";
+-        cout << "Valid: " << boolalpha << runtimeResult.mappedPlan.valid << "\n";
+-        if (runtimeResult.mappedPlan.valid) {
+-            for (const auto& step : runtimeResult.mappedPlan.steps) {
+-                cout << "  " << step.id << "\n";
+-                for (const auto& operation : step.operations)
+-                    cout << "    -> " << operation.name << "\n";
+-            }
+-        }
+-
+-        cout << "\n[STATE-AWARE LOOP LOG]\n";
+-        cout << runtimeResult.stateLog << "\n";
+-
+-        cout << "\n[BRANCH 3 EXECUTION]\n";
+-        for (const auto& item : runtimeResult.operationResults) {
+-            cout << item.stepId << " / operation " << (item.operationIndex + 1)
+-                 << " / " << item.execution.action << " : "
+-                 << (item.execution.status == ExecutionStatus::SUCCESS ? "SUCCESS" : "FAILED")
+-                 << "\n  " << item.execution.message << "\n";
+-        }
+-        cout << "[BRANCH 3 RESULT] " << (runtimeResult.success ? "SUCCESS" : "FAILED")
+-             << "\n" << runtimeResult.message << "\n";
+-
+-        logger.log(runtimeResult.success ? "INFO" : "ERROR", "BRANCH3_RUNTIME",
+-                   runtimeResult.message, runtimeResult.success ? "SUCCESS" : "FAILURE");
+-        return runtimeResult.success ? 0 : 1;
+-    }
+-
+-    // --------------------------------------------------------
+-    // BRANCH 4 â€” EXISTING WORKFLOW
+-    // --------------------------------------------------------
+-
+-    if (
+-        classification.type ==
+-        RequestType::EXISTING_WORKFLOW
+-    )
+-    {
+-        cout << endl;
+-        cout << "[BRANCH 4]" << endl;
+-        cout << "EXISTING_WORKFLOW" << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "EXISTING_WORKFLOW",
+-            "Existing workflow branch selected.",
+-            "SUCCESS"
+-        );
+-    }
+-
+-    // --------------------------------------------------------
+-    // BRANCH 5 â€” CLARIFICATION REQUIRED
+-    // --------------------------------------------------------
+-
+-    if (
+-        classification.type ==
+-        RequestType::CLARIFICATION_REQUIRED
+-    )
+-    {
+-        cout << endl;
+-        cout << "[BRANCH 5]" << endl;
+-        cout << "CLARIFICATION_REQUIRED" << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "CLARIFICATION_REQUIRED",
+-            "Clarification branch selected.",
+-            "SUCCESS"
+-        );
+-    }
+-
+-    // --------------------------------------------------------
+-    // BRANCH 6 â€” UNSUPPORTED
+-    // --------------------------------------------------------
+-
+-    if (
+-        classification.type ==
+-        RequestType::UNSUPPORTED
+-    )
+-    {
+-        cout << endl;
+-        cout << "[BRANCH 6]" << endl;
+-        cout << "UNSUPPORTED" << endl;
+-
+-        logger.log(
+-            "INFO",
+-            "UNSUPPORTED",
+-            "Unsupported request branch selected.",
+-            "SUCCESS"
+-        );
+-    }
+-
++    logger.log("INFO", "RUNTIME_STOP", "Nova shut down.", "SUCCESS");
+     return 0;
+-}
+\ No newline at end of file
++}
+diff --git a/src/multistep_plan.hpp b/src/multistep_plan.hpp
+--- a/src/multistep_plan.hpp
++++ b/src/multistep_plan.hpp
+@@ -25,6 +25,10 @@
+     bool resolved;
+ 
+     // Semantic artifact intent, supplied by goal interpretation, never by filename.
++    // Optional declarative postcondition; untyped steps require observed planner verification.
++    string postconditionKind;
++    string artifactName;
++    string artifactLocation;
+     string contentRequirement = "unspecified";
+ };
+ 
+diff --git a/src/next_action_planner.cpp b/src/next_action_planner.cpp
+--- a/src/next_action_planner.cpp
++++ b/src/next_action_planner.cpp
+@@ -56,10 +56,10 @@
+ NextActionDecision NextActionPlanner::choose(const std::string& goal, const MultiStepPlan& guide,
+                                               const std::string& state, const std::string& catalog) {
+     NextActionDecision out; out.status = "blocked";
+-    if (!generator_) { out.message = "Next-action planner has no LLM generator."; return out; }
++    if (!generator_) { out.failureCategory = LLMFailureCategory::CONFIGURATION_ERROR; out.message = "Next-action planner has no LLM generator."; return out; }
+     json steps = json::array();
+     for (const auto& step : guide.steps)
+-        steps.push_back({{"id", step.id}, {"description", step.description}, {"depends_on", step.dependencies}, {"content_requirement", step.contentRequirement}});
++        steps.push_back({{"id", step.id}, {"description", step.description}, {"depends_on", step.dependencies}, {"content_requirement", step.contentRequirement}, {"postcondition", {{"kind",step.postconditionKind},{"name",step.artifactName},{"location",step.artifactLocation}}}});
+     const std::string system = R"PROMPT(You are Nova's state-aware Branch 3 next-action planner.
+ Return exactly one JSON object and nothing else. The first non-whitespace character must be { and the last non-whitespace character must be }. Do not include explanations, preambles, Markdown fences, or analysis. Choose exactly ONE next operation based on the stable user goal, guide steps, current observed state, action history, and live primitive catalog.
+ Allowed outputs:
+@@ -80,6 +80,7 @@
+ - After typing, verify the requested text appears in the observed editable element's value/content before selecting a send/submit control. Do not send if the wrong chat or composer is uncertain.
+ - Do not claim completion unless the observation provides evidence that the goal is already satisfied.
+ - For browser work, use browser.navigate to open or navigate the controlled browser. Never use application.launch to open a website or browser URL.
++- In a controlled-browser workflow NEVER use global keyboard.press or keyboard.type, including ENTER. Submit using an observed DOM control with browser.click. Prefer domcontentloaded or load over networkidle unless the goal specifically requires network quiescence.
+ - For browser work, every iteration starts with a fresh DOM observation. After each click/type, use the returned post-action DOM snapshot and the next fresh observation to verify the expected state transition before choosing the next action. A successful click call alone is not proof that the goal or step succeeded.
+ - Use browser.click/browser.type only with elements from the latest DOM observation, by observed element_id or exact role+text; never use coordinates or invented CSS selectors.
+ - Treat authentication as a generic DOM state, not a site-specific rule. If the observation reports auth_required or the DOM evidence is insufficient, ask the user to complete authentication or clarify. Do not infer login/QR from a domain name or a canvas alone.
+@@ -96,9 +97,9 @@
+         "\nReturn one decision as strict JSON.";
+     LLMResponse response;
+     try { response = generator_(system, user); }
+-    catch (const std::exception& e) { out.message = std::string("Planner call failed: ") + e.what(); return out; }
+-    catch (...) { out.message = "Planner call failed with an unknown exception."; return out; }
+-    if (!response.success || response.content.empty()) { out.message = response.message.empty() ? "Planner returned no response." : response.message; return out; }
++    catch (const std::exception& e) { out.failureCategory = LLMFailureCategory::CONNECTION_ERROR; out.message = std::string("Planner call failed: ") + e.what(); return out; }
++    catch (...) { out.failureCategory = LLMFailureCategory::CONNECTION_ERROR; out.message = "Planner call failed with an unknown exception."; return out; }
++    if (!response.success || response.content.empty()) { out.failureCategory = response.failureCategory == LLMFailureCategory::NONE ? LLMFailureCategory::INVALID_RESPONSE : response.failureCategory; out.message = response.message.empty() ? "Planner returned no response." : response.message; return out; }
+     json j;
+     try {
+         j = parseDecisionJson(response.content);
+@@ -111,20 +112,24 @@
+         try {
+             response = generator_(system, retryUser);
+             if (!response.success || response.content.empty()) {
++                out.failureCategory = response.failureCategory == LLMFailureCategory::NONE ? LLMFailureCategory::INVALID_RESPONSE : response.failureCategory;
+                 out.message = response.message.empty() ? "Planner retry returned no response." : response.message;
+                 return out;
+             }
+             j = parseDecisionJson(response.content);
+         } catch (const std::exception& e) {
+             out.status = "blocked";
++            out.failureCategory = LLMFailureCategory::INVALID_RESPONSE;
+             out.message = std::string("Planner JSON invalid after one retry: ") + e.what();
+             return out;
+         } catch (...) {
+             out.status = "blocked";
++            out.failureCategory = LLMFailureCategory::INVALID_RESPONSE;
+             out.message = "Planner JSON invalid after one retry.";
+             return out;
+         }
+     }
++    out.failureCategory = LLMFailureCategory::INVALID_RESPONSE;
+     try {
+         if (!j.is_object() || !j.contains("status") || !j["status"].is_string()) { out.message = "Planner response has no valid status."; return out; }
+         out.status = j["status"].get<std::string>();
+@@ -136,8 +141,9 @@
+             out.stepId = j["step_id"].get<std::string>();
+             out.operationJson = j["operation"].dump();
+         } else if (out.status != "done" && out.status != "ask_user" && out.status != "blocked") {
+-            out.status = "blocked"; out.message = "Planner returned an unsupported status.";
++            out.status = "blocked"; out.message = "Planner returned an unsupported status."; return out;
+         }
++        out.failureCategory = LLMFailureCategory::NONE;
+     } catch (const std::exception& e) { out.status = "blocked"; out.message = std::string("Planner decision invalid: ") + e.what(); }
+     return out;
+ }
+diff --git a/src/next_action_planner.hpp b/src/next_action_planner.hpp
+--- a/src/next_action_planner.hpp
++++ b/src/next_action_planner.hpp
+@@ -6,6 +6,7 @@
+ 
+ using NextActionLLM = std::function<LLMResponse(const std::string&, const std::string&)>;
+ struct NextActionDecision {
++    LLMFailureCategory failureCategory = LLMFailureCategory::NONE;
+     std::string status; // operation, done, ask_user, blocked
+     std::string stepId;
+     std::string operationJson;
+diff --git a/src/primitive_execution_engine.cpp b/src/primitive_execution_engine.cpp
+--- a/src/primitive_execution_engine.cpp
++++ b/src/primitive_execution_engine.cpp
+@@ -668,11 +668,27 @@
+             if (!fs::is_directory(parent)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,
+                 "Parent directory does not exist: " + parent.string());
+             const fs::path folder = parent / op.parameters.name;
+-            if (fs::exists(folder)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+-                "Folder already exists: " + folder.string());
++            if (fs::exists(folder)) {
++                const auto authorization = FilesystemPathPolicy{}.authorize(folder, FilesystemAccess::CREATE);
++                if (!authorization.ok) {
++                    auto denied = fail(op, failureReasonForPath(authorization.error), authorization.message, false);
++                    denied.failureCategory = FilesystemPathPolicy::errorName(authorization.error);
++                    denied.resolvedPath = authorization.path.string();
++                    return denied;
++                }
++                auto existing = fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Destination already exists: " + folder.string());
++                existing.failureCategory = "already_exists";
++                existing.resolvedPath = folder.string();
++                existing.postconditionVerified = fs::is_directory(folder);
++                existing.verifiedKind = existing.postconditionVerified ? "directory_exists" : "";
++                return existing;
++            }
+             if (!fs::create_directory(folder)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+                 "Folder could not be created: " + folder.string());
+-            return filesystemSuccess(op, "Folder created: " + folder.string(), folder);
++            auto created = filesystemSuccess(op, "Folder created: " + folder.string(), folder);
++            created.postconditionVerified = fs::is_directory(folder);
++            created.verifiedKind = "directory_exists";
++            return created;
+         } catch (const fs::filesystem_error& e) {
+             return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what());
+         }
+@@ -685,7 +701,12 @@
+         const fs::path filePath = dir / op.parameters.name;
+         try {
+             if (!fs::is_directory(dir)) return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND, "Parent directory does not exist: " + dir.string());
+-            if (fs::exists(filePath)) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "File already exists: " + filePath.string());
++            if (fs::exists(filePath)) {
++                auto collision = fail(op, ExecutionFailureReason::EXECUTION_ERROR, "File already exists: " + filePath.string());
++                collision.failureCategory = "already_exists";
++                collision.resolvedPath = filePath.string();
++                return collision;
++            }
+             ofstream file(filePath, ios::binary);
+             if (!file.is_open()) return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Unable to create file: " + filePath.string());
+             file.write(op.parameters.content.data(), static_cast<streamsize>(op.parameters.content.size()));
+@@ -695,7 +716,10 @@
+             const string actual((istreambuf_iterator<char>(verified)), istreambuf_iterator<char>());
+             if (!verified.is_open() || verified.bad() || !fs::is_regular_file(filePath) || actual != op.parameters.content)
+                 return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Created file failed content readback verification: " + filePath.string());
+-            return filesystemSuccess(op, "File created and content verified: " + filePath.string(), filePath);
++            auto created = filesystemSuccess(op, "File created and content verified: " + filePath.string(), filePath);
++            created.postconditionVerified = true;
++            created.verifiedKind = "file_content";
++            return created;
+         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
+     }
+ 
+@@ -851,15 +875,17 @@
+         }
+         nlohmann::json response;
+         string error;
+-        if (!browserAgentRequest(request, response, error))
+-            return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Browser control failed: " + error);
++        if (!browserAgentRequest(request, response, error)) {
++            auto failed = fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Browser control failed: " + error);
++            failed.failureCategory = response.value("failure_category", string("browser_unavailable"));
++            return failed;
++        }
+         string message = response.value("message", string("Browser operation completed."));
+-        // Include the structured DOM snapshot for every browser primitive. Click/type
+-        // responses contain a fresh post-action observation, so later planning is based
+-        // on actual page state rather than site-specific success assumptions.
+-        message += "\nBrowser DOM result: " + response.dump();
+-        return makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE,
+-            message, true, true);
++        // Preserve wire data separately from concise terminal/planner diagnostics.
++        // The runtime always obtains a fresh observation before another DOM action.
++        auto result = makeResult(op, ExecutionStatus::SUCCESS, ExecutionFailureReason::NONE, message, true, true);
++        result.browserData = response.dump();
++        return result;
+     }
+ 
+     if ((op.type == PrimitiveOperationType::BROWSER_NAVIGATE && op.name == "browser.navigate") ||
+@@ -898,9 +924,11 @@
+         if (navigating) request["url"] = op.parameters.url;
+         nlohmann::json response;
+         string error;
+-        if (!browserAgentRequest(request, response, error))
+-            return fail(op, ExecutionFailureReason::EXECUTION_ERROR,
+-                "Browser control failed: " + error);
++        if (!browserAgentRequest(request, response, error)) {
++            auto failed = fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Browser control failed: " + error);
++            failed.failureCategory = response.value("failure_category", string("browser_unavailable"));
++            return failed;
++        }
+         const string currentUrl = response.value("url", string("unknown URL"));
+         const string title = response.value("title", string{});
+         string domSummary;
+diff --git a/src/runtime_outcome.hpp b/src/runtime_outcome.hpp
+new file mode 100644
+--- /dev/null
++++ b/src/runtime_outcome.hpp
+@@ -0,0 +1,38 @@
++#pragma once
++#include <string>
++#include <vector>
++
++enum class RuntimeOutcome { COMPLETED, PARTIAL_SUCCESS, RETRYABLE, NEEDS_USER, EXTERNAL_UNAVAILABLE, FAILED, CANCELLED };
++enum class RuntimeCause { NONE, LLM_TIMEOUT, LLM_RATE_LIMIT, LLM_AUTH_ERROR, LLM_PROVIDER_ERROR,
++    LLM_INVALID_RESPONSE, BROWSER_TIMEOUT, STALE_ELEMENT, NO_STATE_CHANGE, AUTH_REQUIRED,
++    TARGET_NOT_FOUND, ALREADY_EXISTS, ACCESS_DENIED, VALIDATION_ERROR, ITERATION_LIMIT, INVALID_PLAN, UNKNOWN };
++inline const char* outcomeName(RuntimeOutcome value) {
++    switch (value) {
++#define OUTCOME_CASE(v) case RuntimeOutcome::v: return #v;
++        OUTCOME_CASE(COMPLETED) OUTCOME_CASE(PARTIAL_SUCCESS) OUTCOME_CASE(RETRYABLE)
++        OUTCOME_CASE(NEEDS_USER) OUTCOME_CASE(EXTERNAL_UNAVAILABLE) OUTCOME_CASE(FAILED) OUTCOME_CASE(CANCELLED)
++#undef OUTCOME_CASE
++    }
++    return "FAILED";
++}
++inline const char* causeName(RuntimeCause value) {
++    switch (value) {
++#define CAUSE_CASE(v) case RuntimeCause::v: return #v;
++        CAUSE_CASE(NONE) CAUSE_CASE(LLM_TIMEOUT) CAUSE_CASE(LLM_RATE_LIMIT) CAUSE_CASE(LLM_AUTH_ERROR)
++        CAUSE_CASE(LLM_PROVIDER_ERROR) CAUSE_CASE(LLM_INVALID_RESPONSE) CAUSE_CASE(BROWSER_TIMEOUT)
++        CAUSE_CASE(STALE_ELEMENT) CAUSE_CASE(NO_STATE_CHANGE) CAUSE_CASE(AUTH_REQUIRED)
++        CAUSE_CASE(TARGET_NOT_FOUND) CAUSE_CASE(ALREADY_EXISTS) CAUSE_CASE(ACCESS_DENIED)
++        CAUSE_CASE(VALIDATION_ERROR) CAUSE_CASE(ITERATION_LIMIT) CAUSE_CASE(INVALID_PLAN) CAUSE_CASE(UNKNOWN)
++#undef CAUSE_CASE
++    }
++    return "UNKNOWN";
++}
++struct TaskResult {
++    RuntimeOutcome outcome = RuntimeOutcome::FAILED;
++    RuntimeCause cause = RuntimeCause::UNKNOWN;
++    std::string message;
++    std::vector<std::string> verifiedProgress;
++    std::string blockedStage;
++    std::string lastExecutionIssue;
++    std::string recovery;
++};
+diff --git a/src/runtime_reliability_test.cpp b/src/runtime_reliability_test.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/runtime_reliability_test.cpp
+@@ -0,0 +1,270 @@
++#include <curl/curl.h>
++#include "branch3_runtime.hpp"
++#include "runtime_supervisor.hpp"
++#include "browser_state.hpp"
++#include "state_manager.hpp"
++#include <nlohmann/json.hpp>
++#include <chrono>
++#include <filesystem>
++#include <fstream>
++#include <iostream>
++#include <sstream>
++using nlohmann::json;
++namespace fs = std::filesystem;
++namespace {
++LLMResponse reply(json value) { return {true, value.dump(), ""}; }
++LLMResponse timeout() { return {false, "", "Planner request exceeded Nova's LLM request timeout.", LLMFailureCategory::TIMEOUT}; }
++LLMResponse action(const std::string& name, json params, const std::string& step="step_1") {
++    return reply({{"status","operation"},{"step_id",step},{"operation",{{"name",name},{"parameters",params}}}});
++}
++GoalDecomposerLLM guide(json steps, int* calls = nullptr) {
++    return [=](const std::string&, const std::string&) { if (calls) ++*calls; return reply({{"steps", steps}}); };
++}
++json step(const std::string& id, const std::string& description) { return {{"id",id},{"description",description}}; }
++json artifact(const std::string& id, const std::string& kind, const std::string& name, const fs::path& location) {
++    auto item = step(id,"Create requested artifact");
++    item["postcondition"] = {{"kind",kind},{"name",name},{"location",location.string()}};
++    if (kind == "file_content") item["content_requirement"] = "required";
++    return item;
++}
++json dom(const std::string& id="current", const std::string& url="https://example.org/", const std::string& value="") {
++    return {{"url",url},{"title","Example"},{"page_kind","content"},{"ready_state","complete"},{"auth_required",false},
++        {"visible_text","Search content"}, {"focus",{{"id",id},{"role","textbox"},{"value",value},{"editable",true},{"enabled",true},{"focused",true}}},
++        {"elements",json::array({json{{"id",id},{"role","textbox"},{"text","Search"},{"value",value},{"editable",true},{"enabled",true}}})}};
++}
++ExecutionResult executed(const PrimitiveOperation& op, const std::string& category="", const json& snapshot=json::object()) {
++    ExecutionResult result{};
++    result.action = op.name;
++    result.status = category.empty() ? ExecutionStatus::SUCCESS : ExecutionStatus::FAILED;
++    result.reason = category.empty() ? ExecutionFailureReason::NONE : ExecutionFailureReason::EXECUTION_ERROR;
++    result.failureCategory = category;
++    result.message = category.empty() ? "Operation succeeded" : "Concrete execution problem";
++    if (!snapshot.empty()) result.browserData = snapshot.dump();
++    return result;
++}
++}
++int main() {
++    int checks=0, failures=0;
++    auto check = [&](const std::string& label, bool condition) { ++checks; if (!condition) ++failures; std::cout << label << ": " << (condition ? "PASS" : "FAIL") << '\n'; };
++    const fs::path root = fs::temp_directory_path() / ("NovaSupervisorTest_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
++    if (fs::exists(root)) return 2;
++    fs::create_directory(root);
++    const auto initial = json::array({artifact("step_1","directory_exists","Artifact",root),artifact("step_2","file_content","sample.data",root/"Artifact")});
++    int planCalls=0;
++    Branch3Runtime complete(guide(initial), {}, [&](const std::string&, const std::string&) {
++        ++planCalls;
++        if (planCalls==1) return action("filesystem.create",{{"name","Artifact"},{"location",root.string()}});
++        if (planCalls==2) return action("filesystem.create_file",{{"name","sample.data"},{"location",(root/"Artifact").string()},{"content","requested implementation"}},"step_2");
++        return timeout();
++    });
++    auto completed = complete.start("Create requested artifacts");
++    check("VERIFIED_GOAL_COMPLETES_WITHOUT_FINAL_LLM",completed.outcome==RuntimeOutcome::COMPLETED && completed.success && planCalls==2 && completed.verifiedProgress.size()==2);
++    check("TIMEOUT_AFTER_POSTCONDITIONS_CANNOT_REVERSE_COMPLETION",complete.continueSession().success && planCalls==2);
++
++    int decompositions=0, calls=0;
++    auto continuationSteps=initial;
++    continuationSteps[1]["postcondition"]["name"]="continued.data";
++    Branch3Runtime paused(guide(continuationSteps,&decompositions),{},[&](const std::string&,const std::string&) {
++        ++calls;
++        if (calls==1) return action("filesystem.create",{{"name","Artifact"},{"location",root.string()}});
++        if (calls<=3) return timeout();
++        return action("filesystem.create_file",{{"name","continued.data"},{"location",(root/"Artifact").string()},{"content","resumed"}},"step_2");
++    });
++    auto unavailable=paused.start("Create and populate");
++    check("TIMEOUT_RETRIES_ONCE_PRESERVING_PROGRESS",unavailable.outcome==RuntimeOutcome::EXTERNAL_UNAVAILABLE && unavailable.cause==RuntimeCause::LLM_TIMEOUT && calls==3 && unavailable.verifiedProgress.size()==1 && paused.hasActiveSession());
++    check("EXISTING_AUTHORIZED_DIRECTORY_SATISFIED",unavailable.operationResults.size()==1 && unavailable.operationResults[0].execution.failureCategory=="already_exists");
++    auto resumed=paused.continueSession();
++    check("CONTINUE_REUSES_DECOMPOSITION",resumed.success && decompositions==1 && calls==4 && resumed.operationResults.size()==2);
++
++    Branch3Runtime collision(guide(json::array({artifact("step_1","file_content","sample.data",root/"Artifact")})),{},[&](const std::string&,const std::string&) {
++        return action("filesystem.create_file",{{"name","sample.data"},{"location",(root/"Artifact").string()},{"content","different"}});
++    });
++    auto collided=collision.run("Create conflicting file");
++    check("CONFLICTING_FILE_NOT_SATISFIED",!collided.success && collided.verifiedProgress.empty());
++    std::ifstream content(root/"Artifact"/"sample.data"); std::string original; std::getline(content,original); content.close();
++    check("COLLISION_DOES_NOT_OVERWRITE",original=="requested implementation");
++
++    RuntimeSupervisor supervisor(paused);
++    check("NEW_REQUEST_ABANDONS_SESSION",supervisor.control('V')==SupervisorAction::NEW_REQUEST && !paused.hasActiveSession());
++    check("INVALID_MENU_CONTROL_NO_ACTION",supervisor.control('x')==SupervisorAction::INVALID && supervisor.running());
++    check("QUIT_STOPS_SUPERVISOR",supervisor.control('Q')==SupervisorAction::QUIT && !supervisor.running());
++    RuntimeSupervisor eofSupervisor(paused); std::istringstream eof; std::ostringstream terminal;
++    check("EOF_SHUTS_DOWN_CLEANLY",eofSupervisor.readControl(eof,terminal,completed)==SupervisorAction::QUIT);
++
++    const auto before=dom("old-id");
++    check("FINGERPRINT_IGNORES_OBSERVATION_IDS",BrowserState::fingerprint(before.dump())==BrowserState::fingerprint(dom("new-id").dump()));
++    check("FINGERPRINT_DETECTS_URL_CHANGE",BrowserState::fingerprint(before.dump())!=BrowserState::fingerprint(dom("new-id","https://example.org/results").dump()));
++    check("FINGERPRINT_DETECTS_FOCUS_VALUE",BrowserState::fingerprint(before.dump())!=BrowserState::fingerprint(dom("new-id","https://example.org/","query").dump()));
++    auto changed=before; changed["visible_text"]="Results available";
++    check("FINGERPRINT_DETECTS_CONTENT_CHANGE",BrowserState::fingerprint(before.dump())!=BrowserState::fingerprint(changed.dump()));
++    check("LEGACY_DOM_MARKER_PARSED",BrowserState::fingerprint("Browser DOM result: "+before.dump())==BrowserState::fingerprint(before.dump()));
++    check("COMPACT_CONTEXT_PRESERVES_CURRENT_IDS",BrowserState::compact(before.dump()).find("old-id")!=std::string::npos);
++    StateManager bounded("goal");
++    for(int i=0;i<100;++i) {
++        bounded.addHistory("Operation succeeded Browser DOM result: " + before.dump() + std::string(100000,'x'));
++        bounded.setObservation(dom("current").dump());
++    }
++    check("HISTORY_HAS_NO_OLD_DOM_DUMPS",bounded.render().find("old-id")==std::string::npos && bounded.render().find("Browser DOM result:")==std::string::npos);
++    check("PLANNER_CONTEXT_BOUNDED",bounded.render().size()<40000);
++
++    auto wordingScenario = [&](const std::string& description, const std::string& failure) {
++        int observations=0, planner=0, mutations=0; bool refreshed=false;
++        Branch3Runtime browser(guide(json::array({step("step_1",description)})),{},[&](const std::string&, const std::string& context) {
++            ++planner;
++            if(planner==1) return action("browser.navigate",{{"url","https://example.org/"},{"ready_condition","domcontentloaded"}});
++            if(planner==2) return action(failure=="browser_timeout" ? "browser.wait_for" : "browser.click",
++                failure=="browser_timeout" ? json{{"ready_condition","load"}} : json{{"element_id","fresh-1"}});
++            refreshed=context.find("fresh-2")!=std::string::npos;
++            return timeout();
++        },[&](const PrimitiveOperation& op) {
++            if(op.name=="browser.observe") { ++observations; return executed(op,"",dom("fresh-"+std::to_string(observations), observations>=2 ? "https://example.org/results" : "https://example.org/")); }
++            if(op.name=="browser.click" || op.name=="browser.wait_for") { ++mutations; return executed(op,failure); }
++            return executed(op);
++        });
++        auto result=browser.run("Navigate and inspect results");
++        check("BROWSER_RECOVERY_"+description+failure,result.outcome==RuntimeOutcome::EXTERNAL_UNAVAILABLE && result.cause==RuntimeCause::LLM_TIMEOUT && observations==2 && refreshed && mutations==1 && !result.lastExecutionIssue.empty() && !result.recovery.empty());
++        return observations;
++    };
++    auto a=wordingScenario("Navigate to service","stale_element");
++    auto b=wordingScenario("Navigate to service website","stale_element");
++    check("OBSERVATION_INDEPENDENT_OF_WORDING",a==b);
++    wordingScenario("Navigate to service","browser_timeout");
++
++    check("CURL_TIMEOUT_CLASSIFICATION",classifyLLMFailure(CURLE_OPERATION_TIMEDOUT,0)==LLMFailureCategory::TIMEOUT);
++    check("HTTP_429_CLASSIFICATION",classifyLLMFailure(CURLE_OK,429)==LLMFailureCategory::RATE_LIMIT);
++    check("HTTP_AUTH_CLASSIFICATION",classifyLLMFailure(CURLE_OK,401)==LLMFailureCategory::AUTH_ERROR && classifyLLMFailure(CURLE_OK,403)==LLMFailureCategory::AUTH_ERROR);
++    check("HTTP_PROVIDER_CLASSIFICATION",classifyLLMFailure(CURLE_OK,503)==LLMFailureCategory::PROVIDER_ERROR);
++    check("CONNECTION_CLASSIFICATION",classifyLLMFailure(CURLE_COULDNT_CONNECT,0)==LLMFailureCategory::CONNECTION_ERROR);
++    NextActionPlanner invalid([](const std::string&,const std::string&) { return LLMResponse{false,"","No usable response",LLMFailureCategory::INVALID_RESPONSE}; });
++    MultiStepPlan dummy{};
++    check("INVALID_RESPONSE_PRESERVES_TYPE",invalid.choose("goal",dummy,"state","catalog").failureCategory==LLMFailureCategory::INVALID_RESPONSE);
++
++
++    for (const auto category : {LLMFailureCategory::RATE_LIMIT, LLMFailureCategory::AUTH_ERROR, LLMFailureCategory::PROVIDER_ERROR}) {
++        int attempts=0;
++        Branch3Runtime provider(guide(json::array({step("step_1","Inspect")})),{},[&](const std::string&,const std::string&) {
++            ++attempts; return LLMResponse{false,"","Provider diagnostic",category};
++        });
++        const auto failure=provider.run("Inspect");
++        check("PROVIDER_CATEGORY_AND_RETRY_BOUND_"+std::to_string(static_cast<int>(category)),
++            failure.outcome==RuntimeOutcome::EXTERNAL_UNAVAILABLE &&
++            attempts==(category==LLMFailureCategory::AUTH_ERROR ? 1 : 2) &&
++            failure.cause==(category==LLMFailureCategory::RATE_LIMIT ? RuntimeCause::LLM_RATE_LIMIT :
++                category==LLMFailureCategory::AUTH_ERROR ? RuntimeCause::LLM_AUTH_ERROR : RuntimeCause::LLM_PROVIDER_ERROR));
++    }
++    auto huge=dom("retained");
++    huge["title"]=std::string(50000,'t'); huge["visible_text"]=std::string(100000,'v');
++    for(int i=0;i<1000;++i) huge["elements"].push_back({{"id",std::to_string(i)},{"role","button"},{"text",std::string(5000,'x')}});
++    bounded.setObservation(huge.dump());
++    check("OVERSIZED_OBSERVATION_STILL_BOUNDED",bounded.render().size()<40000);
++
++    int authPlans=0, authObservations=0, authDecompositions=0;
++    Branch3Runtime authentication(guide(json::array({step("step_1","Open account")}),&authDecompositions),{},
++        [&](const std::string&,const std::string&) {
++            ++authPlans;
++            if(authPlans==1) return action("browser.navigate",{{"url","https://example.org/"},{"ready_condition","load"}});
++            return timeout();
++        },[&](const PrimitiveOperation& op) {
++            if(op.name=="browser.observe") {
++                ++authObservations; auto page=dom("authentication-"+std::to_string(authObservations));
++                page["auth_required"] = authObservations==1;
++                return executed(op,"",page);
++            }
++            return executed(op);
++        });
++    const auto authPause=authentication.run("Open account");
++    check("AUTH_REQUIRES_USER_WITHOUT_EXTRA_PLANNING",authPause.outcome==RuntimeOutcome::NEEDS_USER && authPause.cause==RuntimeCause::AUTH_REQUIRED && authPlans==1);
++    RuntimeSupervisor authSupervisor(authentication);
++    std::istringstream resumeMenu("C\n"); std::ostringstream menuOutput;
++    check("CONTINUE_MENU_ACCEPTED",authSupervisor.readControl(resumeMenu,menuOutput,authPause)==SupervisorAction::CONTINUE);
++    const auto authResumed=authentication.continueSession();
++    check("CONTINUATION_REFRESHES_DOM_WITHOUT_DECOMPOSING",authResumed.cause==RuntimeCause::LLM_TIMEOUT && authObservations==2 && authDecompositions==1);
++    std::istringstream retryMenu("R\n");
++    check("RETRY_MENU_ACCEPTED",authSupervisor.readControl(retryMenu,menuOutput,authResumed)==SupervisorAction::RETRY);
++    const auto retried=authentication.retryBlockedDependency();
++    check("RETRY_PRESERVES_SESSION",retried.cause==RuntimeCause::LLM_TIMEOUT && authDecompositions==1 && authObservations==3);
++    check("MENU_REPORTS_TYPED_CAUSE",menuOutput.str().find("LLM_TIMEOUT")!=std::string::npos);
++
++    int keyExecutions=0, globalPlans=0;
++    Branch3Runtime globalKeys(guide(json::array({step("step_1","Use page")})),{},
++        [&](const std::string&,const std::string&) {
++            if(++globalPlans==1) return action("browser.navigate",{{"url","https://example.org/"},{"ready_condition","load"}});
++            return action("keyboard.press",{{"key","ENTER"}});
++        },[&](const PrimitiveOperation& op) {
++            if(op.name.starts_with("keyboard.")) ++keyExecutions;
++            return op.name=="browser.observe" ? executed(op,"",dom()) : executed(op);
++        });
++    auto keys=globalKeys.run("Submit page");
++    check("CONTROLLED_BROWSER_REJECTS_GLOBAL_KEYS",keys.cause==RuntimeCause::VALIDATION_ERROR && keyExecutions==0);
++
++    int stalePlans=0, staleExecutes=0, staleObservations=0;
++    Branch3Runtime staleLoop(guide(json::array({step("step_1","Use page")})),{},
++        [&](const std::string&,const std::string&) {
++            if(++stalePlans==1) return action("browser.navigate",{{"url","https://example.org/"},{"ready_condition","load"}});
++            return action("browser.click",{{"element_id","old-reference"}});
++        },[&](const PrimitiveOperation& op) {
++            if(op.name=="browser.observe") return executed(op,"",dom("fresh-"+std::to_string(++staleObservations)));
++            if(op.name=="browser.click") { ++staleExecutes; return executed(op,"stale_element"); }
++            return executed(op);
++        });
++    auto staleBlocked=staleLoop.run("Use page");
++    check("STALE_CLICK_NOT_BLINDLY_REPEATED",staleBlocked.cause==RuntimeCause::STALE_ELEMENT && staleExecutes==1 && staleObservations>=2);
++
++    int unchangedPlans=0, unchangedClicks=0;
++    Branch3Runtime noChange(guide(json::array({step("step_1","Use page")})),{},
++        [&](const std::string&,const std::string&) {
++            if(++unchangedPlans==1) return action("browser.navigate",{{"url","https://example.org/"},{"ready_condition","load"}});
++            return action("browser.click",{{"role","button"},{"text","Observed control"}});
++        },[&](const PrimitiveOperation& op) {
++            if(op.name=="browser.observe") return executed(op,"",dom("regenerated-"+std::to_string(unchangedPlans)));
++            if(op.name=="browser.click") ++unchangedClicks;
++            return executed(op);
++        });
++    const auto stuck=noChange.run("Use page");
++    check("SEMANTIC_NO_CHANGE_STOPS_BOUNDED",stuck.cause==RuntimeCause::NO_STATE_CHANGE && unchangedClicks==2);
++
++    int readinessPlans=0;
++    Branch3Runtime readiness(guide(json::array({step("step_1","Wait for requested state")})),{},
++        [&](const std::string&,const std::string&) {
++            ++readinessPlans;
++            if(readinessPlans==1) return action("browser.navigate",{{"url","https://example.org/"},{"ready_condition","load"}});
++            if(readinessPlans==2) return action("browser.wait_for",{{"ready_condition","load"}});
++            return reply({{"status","done"}});
++        },[&](const PrimitiveOperation& op) {
++            if(op.name=="browser.observe") return executed(op,"",dom());
++            return executed(op,op.name=="browser.wait_for" ? "browser_timeout" : "");
++        });
++    check("UNCHANGED_TIMEOUT_NOT_FALSE_COMPLETION",!readiness.run("Wait for state").success);
++
++    std::ofstream(root/"not_directory") << "conflict";
++    Branch3Runtime directoryConflict(guide(json::array({artifact("step_1","directory_exists","not_directory",root)})),{},
++        [&](const std::string&,const std::string&) { return action("filesystem.create",{{"name","not_directory"},{"location",root.string()}}); });
++    check("EXISTING_FILE_CANNOT_SATISFY_DIRECTORY",!directoryConflict.run("Ensure directory").success);
++
++
++    int prohibitedWrites=0;
++    Branch3Runtime overwriteGuard(guide(json::array({artifact("step_1","file_content","sample.data",root/"Artifact")})),{},
++        [&](const std::string&,const std::string&) { return action("text.write",{{"target",(root/"Artifact"/"sample.data").string()},{"content","overwrite"}}); },
++        [&](const PrimitiveOperation& op) { ++prohibitedWrites; return executed(op); });
++    check("NEW_ARTIFACT_CANNOT_BYPASS_COLLISION_WITH_TEXT_WRITE",overwriteGuard.run("Create a new artifact").cause==RuntimeCause::ALREADY_EXISTS && prohibitedWrites==0);
++
++    std::ofstream(root/"existing.data") << "old";
++    int writePlans=0;
++    Branch3Runtime legitimateWrite(guide(json::array({step("step_1","Write requested text into the existing artifact")})),{},
++        [&](const std::string&,const std::string&) {
++            if(++writePlans==1) return action("text.write",{{"target",(root/"existing.data").string()},{"content","new"}});
++            return reply({{"status","done"},{"message","Requested content written to the existing file"}});
++        });
++    check("LEGITIMATE_EXISTING_FILE_WRITE_UNCHANGED",legitimateWrite.run("Update the existing artifact").success);
++
++    int inspections=0;
++    Branch3Runtime exhausted(guide(json::array({step("step_1","Inspect environment")})),{},[&](const std::string&,const std::string&) { return action("filesystem.inspect",{{"target",root.string()}}); },
++        [&](const PrimitiveOperation& op) { ++inspections; return executed(op); });
++    auto limit=exhausted.run("Inspect environment");
++    check("ITERATION_LIMIT_IS_TYPED",!limit.success && limit.cause==RuntimeCause::ITERATION_LIMIT && inspections==12);
++    std::error_code ec;
++    fs::remove_all(root,ec);
++    check("FIXTURE_CLEANED",!ec && !fs::exists(root));
++    std::cout << "Passed: " << checks-failures << " Failed: " << failures << '\n';
++    return failures ? 1 : 0;
++}
+diff --git a/src/runtime_supervisor.cpp b/src/runtime_supervisor.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/runtime_supervisor.cpp
+@@ -0,0 +1,45 @@
++#include "runtime_supervisor.hpp"
++#include "branch3_runtime.hpp"
++#include <cctype>
++#include <iostream>
++#include <string>
++SupervisorAction RuntimeSupervisor::control(char key) {
++    switch (std::toupper(static_cast<unsigned char>(key))) {
++        case 'Q': running_ = false; runtime_.abandonSession(); return SupervisorAction::QUIT;
++        case 'V': runtime_.abandonSession(); return SupervisorAction::NEW_REQUEST;
++        case 'R': return runtime_.hasActiveSession() ? SupervisorAction::RETRY : SupervisorAction::INVALID;
++        case 'C': return runtime_.hasActiveSession() ? SupervisorAction::CONTINUE : SupervisorAction::INVALID;
++        default: return SupervisorAction::INVALID;
++    }
++}
++void RuntimeSupervisor::handleOutcome(const TaskResult& result, std::ostream& output) const {
++    output << "\n[NOVA RESULT]\nStatus: " << outcomeName(result.outcome) << "\n";
++    output << "Cause: " << causeName(result.cause) << "\n";
++    if (result.outcome == RuntimeOutcome::COMPLETED) output << "Task completed.\n";
++    else if (result.outcome == RuntimeOutcome::NEEDS_USER) output << "I need your input before I can continue.\n";
++    else output << "Task paused.\n";
++    if (!result.verifiedProgress.empty()) {
++        output << "Verified progress:\n";
++        for (const auto& item : result.verifiedProgress) output << "- " << item << "\n";
++    }
++    if (!result.lastExecutionIssue.empty()) output << "Last execution issue: " << result.lastExecutionIssue << "\n";
++    if (!result.recovery.empty()) output << "Recovery: " << result.recovery << "\n";
++    if (!result.blockedStage.empty()) output << "Blocked at: " << result.blockedStage << "\n";
++    output << "Reason: " << result.message << "\n";
++    if (result.outcome != RuntimeOutcome::COMPLETED && runtime_.hasActiveSession()) output << "[R] Retry  [C] Continue  ";
++    output << "[V] New request  [Q] Quit\n";
++}
++SupervisorAction RuntimeSupervisor::readControl(std::istream& input, std::ostream& output, const TaskResult& result) {
++    handleOutcome(result, output);
++    std::string line;
++    while (std::getline(input, line)) {
++        if (line.size() != 1) { output << "Choose one menu key.\n"; continue; }
++        if (result.outcome == RuntimeOutcome::COMPLETED && (line[0] == 'r' || line[0] == 'R' || line[0] == 'c' || line[0] == 'C')) {
++            output << "Task is complete. Choose V or Q.\n"; continue;
++        }
++        const auto action = control(line[0]);
++        if (action != SupervisorAction::INVALID) return action;
++        output << "Choose an available menu key.\n";
++    }
++    return control('Q');
++}
+diff --git a/src/runtime_supervisor.hpp b/src/runtime_supervisor.hpp
+new file mode 100644
+--- /dev/null
++++ b/src/runtime_supervisor.hpp
+@@ -0,0 +1,16 @@
++#pragma once
++#include "runtime_outcome.hpp"
++#include <iosfwd>
++class Branch3Runtime;
++enum class SupervisorAction { NEW_REQUEST, RETRY, CONTINUE, QUIT, INVALID };
++class RuntimeSupervisor {
++public:
++    explicit RuntimeSupervisor(Branch3Runtime& runtime) : runtime_(runtime) {}
++    bool running() const { return running_; }
++    SupervisorAction control(char key);
++    SupervisorAction readControl(std::istream& input, std::ostream& output, const TaskResult& result);
++    void handleOutcome(const TaskResult& result, std::ostream& output) const;
++private:
++    Branch3Runtime& runtime_;
++    bool running_ = true;
++};
+diff --git a/src/state_manager.cpp b/src/state_manager.cpp
+--- a/src/state_manager.cpp
++++ b/src/state_manager.cpp
+@@ -1,9 +1,10 @@
+ #include "state_manager.hpp"
++#include "browser_state.hpp"
+ #include <sstream>
+ #include <utility>
+ StateManager::StateManager(std::string goal) : goal_(std::move(goal)) {}
+-void StateManager::setObservation(std::string observation) { observation_ = std::move(observation); }
+-void StateManager::addHistory(std::string entry) { history_.push_back(std::move(entry)); if (history_.size() > 20) history_.erase(history_.begin()); }
++void StateManager::setObservation(std::string observation) { observation_ = BrowserState::compact(observation); }
++void StateManager::addHistory(std::string entry) { history_.push_back(BrowserState::summary(entry).substr(0, MAX_HISTORY_ENTRY_BYTES)); if (history_.size() > MAX_HISTORY_ENTRIES) history_.erase(history_.begin()); }
+ bool StateManager::repeatedFailure(const std::string& signature) const {
+     if (failures_.empty()) return false;
+     const std::string prefix = signature + "|reason=";
+@@ -16,7 +17,7 @@
+ void StateManager::recordFailure(const std::string& signature) { failures_.push_back(signature); if (failures_.size()>10) failures_.erase(failures_.begin()); }
+ void StateManager::recordSuccess() { failures_.clear(); }
+ std::string StateManager::render() const {
+-    std::ostringstream out; out << "[STATE]\nGoal: " << goal_ << "\nIteration: " << iterations_ << "\nObservation: " << (observation_.empty()?"not yet available":observation_) << "\nRecent history:\n";
++    std::ostringstream out; out << "[STATE]\nGoal: " << goal_.substr(0, 8000) << "\nIteration: " << iterations_ << "\nObservation: " << (observation_.empty()?"not yet available":observation_) << "\nRecent history:\n";
+     if (history_.empty()) out << "- none\n"; else for (const auto& item:history_) out << "- " << item << "\n";
+     return out.str();
+ }
+diff --git a/src/state_manager.hpp b/src/state_manager.hpp
+--- a/src/state_manager.hpp
++++ b/src/state_manager.hpp
+@@ -3,6 +3,8 @@
+ #include <vector>
+ class StateManager {
+ public:
++    static constexpr std::size_t MAX_HISTORY_ENTRIES = 10;
++    static constexpr std::size_t MAX_HISTORY_ENTRY_BYTES = 768;
+     explicit StateManager(std::string goal);
+     void setObservation(std::string observation);
+     void addHistory(std::string entry);

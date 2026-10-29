@@ -1,14 +1,14 @@
 # Nova Branch 3 — Canonical Primitive Catalog
 
-This document describes the **22 primitives registered in `src/primitive_registry.cpp`** and their current implementation in `src/primitive_execution_engine.cpp`. The registry schemas are the machine-readable contract used by `PrimitiveMapper`; if this document and the code disagree, treat the code as authoritative and update this document.
+This document describes the **26 primitives registered in `src/primitive_registry.cpp`** and their current implementation in `src/primitive_execution_engine.cpp`. The registry schemas are the machine-readable contract used by `PrimitiveMapper`; if this document and the code disagree, treat the code as authoritative and update this document.
 
 ## Execution contract
 
 - The Goal Decomposer converts a user goal into ordered logical steps. It does not choose primitives.
-- The Primitive Mapper receives the **entire live registry catalog and the complete decomposed plan in one LLM call**. It maps all steps without executing anything.
+- The next-action planner receives the raw goal, complete guide, live registry and bounded observed state. It chooses one operation; the mapper validates it deterministically before execution.
 - The host validates the mapped result against the registry and only then starts execution.
-- Branch 3 executes steps in plan order and operations within each step in listed order. It stops on the first failed operation.
-- Branch 2's single-action pipeline remains separate and unchanged.
+- The runtime owns dependency and verification state, performs bounded recovery and rejects premature completion. General steps use observed evidence or typed verification predicates; artifact steps use backend-verified postconditions.
+- All production external requests use this runtime. Legacy phrase-based pipeline sources remain available only to their legacy tests and are not linked into Nova.
 - Filesystem paths are resolved by a shared Windows-aware policy. It supports absolute paths and the `desktop`, `documents`, and `downloads` aliases, normalizes paths before use, checks reparse-point-aware physical destinations, and blocks mutations in protected Windows and application locations.
 
 ## Primitive reference
@@ -68,24 +68,22 @@ This document describes the **22 primitives registered in `src/primitive_registr
 
 - `filesystem.list_directory` lists up to 200 entries in one authorized directory. It returns the resolved directory and absolute entry paths.
 - `filesystem.search` recursively searches an authorized root for a case-insensitive name substring, optionally limited to files or directories, with a maximum of 1000 returned matches.
-- `filesystem.inspect` verifies an authorized path and reports its resolved path and resource type.
+- `filesystem.inspect` reports existence (including `exists=false`), resource type, byte size and a bounded UTF-8 text preview where applicable. A missing inspected path is an observable fact, not an execution failure.
 
 Discovery does not guess a location. When multiple candidates remain viable, the planner must ask the user. Successful filesystem operations expose their resolved paths to later state-aware planning.
 
 ### 7. `application.launch`
 
-- **Purpose:** Launch an allowlisted application, optionally opening an existing file or folder.
-- **Required:** `application`.
-- **Optional:** `target` (must be an existing authorized filesystem path).
-- **Outputs:** `launched`, `application`.
-- **Current allowlist:** Notepad, Calculator, Paint, Explorer, VS Code, Chrome, and Edge (including aliases implemented in `appExeFromName`).
-- **Side effects:** Starts a real Windows process. Success means the launch request was accepted, not that the application finished loading or opened the target successfully.
-- **Limitations:** Arbitrary executables are not allowed.
+- **Purpose:** Launch a registered application or open a verified file/folder using Windows associations.
+- **Parameters:** Supply `application`, `target`, or both. Target must exist and pass filesystem policy.
+- **Discovery:** Application names/AppIDs are resolved from Windows registrations. Ambiguous matches require clarification; there is no hand-written app-name allowlist.
+- **File activation:** Desktop and packaged application contracts are selected from OS metadata. A requested target is passed through rather than silently ignored.
+- **Side effects:** Windows launch/activation is requested. Acceptance is not proof that installation or application loading completed.
 
 ### 8. `application.close`
 
 - **Purpose:** Request a window to close.
-- **Required:** `application` (allowlisted application).
+- **Required:** `application` (an executable identity observed by `environment.observe`).
 - **Optional:** `target` (window-title substring).
 - **Outputs:** `closed`, `application`.
 - **Side effects:** Sends `WM_CLOSE` to a matching visible window. It does not forcibly terminate the process.
@@ -94,7 +92,7 @@ Discovery does not guess a location. When multiple candidates remain viable, the
 ### 9. `application.focus`
 
 - **Purpose:** Bring a matching visible window to the foreground.
-- **Required:** `application` (allowlisted application).
+- **Required:** `application` (an executable identity observed by `environment.observe`).
 - **Optional:** `target` (window-title substring).
 - **Outputs:** `focused`, `application`.
 - **Side effects:** Attempts to restore and foreground a real window.
@@ -188,8 +186,18 @@ The helper does not install browser binaries; it uses the installed Edge or Chro
 
 ## State-aware browser primitives (Branch 3)
 
-- `browser.observe`: returns the controlled browser URL, title, page-kind hint, and up to 40 visible interactive elements with observed IDs, roles, and accessible text. IDs are transient and must be refreshed after navigation or UI changes.
+- `browser.observe`: returns the controlled browser URL, title, page-kind hint, and bounded visible interactive elements and link destinations with observed IDs, roles, and accessible text. IDs are transient and must be refreshed after navigation or UI changes.
 - `browser.click`: clicks an element by an ID from the most recent observation or by an exact accessible role and name. Ambiguous role/name matches fail rather than guessing.
 - `browser.type`: fills an identified input by the same ID or exact role/name matching. Text is bounded by the browser agent.
 
-These primitives operate only in Nova's loopback-controlled Playwright browser profile. They do not inspect or control the user's unrelated everyday browser profile. Branch 3 observes before each planning decision and validates every proposed operation against the live primitive registry.
+These primitives operate in the explicitly connected browser session. The default is a labeled isolated profile; optional loopback CDP attachment and observed tab selection can reuse a configured user session. Ordinary unrelated browser windows are not automatically controllable. See runtime-configuration.md.
+
+
+## Environment, sessions and download effects
+
+- `environment.observe`: bounded title-free visible application inventory, foreground application, locale/region and known-folder paths. It observes, not launches.
+- `browser.tabs`: optional local `target` filter; returns observed IDs and session mode. Unfiltered results omit full URL/title.
+- `browser.select_tab`: requires a returned tab ID in `target`; returns a fresh observation of the selected tab.
+- `browser.download`: observed element ID or exact role/name, optional authorized existing `location` and bounded timeout. Captures transfer completion, refuses overwrite, verifies the file and returns exact path/bytes. It never executes the file automatically.
+
+Ordinary browser clicks refuse declared download controls and cancel unexpected transfers. Browser state includes readable text outside editable controls, dialogs, link destinations, popup and download effects. A successful click dispatch alone cannot verify a submitted message or completed transfer. Copy verifies source/destination bytes; move/rename verify their resulting paths, allowing their effects to satisfy matching artifact postconditions.

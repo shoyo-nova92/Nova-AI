@@ -1,0 +1,9 @@
+{
+  "Directory": "C:\\Users\\shour\\Desktop\\NovaRecoveryQA",
+  "DirectoryExists": true,
+  "File": "C:\\Users\\shour\\Desktop\\NovaRecoveryQA\\hello.txt",
+  "FileExists": true,
+  "ByteCount": 10,
+  "ExactBytesMatch": true,
+  "Content": "hello nova"
+}

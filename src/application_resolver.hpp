@@ -15,6 +15,7 @@ struct ApplicationResolverResult
     string displayName;
 
     string message;
+    bool acceptsCommandLine = false;
 };
 
 class ApplicationResolver

@@ -1,8 +1,17 @@
 import unittest
-from browser_agent import validate_url, validate_timeout, classify_page
+from browser_agent import validate_url, validate_timeout, classify_page, failure_category, StaleElementError, validate_cdp_endpoint
 
 
 class BrowserAgentValidationTests(unittest.TestCase):
+    def test_cdp_requires_explicit_loopback_endpoint(self):
+        self.assertEqual(validate_cdp_endpoint("http://127.0.0.1:9222"), "http://127.0.0.1:9222")
+        for value in ("http://example.org:9222", "http://127.0.0.1.evil.test:9222", "http://user:pass@localhost:9222"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                validate_cdp_endpoint(value)
+    def test_machine_readable_stale_failure(self):
+        self.assertEqual(failure_category(StaleElementError("any diagnostic")), "stale_element")
+        self.assertEqual(failure_category(ValueError("stale in prose is not a category")), "invalid_plan")
+
     def test_accepts_http_and_https(self):
         self.assertEqual(validate_url("https://web.whatsapp.com"), "https://web.whatsapp.com")
         self.assertEqual(validate_url("http://localhost:8080/app"), "http://localhost:8080/app")

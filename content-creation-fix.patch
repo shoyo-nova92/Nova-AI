@@ -1,0 +1,293 @@
+diff --git a/src/branch3_runtime.cpp b/src/branch3_runtime.cpp
+index 6439ce3..da9b7f4 100644
+--- a/src/branch3_runtime.cpp
++++ b/src/branch3_runtime.cpp
+@@ -211,6 +211,9 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
+     constexpr unsigned MAX_ITERATIONS = 12;
+     const std::string catalog = liveCatalog();
+     const bool observeBrowser = browserObservationNeeded(result.decomposedPlan);
++    unsigned validationFailures = 0;
++    bool unrepairedValidation = false;
++    bool unresolvedExecutionFailure = false;
+     std::string lastBrowserAction;
+     std::string snapshotBeforeLastBrowserAction;
+ 
+@@ -251,6 +254,25 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
+         NextActionDecision decision = planner_.choose(goal, result.decomposedPlan, state.render(), catalog);
+         result.stateLog += "[PLANNER] " + decision.status + ": " + decision.message + "\n";
+         if (decision.status == "done") {
++            if (unrepairedValidation || unresolvedExecutionFailure) {
++                result.message = "Branch 3 blocked: planner claimed completion with an unrepaired rejected operation.";
++                return result;
++            }
++            for (const auto& required : result.decomposedPlan.steps) {
++                if (required.contentRequirement != "required") continue;
++                const bool fulfilled = std::any_of(result.mappedPlan.steps.begin(), result.mappedPlan.steps.end(),
++                    [&](const MultiStepAction& step) {
++                        return step.id == required.id && std::any_of(step.operations.begin(), step.operations.end(),
++                            [](const PrimitiveOperation& op) {
++                                return (op.name == "filesystem.create_file" || op.name == "text.write") &&
++                                    op.parameters.content.find_first_not_of(" \t\r\n") != std::string::npos;
++                            });
++                    });
++                if (!fulfilled) {
++                    result.message = "Branch 3 blocked: requested content has not been written and verified for " + required.id;
++                    return result;
++                }
++            }
+             result.success = true;
+             result.message = "Branch 3 goal reported complete by planner after fresh environment observation: " + decision.message;
+             return result;
+@@ -262,13 +284,29 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
+         if (decision.status != "operation") { result.message = "Branch 3 blocked: planner returned no actionable decision."; return result; }
+         const MultiStepAction* sourceStep = findStep(result.decomposedPlan, decision.stepId);
+         if (!sourceStep) { result.message = "Branch 3 blocked: planner selected an unknown guide step ID '" + decision.stepId + "'."; return result; }
++        try {
++            const auto raw = nlohmann::json::parse(decision.operationJson);
++            if (raw.value("name", std::string{}) == "filesystem.create_file") {
++                const auto& params = raw.at("parameters");
++                result.stateLog += "[PLANNER CONTENT] source=planner_json present=" +
++                    std::string(params.contains("content") ? "true" : "false") +
++                    " bytes=" + std::to_string(params.contains("content") && params["content"].is_string()
++                        ? params["content"].get<std::string>().size() : 0) + "\n";
++            }
++        } catch (...) { /* Mapper reports malformed operations below. */ }
+         MultiStepPlan mapped = mapper_.mapStep(*sourceStep, decision.operationJson);
+         if (!mapped.valid || mapped.steps.empty() || mapped.steps.front().operations.size() != 1) {
+             state.addHistory("Rejected planner operation: " + mapped.message);
+             result.stateLog += "[VALIDATION] rejected: " + mapped.message + "\n";
+-            result.message = "Planner operation failed registry/schema validation: " + mapped.message;
+-            return result;
++            unrepairedValidation = true;
++            if (++validationFailures > 1) {
++                result.message = "Planner operation failed registry/schema validation after one repair attempt: " + mapped.message;
++                return result;
++            }
++            state.addHistory("Repair the rejected operation with complete parameters. One validation repair attempt remains; do not claim done.");
++            continue;
+         }
++        unrepairedValidation = false;
+         const PrimitiveOperation& operation = mapped.steps.front().operations.front();
+ 
+         // A missing destination is not permission to manufacture its ancestors.
+@@ -312,6 +350,7 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
+         operationResult.execution = engine.execute(operation);
+         result.operationResults.push_back(operationResult);
+         if (operationResult.execution.status == ExecutionStatus::SUCCESS) {
++            unresolvedExecutionFailure = false;
+             state.recordSuccess();
+             const std::string evidence = resultEvidence(operationResult.execution);
+             state.addHistory("Succeeded " + operation.name + ": " + evidence);
+@@ -319,6 +358,7 @@ Branch3RuntimeResult Branch3Runtime::run(const std::string& goal) {
+             result.mappedPlan.steps.push_back(mapped.steps.front());
+             result.stateLog += "[EXECUTION] success " + operation.name + ": " + evidence + "\n";
+         } else {
++            unresolvedExecutionFailure = true;
+             const std::string failureSignature = operationSignature(operation,
+                 operationResult.execution.failureCategory);
+             state.recordFailure(failureSignature);
+diff --git a/src/branch3_runtime_test.cpp b/src/branch3_runtime_test.cpp
+index 3c1cd46..7bafbb3 100644
+--- a/src/branch3_runtime_test.cpp
++++ b/src/branch3_runtime_test.cpp
+@@ -153,6 +153,73 @@ int main() {
+     check("12_UNSUPPORTED_PRIMITIVE_REJECTED", !guarded.success && guarded.executionStarted && guarded.operationResults.empty());
+     check("13_BAD_PLAN_DID_NOT_CALL_LEGACY_MAPPER", badDecomposerCalls == 1 && badMapperCalls == 0);
+ 
++    // Content intent comes from semantic decomposition, independent of names/extensions.
++    auto contentScenario = [&](const string& requirement, const string& name, int mode) {
++        int calls = 0;
++        const string body = "int transform(int value) { return value * 2; }\n";
++        GoalDecomposerLLM interpret = [&](const string&, const string&) {
++            return LLMResponse{true, json{{"steps", json::array({json{{"id","step_1"},
++                {"description","Create the requested artifact with its requested contents"},
++                {"content_requirement",requirement}}})}}.dump(), ""};
++        };
++        NextActionLLM plan = [&](const string&, const string& context) {
++            ++calls;
++            if (mode == 4 && calls == 2)
++                return LLMResponse{true, json{{"status","done"}}.dump(), ""};
++            if ((mode == 0 || mode == 1) && calls > 1 || mode == 2 && calls > 2)
++                return LLMResponse{true, json{{"status","done"},{"message","Artifact verified in execution history"}}.dump(), ""};
++            json params = {{"name",name},{"location",workspace.string()}};
++            if (mode == 1 || mode == 2 && calls > 1) params["content"] = body;
++            if (mode == 0) params["content"] = "";
++            if (mode == 5) params["content"] = " \t\r\n";
++            if (mode == 2 && calls == 2)
++                check("REPAIR_RECEIVES_VALIDATION_FEEDBACK", context.find("requires populated content") != string::npos);
++            return LLMResponse{true, json{{"status","operation"},{"step_id","step_1"},
++                {"operation",json{{"name","filesystem.create_file"},{"parameters",params}}}}.dump(), ""};
++        };
++        Branch3Runtime subject(interpret, mapper, plan);
++        const auto outcome = subject.run("Create requested artifact");
++        if (mode <= 2) {
++            check("CONTENT_SCENARIO_SUCCEEDS_" + name, outcome.success);
++            ifstream file(workspace / name, ios::binary);
++            const string actual((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
++            check("CONTENT_READBACK_" + name, file.is_open() && actual == (mode == 0 ? "" : body));
++        } else {
++            check("INVALID_CONTENT_FAILS_" + name, !outcome.success && outcome.operationResults.empty() &&
++                !fs::exists(workspace / name) && calls == 2);
++        }
++    };
++    contentScenario("empty_allowed", "empty.data", 0);
++    contentScenario("required", "generated.cpp", 1);
++    contentScenario("required", "repaired.data", 2);
++    contentScenario("required", "omitted.data", 3);
++    contentScenario("required", "false_done.data", 4);
++    contentScenario("required", "whitespace.data", 5);
++
++    PrimitiveExecutionEngine writeEngine;
++    PrimitiveOperation write{};
++    write.name = "text.write";
++    write.type = PrimitiveOperationType::TEXT_WRITE;
++    write.resolved = true;
++    write.parameters.target = (workspace / "empty.data").string();
++    write.parameters.content = "Updated existing artifact";
++    const auto written = writeEngine.execute(write);
++    ifstream existing(workspace / "empty.data", ios::binary);
++    const string updated((istreambuf_iterator<char>(existing)), istreambuf_iterator<char>());
++    if (written.status != ExecutionStatus::SUCCESS) cerr << written.message << "\n";
++    existing.close();
++    check("EXISTING_FILE_WRITE", written.status == ExecutionStatus::SUCCESS && updated == write.parameters.content);
++
++    MultiStepAction probe{};
++    probe.id = "step_1";
++    probe.description = "Create file";
++    PrimitiveMapper direct;
++    const json probeParams = {{"name","probe.data"},{"location",workspace.string()}};
++    auto operationJson = json{{"name","filesystem.create_file"},{"parameters",probeParams}};
++    check("MAPPER_DOES_NOT_INSERT_MISSING_CONTENT", direct.mapStep(probe, operationJson.dump()).valid);
++    operationJson["parameters"]["content"] = "";
++    check("PLANNER_SUPPLIED_EMPTY_VALUE_CAUSES_SCHEMA_ERROR", !direct.mapStep(probe, operationJson.dump()).valid);
++
+     // The workspace path was confirmed absent before this test, so any contents
+     // at this exact unique path belong to this test and can be safely removed.
+     ec.clear();
+diff --git a/src/goal_decomposer.cpp b/src/goal_decomposer.cpp
+index 0ef781c..00c1451 100644
+--- a/src/goal_decomposer.cpp
++++ b/src/goal_decomposer.cpp
+@@ -102,6 +102,8 @@ Required format:
+ }
+ 
+ Rules:
++- For every file creation step include content_requirement: "required" if the user requests contents, or "empty_allowed" if no contents are requested (including explicitly empty files). Use "unspecified" for unrelated steps.
++- Keep creation and requested population of a new file in ONE logical step. Preserve the complete content requirements in its description. Do not split creating a blank file from writing its requested contents.
+ - Step IDs must be unique.
+ - IDs must use the format step_1, step_2, step_3, etc.
+ - Keep steps in logical order.
+@@ -230,7 +232,7 @@ IMPORTANT DECOMPOSITION AND PRESERVATION RULES:
+             const json& item = steps[i];
+ 
+             if (!item.is_object() ||
+-                !hasOnlyKeys(item, {"id", "description", "depends_on"}) ||
++                !hasOnlyKeys(item, {"id", "description", "depends_on", "content_requirement"}) ||
+                 !item.contains("id") ||
+                 !item["id"].is_string() ||
+                 !item.contains("description") ||
+@@ -263,6 +265,13 @@ IMPORTANT DECOMPOSITION AND PRESERVATION RULES:
+             step.id = id;
+             step.description = description;
+             step.resolved = false;
++            step.contentRequirement = item.value("content_requirement", string("unspecified"));
++            if (step.contentRequirement != "unspecified" && step.contentRequirement != "required" &&
++                step.contentRequirement != "empty_allowed") {
++                plan.message = "Invalid content_requirement.";
++                plan.steps.clear();
++                return plan;
++            }
+ 
+             // Goal decomposition must not assign execution primitives.
+             step.operations.clear();
+diff --git a/src/multistep_plan.hpp b/src/multistep_plan.hpp
+index 75cb08b..d4f8cae 100644
+--- a/src/multistep_plan.hpp
++++ b/src/multistep_plan.hpp
+@@ -23,6 +23,9 @@ struct MultiStepAction
+     string capability;
+     vector<string> parameters;
+     bool resolved;
++
++    // Semantic artifact intent, supplied by goal interpretation, never by filename.
++    string contentRequirement = "unspecified";
+ };
+ 
+ struct MultiStepPlan
+diff --git a/src/next_action_planner.cpp b/src/next_action_planner.cpp
+index 299056f..c08f454 100644
+--- a/src/next_action_planner.cpp
++++ b/src/next_action_planner.cpp
+@@ -59,7 +59,7 @@ NextActionDecision NextActionPlanner::choose(const std::string& goal, const Mult
+     if (!generator_) { out.message = "Next-action planner has no LLM generator."; return out; }
+     json steps = json::array();
+     for (const auto& step : guide.steps)
+-        steps.push_back({{"id", step.id}, {"description", step.description}, {"depends_on", step.dependencies}});
++        steps.push_back({{"id", step.id}, {"description", step.description}, {"depends_on", step.dependencies}, {"content_requirement", step.contentRequirement}});
+     const std::string system = R"PROMPT(You are Nova's state-aware Branch 3 next-action planner.
+ Return exactly one JSON object and nothing else. The first non-whitespace character must be { and the last non-whitespace character must be }. Do not include explanations, preambles, Markdown fences, or analysis. Choose exactly ONE next operation based on the stable user goal, guide steps, current observed state, action history, and live primitive catalog.
+ Allowed outputs:
+@@ -70,6 +70,9 @@ Allowed outputs:
+ Rules:
+ - Use only exact primitive names and parameters from the supplied catalog.
+ - Choose one operation only. Do not return a sequence.
++- When creating a new file with requested contents, generate the complete requested content in parameters.content of ONE filesystem.create_file operation. Never create an empty placeholder to populate later. Follow content_requirement and the original goal, even if older guide steps separate creation and writing.
++- For explicitly empty files omit content. Use text.write for legitimate writes to existing files.
++- Validation feedback is actionable: repair the rejected operation once by supplying its missing data. Never report done after a rejection without fulfilling the outstanding requirement.
+ - Guide steps are guidance, not a rigid script. Skip actions already satisfied by observed state.
+ - Treat the observed DOM focus as authoritative evidence about where keyboard input will go. The observation may include a top-level `focus` object and per-element `focused`, `editable`, `enabled`, and `value` fields.
+ - Before proposing a click on a text box or message composer, inspect the current focus. If the active element is focused, editable, and enabled, and it is the intended input target, DO NOT click it again; proceed directly to browser.type using that observed element (or ask_user if the intended target cannot be established).
+diff --git a/src/primitive_execution_engine.cpp b/src/primitive_execution_engine.cpp
+index cbe8455..f269c64 100644
+--- a/src/primitive_execution_engine.cpp
++++ b/src/primitive_execution_engine.cpp
+@@ -691,7 +691,11 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op)
+             file.write(op.parameters.content.data(), static_cast<streamsize>(op.parameters.content.size()));
+             file.close();
+             if (!file) { error_code ignored; fs::remove(filePath, ignored); return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Failed writing file: " + filePath.string()); }
+-            return filesystemSuccess(op, "File created: " + filePath.string(), filePath);
++            ifstream verified(filePath, ios::binary);
++            const string actual((istreambuf_iterator<char>(verified)), istreambuf_iterator<char>());
++            if (!verified.is_open() || verified.bad() || !fs::is_regular_file(filePath) || actual != op.parameters.content)
++                return fail(op, ExecutionFailureReason::EXECUTION_ERROR, "Created file failed content readback verification: " + filePath.string());
++            return filesystemSuccess(op, "File created and content verified: " + filePath.string(), filePath);
+         } catch (const fs::filesystem_error& e) { return fail(op, ExecutionFailureReason::EXECUTION_ERROR, e.what()); }
+     }
+ 
+@@ -1086,6 +1090,9 @@ ExecutionResult PrimitiveExecutionEngine::execute(const PrimitiveOperation& op)
+         }
+         fs::path target; ExecutionResult pathFailure;
+         if (!resolvePathForOperation(op, targetText, FilesystemAccess::WRITE, target, pathFailure)) return pathFailure;
++        // The resolver may append a directory separator to an existing file.
++        // Normalize that spelling only after the original target was authorized.
++        if (target.has_relative_path() && target.filename().empty()) target = target.parent_path();
+         try {
+             if (!fs::is_regular_file(target))
+                 return fail(op, ExecutionFailureReason::TARGET_NOT_FOUND,
+diff --git a/src/primitive_mapper.cpp b/src/primitive_mapper.cpp
+index e81eaa0..6018fa4 100644
+--- a/src/primitive_mapper.cpp
++++ b/src/primitive_mapper.cpp
+@@ -369,7 +369,21 @@ MultiStepPlan PrimitiveMapper::mapStep(const MultiStepAction& sourceStep, const
+     result.steps.front().operations.clear();
+     result.steps.front().resolved = false;
+     try {
+-        const json operation = json::parse(operationJson);
++        json operation = json::parse(operationJson);
++        if (operation.value("name", string{}) == "filesystem.create_file") {
++            auto& parameters = operation.at("parameters");
++            const bool blank = !parameters.contains("content") ||
++                (parameters["content"].is_string() && trim(parameters["content"].get<string>()).empty());
++            // An explicitly empty file may use either omission or an empty string.
++            if (sourceStep.contentRequirement == "empty_allowed" && parameters.contains("content") &&
++                parameters["content"].is_string() && parameters["content"].get<string>().empty())
++                parameters.erase("content");
++            if (sourceStep.contentRequirement == "required" && blank) {
++                result.message = "Requested artifact requires populated content. Generate the complete requested content and supply parameters.content in filesystem.create_file; do not create an empty placeholder.";
++                result.steps.clear();
++                return result;
++            }
++        }
+         json wrapped = {{"id", sourceStep.id}, {"operations", json::array({operation})}};
+         unordered_map<string, PrimitiveDefinition> definitions;
+         for (const auto& entry : PrimitiveRegistry::getCatalog()) definitions.emplace(entry.first, entry.second);

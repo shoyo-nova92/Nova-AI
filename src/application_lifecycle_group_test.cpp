@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <shlobj.h>
 #include "primitive_execution_engine.hpp"
+#include "filesystem_path_policy.hpp"
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -19,10 +20,7 @@ void check(const string& name, bool ok) {
     (ok ? passed : failed)++;
 }
 fs::path desktop() {
-    PWSTR raw = nullptr;
-    HRESULT hr = SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &raw);
-    if (FAILED(hr) || !raw) return {};
-    fs::path p(raw); CoTaskMemFree(raw); return p;
+    return FilesystemPathPolicy{}.resolve("desktop").path;
 }
 PrimitiveOperation base(PrimitiveOperationType type, const string& name) {
     PrimitiveOperation p{}; p.type = type; p.name = name; p.resolved = true; return p;

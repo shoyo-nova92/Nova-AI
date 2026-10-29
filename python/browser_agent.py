@@ -11,6 +11,8 @@ import os
 import re
 import sys
 import uuid
+import shutil
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -25,6 +27,29 @@ _channel = "msedge"
 _playwright = None
 _import_error = None
 _observation_token = ""
+_session_mode = "not_started"
+_tab_ids = {}
+_downloads = []
+_download_expected = False
+_watched_pages = set()
+
+
+
+class StaleElementError(ValueError):
+    pass
+
+
+def failure_category(exc):
+    if isinstance(exc, StaleElementError):
+        return "stale_element"
+    # Playwright is loaded lazily; importing this module must work without it.
+    try:
+        from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+        if isinstance(exc, PlaywrightTimeoutError):
+            return "browser_timeout"
+    except ImportError:
+        pass
+    return "invalid_plan" if isinstance(exc, ValueError) else "browser_unavailable"
 
 
 def validate_url(value: str) -> str:
@@ -52,17 +77,46 @@ def validate_timeout(value) -> int:
     return value
 
 
+def validate_cdp_endpoint(value):
+    parsed = urlsplit(validate_url(value))
+    if parsed.hostname not in ("localhost", "127.0.0.1", "::1"):
+        raise ValueError("CDP attachment must use an explicitly configured loopback endpoint.")
+    return value
+
+
+def watch_page(page):
+    if page in _watched_pages:
+        return
+    _watched_pages.add(page)
+    def downloaded(item):
+        record = {"id": uuid.uuid4().hex, "filename": item.suggested_filename,
+                  "status": "started" if _download_expected else "cancelled_unexpected"}
+        _downloads.append(record)
+        del _downloads[:-10]
+        if not _download_expected:
+            item.cancel()
+    page.on("download", downloaded)
+
+
+def tab_id(page):
+    if page not in _tab_ids:
+        _tab_ids[page] = uuid.uuid4().hex
+    return _tab_ids[page]
+
+
 def ensure_browser(channel: str = "msedge"):
-    global _playwright, _context, _page, _channel, _import_error
+    global _playwright, _context, _page, _channel, _import_error, _browser, _session_mode
     if channel not in ("msedge", "chrome"):
         raise ValueError("Browser channel must be msedge or chrome.")
     if _context is not None and _channel == channel:
         if _page is None or _page.is_closed():
             _page = _context.new_page()
+        watch_page(_page)
         return
     if _context is not None:
         try:
-            _context.close()
+            if _session_mode == "isolated":
+                _context.close()
         except Exception:
             pass
         _context = None
@@ -77,6 +131,19 @@ def ensure_browser(channel: str = "msedge"):
             "Run: python -m pip install playwright"
         ) from exc
 
+    endpoint = os.environ.get("NOVA_BROWSER_CDP_URL", "")
+    if endpoint:
+        _browser = _playwright.chromium.connect_over_cdp(validate_cdp_endpoint(endpoint), timeout=10000)
+        if not _browser.contexts:
+            raise RuntimeError("Connected browser has no accessible context.")
+        _context = _browser.contexts[0]
+        _session_mode = "user_attached_cdp"
+        _channel = channel
+        # Do not observe or navigate an arbitrary private user tab by default.
+        # Existing tabs require an explicit filtered tabs query and select_tab.
+        _page = _context.new_page()
+        watch_page(_page)
+        return
     base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
     profile = Path(base) / "Nova" / "BrowserProfile" / channel
     profile.mkdir(parents=True, exist_ok=True)
@@ -85,6 +152,7 @@ def ensure_browser(channel: str = "msedge"):
             user_data_dir=str(profile),
             channel=channel,
             headless=False,
+            accept_downloads=True,
             args=["--no-first-run", "--no-default-browser-check"],
         )
     except Exception as exc:
@@ -93,6 +161,8 @@ def ensure_browser(channel: str = "msedge"):
         ) from exc
     _channel = channel
     _page = _context.pages[0] if _context.pages else _context.new_page()
+    _session_mode = "isolated"
+    watch_page(_page)
 
 
 def wait_for_condition(page, condition: str, selector: str, timeout_ms: int):
@@ -156,20 +226,23 @@ def observe_page(page):
       document.querySelectorAll('[data-nova-observation-token]').forEach(el => el.removeAttribute('data-nova-observation-token'));
       const nodes = document.querySelectorAll('button, a, input, textarea, select, [role], [contenteditable="true"]');
       for (const el of nodes) {
-        if (out.length >= 60) break;
+        if (out.length >= 100) break;
         if (!visible(el)) continue;
         const role = el.getAttribute('role') || ({BUTTON:'button', A:'link', INPUT: (el.type === 'checkbox' ? 'checkbox' : 'textbox'), TEXTAREA:'textbox', SELECT:'combobox'}[el.tagName] || (el.isContentEditable ? 'textbox' : 'element'));
         const label = el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.getAttribute('title') || el.getAttribute('name') || '';
-        const text = (el.innerText || label || el.value || '').trim().slice(0, 120);
+        const sensitive = el.type === 'password' || /one-time-code|cc-number|cc-csc/.test(el.getAttribute('autocomplete') || '');
+        const text = (el.innerText || label || (!sensitive && el.value) || '').trim().slice(0, 120);
         const active = el === document.activeElement;
-        const editable = !!(el.isContentEditable || ['INPUT', 'TEXTAREA'].includes(el.tagName) && !['button', 'checkbox', 'radio', 'submit', 'reset', 'hidden'].includes((el.type || '').toLowerCase()));
+        const editable = !!(el.isContentEditable || ['INPUT', 'TEXTAREA'].includes(el.tagName) && !['button', 'checkbox', 'radio', 'submit', 'reset', 'hidden', 'password', 'file'].includes((el.type || '').toLowerCase()));
         const id = token + '-' + String(out.length + 1);
         el.setAttribute('data-nova-observation-token', id);
         out.push({id, role, text, tag: el.tagName.toLowerCase(),
+                  href: el.tagName === 'A' ? el.href : '', download: el.hasAttribute('download'),
+                  blocked: (() => {const r=el.getBoundingClientRect(), top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return !!top && top!==el && !el.contains(top);})(),
                   type: (el.getAttribute('type') || '').slice(0, 30),
                   placeholder: (el.getAttribute('placeholder') || '').slice(0, 100),
                   accessible_name: label.slice(0, 120), focused: active,
-                  editable, enabled: !el.matches(':disabled') && el.getAttribute('aria-disabled') !== 'true',
+                  editable, visible: true, enabled: !el.matches(':disabled') && el.getAttribute('aria-disabled') !== 'true',
                   value: editable ? String(el.innerText || el.value || '').slice(0, 300) : ''});
       }
       const visiblePasswords = [...document.querySelectorAll('input[type="password"]')].some(visible);
@@ -181,8 +254,17 @@ def observe_page(page):
         (/sign.?in|log.?in|authenticate|verify|password|one.?time.?code/i.test(form.innerText || '') ||
          [...form.querySelectorAll('input')].some(el => visible(el) && /password/i.test(el.type))));
       const active = document.activeElement;
+      const readable = [];
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let current, size = 0;
+      while ((current = walker.nextNode()) && size < 8000) {
+        const parent = current.parentElement;
+        if (!parent || parent.closest('input,textarea,select,[contenteditable],script,style') || !visible(parent)) continue;
+        const text = (current.textContent || '').trim();
+        if (text) { readable.push(text); size += text.length + 1; }
+      }
       const activeLabel = active ? (active.getAttribute('aria-label') || active.getAttribute('placeholder') || active.getAttribute('title') || active.getAttribute('name') || active.innerText || '') : '';
-      const activeEditable = !!(active && (active.isContentEditable || ['INPUT', 'TEXTAREA'].includes(active.tagName) && !['button', 'checkbox', 'radio', 'submit', 'reset', 'hidden'].includes((active.type || '').toLowerCase())));
+      const activeEditable = !!(active && (active.isContentEditable || ['INPUT', 'TEXTAREA'].includes(active.tagName) && !['button', 'checkbox', 'radio', 'submit', 'reset', 'hidden', 'password', 'file'].includes((active.type || '').toLowerCase())));
       return {
         elements: out,
         focus: {present: !!active && active !== document.body && active !== document.documentElement,
@@ -191,7 +273,9 @@ def observe_page(page):
                 focused: !!active && active === document.activeElement, editable: activeEditable,
                 enabled: !!active && !active.matches(':disabled') && active.getAttribute('aria-disabled') !== 'true',
                 value: activeEditable ? String(active.innerText || active.value || '').slice(0, 300) : ''},
-        visible_text: ((document.body && document.body.innerText) || '').slice(0, 2400),
+        visible_text: ((document.body && document.body.innerText) || '').slice(0, 8000),
+        readable_text: readable.join('\n').slice(0,8000),
+        dialogs: [...document.querySelectorAll('[role="dialog"],[aria-modal="true"],dialog[open]')].filter(visible).slice(0,5).map(el => ({text:(el.innerText||'').slice(0,500), modal:el.matches('[aria-modal="true"],dialog[open]')})),
         ready_state: document.readyState,
         visible_password_input: visiblePasswords,
         visible_otp_input: visibleOtp,
@@ -204,13 +288,17 @@ def observe_page(page):
             "page_kind": page_kind, "auth_required": auth_required,
             "auth_evidence": auth_evidence,
             "visible_text": snapshot.get("visible_text", ""),
+            "readable_text": snapshot.get("readable_text", ""),
+            "session_mode": _session_mode,
+            "dialogs": snapshot.get("dialogs", []),
+            "downloads": list(_downloads[-10:]),
             "ready_state": snapshot.get("ready_state", "unknown"),
             "elements": snapshot.get("elements", []),
             "focus": snapshot.get("focus", {"present": False, "focused": False, "editable": False, "enabled": False}),
             "message": "Fresh DOM observation: visible interactive elements, active keyboard focus, editability, page text, and generic authentication signals."}
 
 def execute(payload):
-    global _page
+    global _page, _download_expected
     if not isinstance(payload, dict):
         raise ValueError("Request body must be a JSON object.")
     command = payload.get("command")
@@ -225,6 +313,36 @@ def execute(payload):
         ensure_browser(channel)
         return {"success": True, "browser": channel, "url": _page.url,
                 "message": f"Controlled {channel} browser is ready."}
+    if command == "tabs":
+        ensure_browser(_channel)
+        target = payload.get("target", "")
+        if not isinstance(target, str) or len(target)>500:
+            raise ValueError("Tab filter must be a bounded string.")
+        items=[]
+        for page in _context.pages[:100]:
+            if page.is_closed():
+                continue
+            url=page.url
+            if target and target.casefold() not in (url+" "+page.title()).casefold():
+                continue
+            origin=urlsplit(url)
+            item={"id":tab_id(page), "origin":origin.scheme+"://"+origin.netloc}
+            if target:
+                item.update(url=url,title=page.title())
+            items.append(item)
+            if len(items)>=20:
+                break
+        return {"success":True,"session_mode":_session_mode,"tabs":items,"message":"Observed connected browser tabs, filtered locally."}
+    if command == "select_tab":
+        if _context is None:
+            raise RuntimeError("No browser session is connected.")
+        matches=[page for page in _context.pages if not page.is_closed() and tab_id(page)==payload.get("target")]
+        if len(matches)!=1:
+            raise ValueError("Select exactly one tab ID from browser.tabs.")
+        _page=matches[0]
+        watch_page(_page)
+        _page.bring_to_front()
+        return observe_page(_page)
     if command == "navigate":
         url = validate_url(payload.get("url"))
         timeout = validate_timeout(payload.get("timeout_ms"))
@@ -234,6 +352,13 @@ def execute(payload):
             raise ValueError("selector must be a string.")
         ensure_browser(payload.get("browser", _channel))
         # Navigation always waits for DOMContentLoaded before checking the requested condition.
+        if _session_mode == "user_attached_cdp":
+            matches=[page for page in _context.pages if not page.is_closed() and page.url == url]
+            if len(matches)==1:
+                _page=matches[0]
+            elif _page.url != "about:blank" and _page.url != url:
+                _page=_context.new_page()
+            watch_page(_page)
         _page.goto(url, wait_until="domcontentloaded", timeout=timeout)
         dom = wait_for_condition(_page, condition, selector, timeout)
         return {"success": True, "url": _page.url, "title": _page.title(), "dom": dom,
@@ -259,7 +384,7 @@ def execute(payload):
         if _page is None or _page.is_closed():
             _page = _context.new_page()
         return observe_page(_page)
-    if command in ("click", "type"):
+    if command in ("click", "type", "download"):
         if _context is None or _page is None or _page.is_closed():
             raise RuntimeError("Nova's controlled browser is not open. Launch it first.")
         element_id = payload.get("element_id", "")
@@ -273,12 +398,12 @@ def execute(payload):
             # Resolve the exact node tagged by the latest observation. Never
             # reinterpret an observed ID as an index in a newly enumerated list.
             if not re.fullmatch(r"[0-9a-f]{32}-[1-9][0-9]*", element_id):
-                raise ValueError("element_id is invalid or stale; observe again.")
+                raise StaleElementError("element_id is invalid or stale; observe again.")
             locator = _page.locator(f'[data-nova-observation-token="{element_id}"]')
             if locator.count() != 1:
-                raise ValueError("Observed element ID is stale or no longer unique; observe again.")
+                raise StaleElementError("Observed element ID is stale or no longer unique; observe again.")
             if not locator.is_visible():
-                raise ValueError("Observed target is no longer visible; observe again.")
+                raise StaleElementError("Observed target is no longer visible; observe again.")
         else:
             if not role or not text:
                 raise ValueError("Provide element_id or both role and text.")
@@ -286,11 +411,54 @@ def execute(payload):
             count = locator.count()
             if count != 1:
                 raise ValueError(f"Expected exactly one element matching role={role!r}, text={text!r}; found {count}. Observe and clarify if ambiguous.")
+        if command == "download":
+            directory=Path(payload.get("location", ""))
+            if not directory.is_absolute() or not directory.is_dir():
+                raise ValueError("Download location must be an existing absolute directory.")
+            _download_expected=True
+            temporary=directory/(".nova-"+uuid.uuid4().hex+".part")
+            try:
+                with _page.expect_download(timeout=validate_timeout(payload.get("timeout_ms"))) as transfer:
+                    locator.click(timeout=10000)
+                download=transfer.value
+                name=download.suggested_filename
+                if not name or name in (".","..") or any(ch in name for ch in ('/', '\\', ':')):
+                    download.cancel()
+                    raise ValueError("Download supplied an unsafe filename.")
+                destination=directory/name
+                if destination.exists():
+                    download.cancel()
+                    raise ValueError("Download destination already exists; no overwrite performed.")
+                download.save_as(str(temporary))
+                if download.failure():
+                    raise RuntimeError("Browser reported download transfer failure.")
+                # Same-directory atomic non-overwriting publication.
+                os.link(temporary,destination)
+                record={"id":uuid.uuid4().hex,"filename":name,"path":str(destination),"bytes":destination.stat().st_size,"status":"completed"}
+                _downloads.append(record)
+                del _downloads[:-10]
+                return {"success":True,"completed":True,"path":str(destination),"bytes":record["bytes"],
+                        "effects":["download_completed"],"post_action_observation":observe_page(_page),
+                        "message":"Download completed and persisted without overwriting."}
+            finally:
+                _download_expected=False
+                if temporary.exists():
+                    temporary.unlink()
         if command == "click":
+            if locator.evaluate("el => el.tagName === 'A' && el.hasAttribute('download')"):
+                raise ValueError("Observed control is a download. Use browser.download only for a user-requested download; read-only tasks should use page evidence.")
+            before_pages=set(_context.pages)
             locator.click(timeout=10000)
+            _page.wait_for_timeout(150)  # pump popup/download events, not a readiness heuristic
+            effects=[]
+            new_pages=[page for page in _context.pages if page not in before_pages and not page.is_closed()]
+            if len(new_pages)==1:
+                _page=new_pages[0]
+                watch_page(_page)
+                effects.append("new_tab_opened")
             post_action = observe_page(_page)
             return {"success": True, "action": "click", "url": _page.url, "title": _page.title(),
-                    "post_action_observation": post_action,
+                    "effects":effects,"post_action_observation": post_action,
                     "message": "Click dispatched; fresh DOM observation captured for state-transition verification."}
         content = payload.get("content", "")
         if not isinstance(content, str) or len(content) > 10000:
@@ -347,7 +515,7 @@ class Handler(BaseHTTPRequestHandler):
             result = execute(payload)
             self.send_json(200, result)
         except Exception as exc:
-            self.send_json(500, {"success": False, "error": str(exc)})
+            self.send_json(500, {"success": False, "error": str(exc), "failure_category": failure_category(exc)})
 
 
 def main():

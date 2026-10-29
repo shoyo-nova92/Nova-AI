@@ -41,9 +41,12 @@ int main() {
         {"steps", json::array({
             json{{"id", "step_1"},
                  {"description", "Create folder " + folder},
+                 {"postcondition",{{"kind","directory_exists"},{"name",folder},{"location",base.string()}}},
                  {"depends_on", json::array()}},
             json{{"id", "step_2"},
                  {"description", "Create Main.java inside " + folder},
+                 {"postcondition",{{"kind","file_content"},{"name","Main.java"},{"location",workspace.string()}}},
+                 {"content_requirement","required"},
                  {"depends_on", json::array({"step_1"})}}
         })}
     }.dump();
@@ -91,6 +94,7 @@ int main() {
              << "MAPPER MESSAGE: " << result.mappedPlan.message << '\n'
              << "DECOMPOSER CALLS: " << decomposerCalls
              << ", MAPPER CALLS: " << mapperCalls << "\n\n";
+        cerr << result.stateLog;
     }
 
     check("01_RUNTIME_SUCCEEDED", result.success);
@@ -98,7 +102,7 @@ int main() {
     check("03_EXECUTION_STARTED", result.executionStarted);
     check("04_EXACTLY_ONE_DECOMPOSER_CALL", decomposerCalls == 1);
     check("05_LEGACY_MAPPER_NOT_CALLED", mapperCalls == 0);
-    check("06_THREE_PLANNER_DECISIONS", plannerCalls == 3);
+    check("06_VERIFIED_ARTIFACTS_NEED_TWO_PLANNER_DECISIONS", plannerCalls == 2);
     check("07_TWO_LOGICAL_STEPS", result.mappedPlan.steps.size() == 2);
     check("08_TWO_EXECUTED_PRIMITIVES", result.operationResults.size() == 2);
     check("09_FOLDER_EXISTS_ON_DISK", fs::is_directory(workspace));
@@ -150,8 +154,75 @@ int main() {
     };
     Branch3Runtime guardedRuntime(badDecomposer, badMapper, badPlanner);
     const auto guarded = guardedRuntime.run("Create a folder");
-    check("12_UNSUPPORTED_PRIMITIVE_REJECTED", !guarded.success && guarded.executionStarted && guarded.operationResults.empty());
+    check("12_UNSUPPORTED_PRIMITIVE_REJECTED", !guarded.success && !guarded.executionStarted && guarded.operationResults.empty() && guarded.cause==RuntimeCause::UNSUPPORTED_CAPABILITY);
     check("13_BAD_PLAN_DID_NOT_CALL_LEGACY_MAPPER", badDecomposerCalls == 1 && badMapperCalls == 0);
+
+    // Content intent comes from semantic decomposition, independent of names/extensions.
+    auto contentScenario = [&](const string& requirement, const string& name, int mode) {
+        int calls = 0;
+        const string body = "int transform(int value) { return value * 2; }\n";
+        GoalDecomposerLLM interpret = [&](const string&, const string&) {
+            return LLMResponse{true, json{{"steps", json::array({json{{"id","step_1"},
+                {"description","Create the requested artifact with its requested contents"},
+                {"content_requirement",requirement}}})}}.dump(), ""};
+        };
+        NextActionLLM plan = [&](const string&, const string& context) {
+            ++calls;
+            if (mode == 4 && calls == 2)
+                return LLMResponse{true, json{{"status","done"}}.dump(), ""};
+            if ((mode == 0 || mode == 1) && calls > 1 || mode == 2 && calls > 2)
+                return LLMResponse{true, json{{"status","done"},{"message","Artifact verified in execution history"}}.dump(), ""};
+            json params = {{"name",name},{"location",workspace.string()}};
+            if (mode == 1 || mode == 2 && calls > 1) params["content"] = body;
+            if (mode == 0) params["content"] = "";
+            if (mode == 5) params["content"] = " \t\r\n";
+            if (mode == 2 && calls == 2)
+                check("REPAIR_RECEIVES_VALIDATION_FEEDBACK", context.find("requires populated content") != string::npos);
+            return LLMResponse{true, json{{"status","operation"},{"step_id","step_1"},
+                {"operation",json{{"name","filesystem.create_file"},{"parameters",params}}}}.dump(), ""};
+        };
+        Branch3Runtime subject(interpret, mapper, plan);
+        const auto outcome = subject.run("Create requested artifact");
+        if (mode <= 2) {
+            check("CONTENT_SCENARIO_SUCCEEDS_" + name, outcome.success);
+            ifstream file(workspace / name, ios::binary);
+            const string actual((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+            check("CONTENT_READBACK_" + name, file.is_open() && actual == (mode == 0 ? "" : body));
+        } else {
+            check("INVALID_CONTENT_FAILS_" + name, !outcome.success && outcome.operationResults.empty() &&
+                !fs::exists(workspace / name) && calls == 3);
+        }
+    };
+    contentScenario("empty_allowed", "empty.data", 0);
+    contentScenario("required", "generated.cpp", 1);
+    contentScenario("required", "repaired.data", 2);
+    contentScenario("required", "omitted.data", 3);
+    contentScenario("required", "false_done.data", 4);
+    contentScenario("required", "whitespace.data", 5);
+
+    PrimitiveExecutionEngine writeEngine;
+    PrimitiveOperation write{};
+    write.name = "text.write";
+    write.type = PrimitiveOperationType::TEXT_WRITE;
+    write.resolved = true;
+    write.parameters.target = (workspace / "empty.data").string();
+    write.parameters.content = "Updated existing artifact";
+    const auto written = writeEngine.execute(write);
+    ifstream existing(workspace / "empty.data", ios::binary);
+    const string updated((istreambuf_iterator<char>(existing)), istreambuf_iterator<char>());
+    if (written.status != ExecutionStatus::SUCCESS) cerr << written.message << "\n";
+    existing.close();
+    check("EXISTING_FILE_WRITE", written.status == ExecutionStatus::SUCCESS && updated == write.parameters.content);
+
+    MultiStepAction probe{};
+    probe.id = "step_1";
+    probe.description = "Create file";
+    PrimitiveMapper direct;
+    const json probeParams = {{"name","probe.data"},{"location",workspace.string()}};
+    auto operationJson = json{{"name","filesystem.create_file"},{"parameters",probeParams}};
+    check("MAPPER_DOES_NOT_INSERT_MISSING_CONTENT", direct.mapStep(probe, operationJson.dump()).valid);
+    operationJson["parameters"]["content"] = "";
+    check("PLANNER_SUPPLIED_EMPTY_VALUE_CAUSES_SCHEMA_ERROR", !direct.mapStep(probe, operationJson.dump()).valid);
 
     // The workspace path was confirmed absent before this test, so any contents
     // at this exact unique path belong to this test and can be safely removed.

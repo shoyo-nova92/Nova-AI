@@ -40,4 +40,9 @@ struct ExecutionResult
     // File operations populate the normalized, policy-checked physical target.
     string resolvedPath;
     vector<string> discoveredPaths;
+    // Structured wire data is kept out of normal terminal messages/history.
+    string browserData;
+    bool postconditionVerified = false;
+    string verifiedKind;
+    string factsJson;
 };

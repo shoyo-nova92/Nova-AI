@@ -1,367 +1,107 @@
 #include <curl/curl.h>
-#include <nlohmann/json.hpp>
-
 #include "llm_client.hpp"
-
+#include "utf8_text.hpp"
+#include <nlohmann/json.hpp>
+#include <algorithm>
+#include <chrono>
+#include <cctype>
 #include <cstdlib>
 #include <iostream>
-#include <string>
-
-using json = nlohmann::json;
-
-namespace
-{
-    size_t writeCallback(
-        void* contents,
-        size_t size,
-        size_t count,
-        void* userPointer
-    )
-    {
-        size_t totalSize =
-            size * count;
-
-        string* response =
-            static_cast<string*>(userPointer);
-
-        response->append(
-            static_cast<char*>(contents),
-            totalSize
-        );
-
-        return totalSize;
-    }
+#include <vector>
+using nlohmann::json;
+namespace {
+size_t writeCallback(void* data, size_t size, size_t count, void* target) {
+    const size_t bytes = size * count;
+    auto& out = *static_cast<string*>(target);
+    if (out.size() + bytes > 8 * 1024 * 1024) return 0;
+    out.append(static_cast<char*>(data), bytes);
+    return bytes;
 }
-
-LLMResponse LLMClient::generate(
-    const string& prompt
-)
-{
-    return generate(
-        "You are Nova, a helpful AI assistant.",
-        prompt
-    );
+string setting(const string& name, const string& fallback = "") {
+    const auto* value = getenv(name.c_str());
+    return value && *value ? value : fallback;
 }
-
-LLMResponse LLMClient::generate(
-    const string& systemPrompt,
-    const string& userPrompt
-)
-{
-    LLMResponse result;
-
-    result.success = false;
-    result.content = "";
-    result.message = "";
-
-    // --------------------------------------------------------
-    // API KEY
-    // --------------------------------------------------------
-
-    const char* apiKey =
-        getenv("OPENROUTER_API_KEY");
-
-    if (
-        apiKey == nullptr ||
-        string(apiKey).empty()
-    )
-    {
-        result.message =
-            "OPENROUTER_API_KEY environment variable is not set.";
-
-        return result;
+long boundedSetting(const string& name, long fallback, long minimum, long maximum) {
+    try { const auto text=setting(name); size_t used=0; const long n=stol(text,&used); return used==text.size() && n>=minimum && n<=maximum ? n : fallback; }
+    catch (...) { return fallback; }
+}
+bool fallbackEligible(LLMFailureCategory category) {
+    return category==LLMFailureCategory::TIMEOUT || category==LLMFailureCategory::CONNECTION_ERROR ||
+        category==LLMFailureCategory::PROVIDER_ERROR || category==LLMFailureCategory::RATE_LIMIT;
+}
+}
+LLMFailureCategory classifyLLMFailure(int curlCode, long status) {
+    if (curlCode == CURLE_OPERATION_TIMEDOUT) return LLMFailureCategory::TIMEOUT;
+    if (curlCode != CURLE_OK) return LLMFailureCategory::CONNECTION_ERROR;
+    if (status == 401 || status == 403) return LLMFailureCategory::AUTH_ERROR;
+    if (status == 429) return LLMFailureCategory::RATE_LIMIT;
+    if (status < 200 || status >= 300) return LLMFailureCategory::PROVIDER_ERROR;
+    return LLMFailureCategory::NONE;
+}
+LLMResponse LLMClient::generate(const string& prompt) {
+    return generate("You are Nova, a helpful AI assistant.", prompt);
+}
+LLMResponse LLMClient::generate(const string& systemPrompt, const string& userPrompt, const string& role) {
+    LLMResponse result{};
+    try {
+        Utf8::require(systemPrompt, "llm."+role+".system_prompt");
+        Utf8::require(userPrompt, "llm."+role+".user_prompt");
+    } catch (const Utf8::Error& error) {
+        result.failureCategory=LLMFailureCategory::INVALID_UTF8; result.message=error.what(); return result;
     }
-
-    // --------------------------------------------------------
-    // CURL INITIALIZATION
-    // --------------------------------------------------------
-
-    CURL* curl =
-        curl_easy_init();
-
-    if (curl == nullptr)
-    {
-        result.message =
-            "Failed to initialize libcurl.";
-
-        return result;
-    }
-
-    string responseBody;
-
-    // --------------------------------------------------------
-    // REQUEST BODY
-    // --------------------------------------------------------
-
-    json requestBody =
-    {
-        {
-            "model",
-            "nvidia/nemotron-3-ultra-550b-a55b:free"
-        },
-        {
-            "messages",
-            json::array(
-            {
-                {
-                    {
-                        "role",
-                        "system"
-                    },
-                    {
-                        "content",
-                        systemPrompt
-                    }
-                },
-                {
-                    {
-                        "role",
-                        "user"
-                    },
-                    {
-                        "content",
-                        userPrompt
-                    }
-                }
-            })
+    const string key=setting("OPENROUTER_API_KEY");
+    if (key.empty()) { result.failureCategory=LLMFailureCategory::CONFIGURATION_ERROR; result.message="OPENROUTER_API_KEY is not configured."; return result; }
+    string roleKey=role;
+    transform(roleKey.begin(),roleKey.end(),roleKey.begin(),[](unsigned char c){return static_cast<char>(toupper(c));});
+    const string model=setting("NOVA_"+roleKey+"_MODEL",setting("NOVA_MODEL","nvidia/nemotron-3-ultra-550b-a55b:free"));
+    vector<string> models{model};
+    const string fallback=setting("NOVA_"+roleKey+"_FALLBACK_MODEL",setting("NOVA_FALLBACK_MODEL"));
+    if (!fallback.empty() && fallback!=model) models.push_back(fallback);
+    for (const auto& selected : models) {
+        CURL* curl=curl_easy_init();
+        if (!curl) { result.failureCategory=LLMFailureCategory::CONFIGURATION_ERROR; result.message="Could not initialize HTTP transport."; return result; }
+        json body={{"model",selected},{"messages",json::array({{{"role","system"},{"content",systemPrompt}},{{"role","user"},{"content",userPrompt}}})},
+            {"temperature",0},{"max_tokens",boundedSetting("NOVA_MAX_OUTPUT_TOKENS",8192,256,65536)}};
+        string request;
+        try { request=Utf8::dump(body,"llm_request"); }
+        catch (const Utf8::Error& error) { curl_easy_cleanup(curl); result.failureCategory=LLMFailureCategory::INVALID_UTF8; result.message=error.what(); return result; }
+        string response;
+        curl_slist* headers=nullptr;
+        headers=curl_slist_append(headers,"Content-Type: application/json; charset=utf-8");
+        headers=curl_slist_append(headers,("Authorization: Bearer "+key).c_str());
+        curl_easy_setopt(curl,CURLOPT_URL,"https://openrouter.ai/api/v1/chat/completions");
+        curl_easy_setopt(curl,CURLOPT_HTTPHEADER,headers);
+        curl_easy_setopt(curl,CURLOPT_POST,1L);
+        curl_easy_setopt(curl,CURLOPT_POSTFIELDS,request.c_str());
+        curl_easy_setopt(curl,CURLOPT_POSTFIELDSIZE,static_cast<long>(request.size()));
+        curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,writeCallback);
+        curl_easy_setopt(curl,CURLOPT_WRITEDATA,&response);
+        curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,boundedSetting("NOVA_LLM_CONNECT_TIMEOUT_SECONDS",10,1,120));
+        curl_easy_setopt(curl,CURLOPT_TIMEOUT,boundedSetting("NOVA_LLM_TIMEOUT_SECONDS",90,5,300));
+        const auto began=chrono::steady_clock::now();
+        const auto code=curl_easy_perform(curl);
+        long http=0; curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE,&http);
+        const auto elapsed=chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now()-began).count();
+        curl_slist_free_all(headers); curl_easy_cleanup(curl);
+        result={}; result.httpStatus=http; result.failureCategory=classifyLLMFailure(code,http);
+        if (code!=CURLE_OK) result.message="Provider request failed: "+string(curl_easy_strerror(code));
+        else if (http<200 || http>=300) result.message="Provider returned HTTP "+to_string(http)+". Check quota/provider availability; retry later.";
+        else {
+            try {
+                const auto parsed=json::parse(response);
+                const auto& content=parsed.at("choices").at(0).at("message").at("content");
+                if (!content.is_string() || content.get_ref<const string&>().empty()) throw runtime_error("Empty response content.");
+                result.content=content.get<string>();
+                Utf8::require(result.content,"llm_response."+role);
+                result.success=true; result.message="LLM response received."; result.failureCategory=LLMFailureCategory::NONE;
+            } catch (const Utf8::Error& error) { result.failureCategory=LLMFailureCategory::INVALID_UTF8; result.message=error.what(); }
+            catch (const exception&) { result.failureCategory=LLMFailureCategory::INVALID_RESPONSE; result.message="Provider returned an incomplete or malformed text response."; }
         }
-    };
-
-    string requestBodyString =
-        requestBody.dump();
-
-    // --------------------------------------------------------
-    // HEADERS
-    // --------------------------------------------------------
-
-    struct curl_slist* headers =
-        nullptr;
-
-    string authorization =
-        "Authorization: Bearer "
-        + string(apiKey);
-
-    headers =
-        curl_slist_append(
-            headers,
-            "Content-Type: application/json"
-        );
-
-    headers =
-        curl_slist_append(
-            headers,
-            authorization.c_str()
-        );
-
-    // --------------------------------------------------------
-    // CURL CONFIGURATION
-    // --------------------------------------------------------
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_URL,
-        "https://openrouter.ai/api/v1/chat/completions"
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_HTTPHEADER,
-        headers
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_POST,
-        1L
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_POSTFIELDS,
-        requestBodyString.c_str()
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_WRITEFUNCTION,
-        writeCallback
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_WRITEDATA,
-        &responseBody
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_CONNECTTIMEOUT,
-        10L
-    );
-
-    curl_easy_setopt(
-        curl,
-        CURLOPT_TIMEOUT,
-        60L
-    );
-
-    // --------------------------------------------------------
-    // EXECUTE REQUEST
-    // --------------------------------------------------------
-
-    CURLcode curlResult =
-        curl_easy_perform(curl);
-
-    if (
-        curlResult != CURLE_OK
-    )
-    {
-        result.message =
-            "OpenRouter request failed: "
-            + string(
-                curl_easy_strerror(
-                    curlResult
-                )
-            );
-
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-
-        return result;
+        // Metadata only: never emit credentials, prompts, page text or provider identifiers.
+        cout << "[LLM] role=" << role << " model=" << selected << " request_bytes=" << request.size()
+             << " response_bytes=" << response.size() << " latency_ms=" << elapsed << " http=" << http
+             << " category=" << llmFailureName(result.failureCategory) << '\n';
+        if (result.success || !fallbackEligible(result.failureCategory)) return result;
     }
-
-    // --------------------------------------------------------
-    // HTTP STATUS
-    // --------------------------------------------------------
-
-    long httpStatus = 0;
-
-    curl_easy_getinfo(
-        curl,
-        CURLINFO_RESPONSE_CODE,
-        &httpStatus
-    );
-
-    if (
-        httpStatus < 200 ||
-        httpStatus >= 300
-    )
-    {
-        result.message =
-            "OpenRouter returned HTTP status "
-            + to_string(httpStatus)
-            + ".";
-
-        cout
-            << "[LLM] HTTP status: "
-            << httpStatus
-            << endl;
-
-        cout
-            << "[LLM] Response: "
-            << responseBody
-            << endl;
-
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-
-        return result;
-    }
-
-    // --------------------------------------------------------
-    // PARSE RESPONSE
-    // --------------------------------------------------------
-
-    
-    try
-    {
-        json response = json::parse(responseBody);
-
-        
-        if (!response.is_object() ||
-            !response.contains("choices") ||
-            !response["choices"].is_array() ||
-            response["choices"].empty())
-        {
-            result.message =
-                "Invalid OpenRouter response: missing or empty choices array.";
-
-            // Print the response for diagnosis, without exposing credentials.
-            std::cerr << "[LLM] Unexpected OpenRouter response: "
-                    << response.dump().substr(0, 2000)
-                    << std::endl;
-        }
-
-        else
-        {
-            const auto& choice = response["choices"][0];
-
-            if (!choice.is_object() ||
-                !choice.contains("message") ||
-                !choice["message"].is_object())
-            {
-                result.message =
-                    "Invalid OpenRouter response: missing message object.";
-            }
-            else
-            {
-                const auto& message = choice["message"];
-
-                if (!message.contains("content") ||
-                    !message["content"].is_string())
-                {
-                    // Some providers return null content for refusal,
-                    // tool-call, or otherwise non-text responses.
-                    string detail =
-                        "OpenRouter returned no usable text content.";
-
-                    if (message.contains("refusal") &&
-                        message["refusal"].is_string())
-                    {
-                        detail += " Refusal: " +
-                            message["refusal"].get<string>();
-                    }
-                    else if (choice.contains("finish_reason") &&
-                             choice["finish_reason"].is_string())
-                    {
-                        detail += " Finish reason: " +
-                            choice["finish_reason"].get<string>();
-                    }
-
-                    result.message = detail;
-                }
-                else
-                {
-                    result.content = message["content"].get<string>();
-
-                    if (result.content.empty())
-                    {
-                        result.message =
-                            "OpenRouter returned an empty text response.";
-                    }
-                    else
-                    {
-                        result.success = true;
-                        result.message = "LLM response received.";
-                    }
-                }
-            }
-        }
-    }
-    catch (const exception& exception)
-    {
-        result.message =
-            "Failed to parse OpenRouter response: " +
-            string(exception.what());
-    }
-
-
-    // --------------------------------------------------------
-    // CLEANUP
-    // --------------------------------------------------------
-
-    curl_slist_free_all(headers);
-    curl_easy_cleanup(curl);
-
     return result;
 }

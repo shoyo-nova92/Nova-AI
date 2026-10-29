@@ -9,4 +9,6 @@ public:
     ExecutionResult execute(
         const PrimitiveOperation& operation
     );
+private:
+    ExecutionResult executeValidated(const PrimitiveOperation& operation);
 };

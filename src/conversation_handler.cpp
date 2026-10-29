@@ -20,5 +20,5 @@ LLMResponse ConversationHandler::handle(
 
     LLMClient llmClient;
 
-    return llmClient.generate(input);
+    return llmClient.generate("You are Nova, a helpful AI assistant.",input,"conversation");
 }

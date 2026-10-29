@@ -14,6 +14,7 @@ find_package(nlohmann_json REQUIRED)
 
 add_executable(Nova
     src/main.cpp
+    src/runtime_supervisor.cpp
     src/logger.cpp
     src/input_normalizer.cpp
     src/part_a_bridge.cpp
@@ -22,26 +23,12 @@ add_executable(Nova
     src/request_classifier.cpp
     src/conversation_handler.cpp
     src/llm_client.cpp
-    src/action_parser.cpp
-    src/single_action_pipeline.cpp
-    src/capability_resolver.cpp
-    src/parameter_resolver.cpp
     src/primitive_registry.cpp
-    src/action_validator.cpp
-    src/execution_plan_builder.cpp
-    src/execution_engine.cpp
     src/application_resolver.cpp
-    src/action_primitive_resolver.cpp
-    src/content_resolver.cpp
-    src/multistep_pipeline.cpp
     src/goal_decomposer.cpp
-    src/dependency_resolver.cpp
-    src/context_resolver.cpp
     src/filesystem_path_policy.cpp
     src/filesystem_location_resolver.cpp
-    src/plan_validator.cpp
     src/primitive_execution_engine.cpp
-    src/multi_step_executor.cpp
     src/primitive_mapper.cpp
     src/branch3_runtime.cpp
     src/next_action_planner.cpp
@@ -90,6 +77,8 @@ add_executable(RequestClassifierTest
     src/request_classifier.cpp
 
     src/llm_client.cpp
+
+    src/primitive_registry.cpp
 
 )
 
@@ -425,3 +414,87 @@ target_link_libraries(Branch3RuntimeIntegrationTest PRIVATE
     nlohmann_json::nlohmann_json
     shell32 ole32 psapi user32 winhttp
 )
+
+# Offline supervisor/recovery coverage shares the production Branch 3 sources.
+get_target_property(RUNTIME_TEST_SOURCES Branch3RuntimeIntegrationTest SOURCES)
+list(REMOVE_ITEM RUNTIME_TEST_SOURCES src/branch3_runtime_test.cpp)
+add_executable(RuntimeReliabilityTest src/runtime_reliability_test.cpp src/runtime_supervisor.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(RuntimeReliabilityTest PRIVATE src)
+target_link_libraries(RuntimeReliabilityTest PRIVATE CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 psapi user32 winhttp)
+enable_testing()
+add_test(NAME RuntimeReliability COMMAND RuntimeReliabilityTest)
+add_test(NAME Branch3RuntimeIntegration COMMAND Branch3RuntimeIntegrationTest)
+add_executable(ReliabilityRegressionTest src/reliability_regression_test.cpp src/input_normalizer.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(ReliabilityRegressionTest PRIVATE src)
+target_link_libraries(ReliabilityRegressionTest PRIVATE CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 psapi user32 winhttp)
+add_test(NAME ReliabilityRegression COMMAND ReliabilityRegressionTest)
+
+# Windows registered-app file activation uses platform COM interface GUIDs.
+get_property(NOVA_BUILD_TARGETS DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+foreach(NOVA_TARGET IN LISTS NOVA_BUILD_TARGETS)
+    get_target_property(NOVA_TARGET_SOURCES ${NOVA_TARGET} SOURCES)
+    if("src/primitive_execution_engine.cpp" IN_LIST NOVA_TARGET_SOURCES)
+        target_link_libraries(${NOVA_TARGET} PRIVATE uuid oleaut32)
+    endif()
+endforeach()
+
+add_library(WorkflowKernel STATIC src/workflow_kernel.cpp src/semantic_evidence.cpp)
+target_include_directories(WorkflowKernel PUBLIC src)
+target_link_libraries(WorkflowKernel PUBLIC nlohmann_json::nlohmann_json)
+foreach(NOVA_TARGET IN LISTS NOVA_BUILD_TARGETS)
+    get_target_property(NOVA_TARGET_SOURCES ${NOVA_TARGET} SOURCES)
+    if("src/branch3_runtime.cpp" IN_LIST NOVA_TARGET_SOURCES)
+        target_link_libraries(${NOVA_TARGET} PRIVATE WorkflowKernel)
+    endif()
+    if("src/goal_decomposer.cpp" IN_LIST NOVA_TARGET_SOURCES AND NOT "src/primitive_registry.cpp" IN_LIST NOVA_TARGET_SOURCES)
+        target_sources(${NOVA_TARGET} PRIVATE src/primitive_registry.cpp)
+    endif()
+endforeach()
+add_executable(WorkflowKernelTest src/workflow_kernel_test.cpp src/primitive_registry.cpp)
+target_link_libraries(WorkflowKernelTest PRIVATE WorkflowKernel)
+add_test(NAME WorkflowKernel COMMAND WorkflowKernelTest)
+add_executable(SemanticEvidenceTest src/semantic_evidence_test.cpp)
+target_link_libraries(SemanticEvidenceTest PRIVATE WorkflowKernel)
+add_test(NAME SemanticEvidence COMMAND SemanticEvidenceTest)
+add_executable(WorkflowAcceptanceTest src/workflow_acceptance_test.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(WorkflowAcceptanceTest PRIVATE src)
+target_link_libraries(WorkflowAcceptanceTest PRIVATE WorkflowKernel CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 oleaut32 psapi user32 winhttp uuid)
+add_test(NAME WorkflowAcceptance COMMAND WorkflowAcceptanceTest)
+add_custom_target(check-workflow
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    DEPENDS WorkflowKernelTest WorkflowAcceptanceTest RuntimeReliabilityTest Branch3RuntimeIntegrationTest ReliabilityRegressionTest SemanticEvidenceTest
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    USES_TERMINAL)
+
+add_executable(DiscoveryDecisionTest src/discovery_decision_test.cpp src/runtime_supervisor.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(DiscoveryDecisionTest PRIVATE src)
+target_link_libraries(DiscoveryDecisionTest PRIVATE WorkflowKernel CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 oleaut32 psapi user32 winhttp uuid)
+add_test(NAME DiscoveryDecision COMMAND DiscoveryDecisionTest)
+add_dependencies(check-workflow DiscoveryDecisionTest)
+
+add_executable(PostconditionContractTest src/postcondition_contract_test.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(PostconditionContractTest PRIVATE src)
+target_link_libraries(PostconditionContractTest PRIVATE WorkflowKernel CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 oleaut32 psapi user32 winhttp uuid)
+add_test(NAME PostconditionContract COMMAND PostconditionContractTest)
+add_test(NAME GoalDecomposerContract COMMAND GoalDecomposerContractTest)
+add_dependencies(check-workflow PostconditionContractTest GoalDecomposerContractTest)
+
+add_executable(RecoveryGuidanceTest src/recovery_guidance_test.cpp src/runtime_supervisor.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(RecoveryGuidanceTest PRIVATE src)
+target_link_libraries(RecoveryGuidanceTest PRIVATE WorkflowKernel CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 oleaut32 psapi user32 winhttp uuid)
+add_test(NAME RecoveryGuidance COMMAND RecoveryGuidanceTest)
+add_dependencies(check-workflow RecoveryGuidanceTest)
+
+add_executable(ArtifactDependencyTest src/artifact_dependency_test.cpp src/runtime_supervisor.cpp ${RUNTIME_TEST_SOURCES})
+target_include_directories(ArtifactDependencyTest PRIVATE src)
+target_link_libraries(ArtifactDependencyTest PRIVATE WorkflowKernel CURL::libcurl nlohmann_json::nlohmann_json shell32 ole32 oleaut32 psapi user32 winhttp uuid)
+add_test(NAME ArtifactDependency COMMAND ArtifactDependencyTest)
+add_dependencies(check-workflow ArtifactDependencyTest)
+
+add_test(NAME PrimitiveMapperContract COMMAND PrimitiveMapperContractTest)
+add_test(NAME FilesystemPathPolicy COMMAND FilesystemPathPolicyTest)
+add_test(NAME FilesystemLocationResolver COMMAND FilesystemLocationResolverTest)
+add_test(NAME FilesystemDiscovery COMMAND FilesystemDiscoveryGroupTest)
+add_test(NAME FilesystemCreationOffline COMMAND FilesystemCreationGroupTest --offline)
+add_test(NAME FilesystemManipulationOffline COMMAND FilesystemManipulationGroupTest --offline)
+add_dependencies(check-workflow PrimitiveMapperContractTest FilesystemPathPolicyTest FilesystemLocationResolverTest FilesystemDiscoveryGroupTest FilesystemCreationGroupTest FilesystemManipulationGroupTest)

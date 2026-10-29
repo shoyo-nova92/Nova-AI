@@ -1,0 +1,11 @@
+# Install into a separate environment; do not change Nova's runtime environment.
+numpy==2.2.6
+scipy==1.17.1
+requests==2.32.4
+torch==2.8.0
+onnx==1.23.2
+onnxruntime==1.25.0
+onnxruntime-gpu==1.25.0
+openwakeword==0.6.0
+piper-tts==1.8.0
+soundfile==0.14.0

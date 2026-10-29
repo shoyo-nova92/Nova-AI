@@ -29,6 +29,29 @@ PrimitiveDefinition d(PrimitiveOperationType type, string desc, string cap,
 }
 
 const unordered_map<string, PrimitiveDefinition> REGISTRY = {
+ {"environment.observe", d(PrimitiveOperationType::ENVIRONMENT_OBSERVE,
+  "Observe OS locale, known folders, foreground application and bounded visible application counts. Window titles and document text are omitted.", "environment",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{}),
+  {o("environment","object","Local title-free environment inventory.")})},
+ {"browser.tabs", d(PrimitiveOperationType::BROWSER_TABS,
+  "List connected browser tabs. Optional target filters URLs/titles locally; unfiltered output exposes origins only. Shows attached versus isolated session honestly.", "browser_control",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::OPTIONAL,R::NOT_APPLICABLE,{
+   p("target",T::STRING,R::OPTIONAL,"Optional relevant URL/domain/title substring to filter locally.")}),
+  {o("tabs","array","Observed tab identifiers and relevant matching tabs.")})},
+ {"browser.select_tab", d(PrimitiveOperationType::BROWSER_SELECT_TAB,
+  "Select a tab using an identifier returned by browser.tabs; never invent IDs.", "browser_control",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::NOT_APPLICABLE,{
+   p("target",T::STRING,R::REQUIRED,"Exact observed tab identifier.")}),
+  {o("url","url","Selected tab URL.")})},
+ {"browser.download", d(PrimitiveOperationType::BROWSER_DOWNLOAD,
+  "Click an observed control ONLY when user requested a download. Capture the transfer, save without overwriting and return verified path, byte count and completion. Never execute downloaded files automatically.", "browser_control",
+  s(R::NOT_APPLICABLE,R::OPTIONAL,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
+   p("element_id",T::STRING,R::OPTIONAL,"ID from latest browser observation."),
+   p("role",T::STRING,R::OPTIONAL,"Observed accessible role."),
+   p("text",T::STRING,R::OPTIONAL,"Exact accessible label with role."),
+   p("location",T::DIRECTORY_PATH,R::OPTIONAL,"Existing download directory; defaults to Windows Downloads."),
+   p("timeout_ms",T::INTEGER,R::OPTIONAL,"Download event timeout milliseconds.",{},true,1000,true,120000)}),
+  {o("path","file_path","Verified downloaded artifact path."),o("completed","boolean","Transfer completed successfully.")})},
  {"filesystem.create", d(PrimitiveOperationType::FILESYSTEM_CREATE,
   "Create one new directory inside an existing parent location.", "filesystem",
   s(R::REQUIRED,R::REQUIRED,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
@@ -55,14 +78,14 @@ const unordered_map<string, PrimitiveDefinition> REGISTRY = {
   "Move a file or directory from source to destination.", "filesystem",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
    p("source",T::FILE_PATH,R::REQUIRED,"Existing file or directory to move."),
-   p("destination",T::FILE_PATH,R::REQUIRED,"Destination path; overwrite is not implied.")}),
+   p("destination",T::FILE_PATH,R::REQUIRED,"Complete destination path including new filename. A relative destination is resolved against the explicit source parent; overwrite is not implied.")}),
   {o("path","file_path","Final path after moving."),o("moved","boolean","Whether move succeeded.")})},
 
  {"filesystem.copy", d(PrimitiveOperationType::FILESYSTEM_COPY,
   "Copy a file or directory from source to destination.", "filesystem",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
    p("source",T::FILE_PATH,R::REQUIRED,"Existing file or directory to copy."),
-   p("destination",T::FILE_PATH,R::REQUIRED,"Destination path."),
+   p("destination",T::FILE_PATH,R::REQUIRED,"Complete destination path including new filename, never a child of the source file. A relative destination uses the source parent."),
    p("overwrite",T::BOOLEAN,R::OPTIONAL,"Allow replacing destination; defaults false.",{},true,0,true,1)}),
   {o("path","file_path","Path of copied resource."),o("copied","boolean","Whether copy succeeded.")})},
 
@@ -81,38 +104,49 @@ const unordered_map<string, PrimitiveDefinition> REGISTRY = {
   {o("path","directory_path","Resolved directory path."),o("entries","array","Bounded list of absolute entry paths."),o("entry_count","integer","Number of entries returned.")})},
 
  {"filesystem.search", d(PrimitiveOperationType::FILESYSTEM_SEARCH,
-  "Recursively search a bounded authorized root for names containing the requested query.", "filesystem",
+  "Search an authorized root with deterministic normalized, substring, token-order-independent and fuzzy ranking. Returns canonical candidate identities, scores, reasons and completeness.", "filesystem",
   s(R::NOT_APPLICABLE,R::REQUIRED,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,{
    p("location",T::DIRECTORY_PATH,R::REQUIRED,"Authorized root directory to search."),
-   p("query",T::STRING,R::REQUIRED,"Case-insensitive substring to match against file or directory names."),
+   p("query",T::STRING,R::REQUIRED,"Meaningful filename words; punctuation and word order need not match. Use * only for an explicit type/time-only discovery request."),
+   p("extension",T::STRING,R::OPTIONAL,"Requested extension including dot, compared case-insensitively."),
+   p("modified_within_days",T::INTEGER,R::OPTIONAL,"Explicit recency bound in days; modification time is not download time.",{},true,0,true,36500),
    p("entry_type",T::ENUM,R::OPTIONAL,"Limit matches by resource type; defaults to any.",{"any","file","directory"}),
    p("max_results",T::INTEGER,R::OPTIONAL,"Maximum matches to return; defaults to 100.",{},true,1,true,1000)}),
   {o("path","directory_path","Resolved search root."),o("matches","array","Bounded list of matching absolute paths."),o("match_count","integer","Number of matches returned.")})},
 
  {"filesystem.inspect", d(PrimitiveOperationType::FILESYSTEM_INSPECT,
-  "Inspect an authorized filesystem path to verify existence and resource type.", "filesystem",
+  "Inspect an authorized filesystem path: existence, resource type and file size. Small valid UTF-8 files also return a bounded text preview in execution evidence, with an explicit truncation flag; use it to read and compare short documents without opening an app.", "filesystem",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::NOT_APPLICABLE,{
    p("target",T::FILE_PATH,R::REQUIRED,"Exact path to inspect.")}),
   {o("path","file_path","Resolved inspected path."),o("exists","boolean","Whether the path exists."),o("resource_type","string","file, directory, or other.")})},
 
+ {"application.observe", d(PrimitiveOperationType::APPLICATION_OBSERVE,
+  "Read scoped process/window state without focusing or changing it. Supply observed process_id or exact executable application name, optionally window_handle and target path. Returns process instance identity, observation times, windows and direct document evidence. The runtime may derive correlated target proof from a successful exact-target launch of the same new process instance and a subsequent consistent visible document window. target_proof_level distinguishes exact, correlated and unavailable. Launch arguments, a PID or basename alone are never proof.", "application_control",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::OPTIONAL,R::OPTIONAL,R::NOT_APPLICABLE,{
+   p("application",T::APPLICATION,R::OPTIONAL,"Exact observed executable name when process_id is unavailable."),
+   p("process_id",T::INTEGER,R::OPTIONAL,"Actual observed or launch-returned process ID.",{},true,1,true,4294967295.0),
+   p("window_handle",T::STRING,R::OPTIONAL,"Decimal window_handle from an earlier scoped application observation."),
+   p("target",T::FILE_PATH,R::OPTIONAL,"Exact requested document path to check against observed document/tab metadata.")}),
+  {o("processes","array","Observed matching process identities."),o("windows","array","Observed windows, visibility/title/foreground and supported target associations.")})},
+
  {"application.launch", d(PrimitiveOperationType::APPLICATION_LAUNCH,
-  "Launch an application, optionally opening a specified file or folder.", "application_control",
-  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::OPTIONAL,R::NOT_APPLICABLE,{
-   p("application",T::APPLICATION,R::REQUIRED,"Application name or resolvable executable."),
+  "Launch a registered application, or open an existing file/folder using its Windows association. Supply application, target, or both; execute a downloaded file only if explicitly requested.", "application_control",
+  s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::OPTIONAL,R::OPTIONAL,R::NOT_APPLICABLE,{
+   p("application",T::APPLICATION,R::OPTIONAL,"Installed application name/AppID. Omit when opening target with its Windows association."),
    p("target",T::FILE_PATH,R::OPTIONAL,"Optional file or folder to open.")}),
   {o("launched","boolean","Whether launch request succeeded."),o("application","application","Resolved application identity when available.")})},
 
  {"application.close", d(PrimitiveOperationType::APPLICATION_CLOSE,
   "Request that the specified application close.", "application_control",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::OPTIONAL,R::NOT_APPLICABLE,{
-   p("application",T::APPLICATION,R::REQUIRED,"Application name or process identity."),
+   p("application",T::APPLICATION,R::REQUIRED,"Exact executable name observed by environment.observe, rather than a guessed process alias."),
    p("target",T::STRING,R::OPTIONAL,"Optional window or document qualifier.")}),
   {o("closed","boolean","Whether close request succeeded."),o("application","application","Application targeted.")})},
 
  {"application.focus", d(PrimitiveOperationType::APPLICATION_FOCUS,
   "Bring an existing application window to the foreground.", "application_control",
   s(R::NOT_APPLICABLE,R::NOT_APPLICABLE,R::REQUIRED,R::OPTIONAL,R::NOT_APPLICABLE,{
-   p("application",T::APPLICATION,R::REQUIRED,"Application name or window identity."),
+   p("application",T::APPLICATION,R::REQUIRED,"Exact executable name observed by environment.observe, rather than a guessed process alias."),
    p("target",T::STRING,R::OPTIONAL,"Optional window title qualifier.")}),
   {o("focused","boolean","Whether target window was focused."),o("application","application","Application targeted.")})},
 

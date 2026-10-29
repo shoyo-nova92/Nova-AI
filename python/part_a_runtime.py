@@ -15,6 +15,11 @@ import sounddevice as sd
 import soundfile as sf
 
 from openwakeword.model import Model
+from wakeword_config import (
+    WAKEWORD_MODEL_KEY,
+    WAKEWORD_MODEL_PATH,
+    WAKEWORD_THRESHOLD,
+)
 import os
 
 BASE_DIR = os.path.dirname(
@@ -77,8 +82,6 @@ CHUNK_SIZE = int(
     SAMPLE_RATE * CHUNK_DURATION
 )
 
-WAKEWORD_THRESHOLD = 0.4
-
 RMS_START_THRESHOLD = 0.02
 RMS_END_THRESHOLD = 0.005
 
@@ -126,11 +129,14 @@ print(flush=True)
 print("[INIT] Loading OpenWakeWord...", flush=True)
 
 wakeword_model = Model(
-    wakeword_models=["hey_jarvis_v0.1"],
+    wakeword_models=[str(WAKEWORD_MODEL_PATH)],
     inference_framework="onnx"
 )
 
-print("[INIT] OpenWakeWord: READY", flush=True)
+print(
+    f"[INIT] OpenWakeWord: READY (Hey Nova, threshold={WAKEWORD_THRESHOLD:.2f})",
+    flush=True,
+)
 
 print("[INIT] Loading Whisper Large-v3...", flush=True)
 
@@ -151,7 +157,7 @@ print(flush=True)
 print("[INIT] All Part A models ready.", flush=True)
 print(flush=True)
 print("Press V to bypass wake word.", flush=True)
-print("Say 'Hey Jarvis' to activate.", flush=True)
+print("Say 'Hey Nova' (hey-No-Va) to activate.", flush=True)
 print("Press Q to quit.", flush=True)
 print(flush=True)
 
@@ -217,7 +223,7 @@ with sd.InputStream(
 
             score = float(
                 prediction.get(
-                    "hey_jarvis_v0.1",
+                    WAKEWORD_MODEL_KEY,
                     0.0
                 )
             )
@@ -226,7 +232,7 @@ with sd.InputStream(
 
                 print(flush=True)
                 print(
-                    f"[WAKE] Hey Jarvis "
+                    f"[WAKE] Hey Nova "
                     f"(score={score:.4f})",
                     flush=True
                 )

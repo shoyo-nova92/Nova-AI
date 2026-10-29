@@ -1,5 +1,6 @@
 #include "request_classifier.hpp"
 #include "llm_client.hpp"
+#include "primitive_registry.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -187,19 +188,23 @@ Do not return explanations.
 Do not return any text outside the JSON object.
 )";
 
-    const string userPrompt =
-        "Classify this request:\n" + input;
+    string userPrompt = "Classify this request:\n" + input + "\nAvailable external capabilities:\n";
+    for (const auto& [name, definition] : PrimitiveRegistry::getCatalog())
+        userPrompt += name + ": " + definition.description + "\n";
+    userPrompt += "Both single_action and multi_step_goal use this same catalog. Conditional inspection, reporting and search are supported goals. Do not invent missing user values.";
 
     LLMClient llmClient;
 
     LLMResponse response =
         llmClient.generate(
             systemPrompt,
-            userPrompt
+            userPrompt, "router"
         );
 
     if (!response.success)
     {
+        result.failureCategory = response.failureCategory == LLMFailureCategory::NONE
+            ? LLMFailureCategory::INVALID_RESPONSE : response.failureCategory;
         result.message =
             "Root Router LLM failed: "
             + response.message;
@@ -209,6 +214,7 @@ Do not return any text outside the JSON object.
 
     try
     {
+        result.failureCategory = LLMFailureCategory::INVALID_RESPONSE;
         json parsed =
             json::parse(response.content);
 
@@ -247,6 +253,7 @@ Do not return any text outside the JSON object.
 
         result.type = requestType;
         result.success = true;
+        result.failureCategory = LLMFailureCategory::NONE;
         result.message =
             "Request classified successfully.";
 

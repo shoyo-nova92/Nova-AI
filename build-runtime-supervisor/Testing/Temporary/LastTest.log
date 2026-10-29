@@ -1,0 +1,786 @@
+Start testing: Oct 29 22:34 India Standard Time
+----------------------------------------------------------
+1/17 Testing: RuntimeReliability
+1/17 Test: RuntimeReliability
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/RuntimeReliabilityTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"RuntimeReliability" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+VERIFIED_GOAL_COMPLETES_WITHOUT_FINAL_LLM: PASS
+TIMEOUT_AFTER_POSTCONDITIONS_CANNOT_REVERSE_COMPLETION: PASS
+TIMEOUT_RETRIES_ONCE_PRESERVING_PROGRESS: PASS
+EXISTING_AUTHORIZED_DIRECTORY_SATISFIED: PASS
+CONTINUE_REUSES_DECOMPOSITION: PASS
+CONFLICTING_FILE_NOT_SATISFIED: PASS
+COLLISION_DOES_NOT_OVERWRITE: PASS
+NEW_REQUEST_ABANDONS_SESSION: PASS
+INVALID_MENU_CONTROL_NO_ACTION: PASS
+QUIT_STOPS_SUPERVISOR: PASS
+EOF_SHUTS_DOWN_CLEANLY: PASS
+FINGERPRINT_IGNORES_OBSERVATION_IDS: PASS
+FINGERPRINT_DETECTS_URL_CHANGE: PASS
+FINGERPRINT_DETECTS_FOCUS_VALUE: PASS
+FINGERPRINT_DETECTS_CONTENT_CHANGE: PASS
+LEGACY_DOM_MARKER_PARSED: PASS
+COMPACT_CONTEXT_PRESERVES_CURRENT_IDS: PASS
+HISTORY_HAS_NO_OLD_DOM_DUMPS: PASS
+PLANNER_CONTEXT_BOUNDED: PASS
+BROWSER_RECOVERY_Navigate to servicestale_element: PASS
+BROWSER_RECOVERY_Navigate to service websitestale_element: PASS
+OBSERVATION_INDEPENDENT_OF_WORDING: PASS
+BROWSER_RECOVERY_Navigate to servicebrowser_timeout: PASS
+CURL_TIMEOUT_CLASSIFICATION: PASS
+HTTP_429_CLASSIFICATION: PASS
+HTTP_AUTH_CLASSIFICATION: PASS
+HTTP_PROVIDER_CLASSIFICATION: PASS
+CONNECTION_CLASSIFICATION: PASS
+INVALID_RESPONSE_PRESERVES_TYPE: PASS
+PROVIDER_CATEGORY_AND_RETRY_BOUND_4: PASS
+PROVIDER_CATEGORY_AND_RETRY_BOUND_3: PASS
+PROVIDER_CATEGORY_AND_RETRY_BOUND_5: PASS
+OVERSIZED_OBSERVATION_STILL_BOUNDED: PASS
+AUTH_REQUIRES_USER_WITHOUT_EXTRA_PLANNING: PASS
+CONTINUE_MENU_ACCEPTED: PASS
+CONTINUATION_REFRESHES_DOM_WITHOUT_DECOMPOSING: PASS
+RETRY_MENU_ACCEPTED: PASS
+RETRY_PRESERVES_SESSION: PASS
+MENU_REPORTS_TYPED_CAUSE: PASS
+CONTROLLED_BROWSER_REJECTS_GLOBAL_KEYS: PASS
+STALE_CLICK_NOT_BLINDLY_REPEATED: PASS
+SUCCESSFUL_CLICK_NOT_REPLAYED_FOR_VERIFICATION: PASS
+UNCHANGED_TIMEOUT_NOT_FALSE_COMPLETION: PASS
+EXISTING_FILE_CANNOT_SATISFY_DIRECTORY: PASS
+NEW_ARTIFACT_CANNOT_BYPASS_COLLISION_WITH_TEXT_WRITE: PASS
+LEGITIMATE_EXISTING_FILE_WRITE_UNCHANGED: PASS
+APP_FINGERPRINT_IGNORES_DIAGNOSTIC_CHURN: PASS
+APP_FINGERPRINT_DETECTS_VISIBLE_STATE: PASS
+UNAVAILABLE_TARGET_STOPS_BEFORE_MORE_PLANNING: PASS
+UNAVAILABLE_CAUSE_HAS_PUBLIC_NAME: PASS
+CONTINUE_REFRESHES_WITHOUT_PLANNER_OR_MUTATION: PASS
+REPEATED_CONTINUE_PRESERVES_TYPED_BLOCKER_WITHOUT_LLM: PASS
+DEPENDENCY_RETRY_DOES_NOT_RESUME_EVIDENCE_BLOCKER: PASS
+FOCUS_CHANGES_IRRELEVANT_TO_TARGET_REFRESH: PASS
+EQUIVALENT_APP_OBSERVATIONS_STOP_AT_TWO: PASS
+EMPTY_WINDOW_SCOPE_IS_NOT_IMMEDIATE_UNAVAILABLE: PASS
+EMPTY_WINDOW_SCOPE_IS_BOUNDED: PASS
+SEPARATE_STEPS_CAN_REQUEST_SAME_MUTATION: PASS
+APP_EVIDENCE_LIMIT_PAUSES: PASS
+CONTINUE_CAN_VERIFY_NEW_EXACT_EVIDENCE: PASS
+CORRELATED_OPEN_REUSE_VERIFY_CLOSE_WORKFLOW: PASS
+WINDOW_STARTUP_LIMIT_RETAINS_LAUNCH_CONTEXT: PASS
+CONTINUE_REFRESH_DERIVES_NEW_CORRELATION_BEFORE_PLANNER: PASS
+FAILED_REFRESH_PRESERVES_EVIDENCE_BLOCKER_WITHOUT_LLM: PASS
+UNRELATED_STEP_DISPATCH_CANNOT_SUPPLY_CORRELATION: PASS
+FAILED_MUTATION_CAN_BE_REPAIRED: PASS
+REPEATED_UNVERIFIED_OBSERVATION_REQUESTS_GUIDANCE: PASS
+FIXTURE_CLEANED: PASS
+Passed: 68 Failed: 0
+<end of output>
+Test time =   1.03 sec
+----------------------------------------------------------
+Test Passed.
+"RuntimeReliability" end time: Oct 29 22:34 India Standard Time
+"RuntimeReliability" time elapsed: 00:00:01
+----------------------------------------------------------
+
+2/17 Testing: Branch3RuntimeIntegration
+2/17 Test: Branch3RuntimeIntegration
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/Branch3RuntimeIntegrationTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"Branch3RuntimeIntegration" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+[01_RUNTIME_SUCCEEDED] PASS
+[02_PLANNING_SUCCEEDED] PASS
+[03_EXECUTION_STARTED] PASS
+[04_EXACTLY_ONE_DECOMPOSER_CALL] PASS
+[05_LEGACY_MAPPER_NOT_CALLED] PASS
+[06_VERIFIED_ARTIFACTS_NEED_TWO_PLANNER_DECISIONS] PASS
+[07_TWO_LOGICAL_STEPS] PASS
+[08_TWO_EXECUTED_PRIMITIVES] PASS
+[09_FOLDER_EXISTS_ON_DISK] PASS
+[10_FILE_EXISTS_ON_DISK] PASS
+[11_FILE_CONTENT_VERIFIED] PASS
+[12_UNSUPPORTED_PRIMITIVE_REJECTED] PASS
+[13_BAD_PLAN_DID_NOT_CALL_LEGACY_MAPPER] PASS
+[CONTENT_SCENARIO_SUCCEEDS_empty.data] PASS
+[CONTENT_READBACK_empty.data] PASS
+[CONTENT_SCENARIO_SUCCEEDS_generated.cpp] PASS
+[CONTENT_READBACK_generated.cpp] PASS
+[REPAIR_RECEIVES_VALIDATION_FEEDBACK] PASS
+[CONTENT_SCENARIO_SUCCEEDS_repaired.data] PASS
+[CONTENT_READBACK_repaired.data] PASS
+[INVALID_CONTENT_FAILS_omitted.data] PASS
+[INVALID_CONTENT_FAILS_false_done.data] PASS
+[INVALID_CONTENT_FAILS_whitespace.data] PASS
+[EXISTING_FILE_WRITE] PASS
+[MAPPER_DOES_NOT_INSERT_MISSING_CONTENT] PASS
+[PLANNER_SUPPLIED_EMPTY_VALUE_CAUSES_SCHEMA_ERROR] PASS
+[14_TEST_WORKSPACE_CLEANED] PASS
+
+BRANCH 3 RUNTIME INTEGRATION TEST
+Passed: 27
+Failed: 0
+RESULT: PASS
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"Branch3RuntimeIntegration" end time: Oct 29 22:34 India Standard Time
+"Branch3RuntimeIntegration" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/17 Testing: ReliabilityRegression
+3/17 Test: ReliabilityRegression
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/ReliabilityRegressionTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"ReliabilityRegression" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+UTF8_BOUNDARY_240_0: PASS
+UTF8_BOUNDARY_240_1: PASS
+UTF8_BOUNDARY_240_2: PASS
+UTF8_BOUNDARY_240_3: PASS
+UTF8_BOUNDARY_240_4: PASS
+UTF8_BOUNDARY_240_5: PASS
+UTF8_BOUNDARY_768_0: PASS
+UTF8_BOUNDARY_768_1: PASS
+UTF8_BOUNDARY_768_2: PASS
+UTF8_BOUNDARY_768_3: PASS
+UTF8_BOUNDARY_768_4: PASS
+UTF8_BOUNDARY_768_5: PASS
+UTF8_BOUNDARY_2000_0: PASS
+UTF8_BOUNDARY_2000_1: PASS
+UTF8_BOUNDARY_2000_2: PASS
+UTF8_BOUNDARY_2000_3: PASS
+UTF8_BOUNDARY_2000_4: PASS
+UTF8_BOUNDARY_2000_5: PASS
+UTF8_BOUNDARY_2048_0: PASS
+UTF8_BOUNDARY_2048_1: PASS
+UTF8_BOUNDARY_2048_2: PASS
+UTF8_BOUNDARY_2048_3: PASS
+UTF8_BOUNDARY_2048_4: PASS
+UTF8_BOUNDARY_2048_5: PASS
+UTF8_BOUNDARY_8000_0: PASS
+UTF8_BOUNDARY_8000_1: PASS
+UTF8_BOUNDARY_8000_2: PASS
+UTF8_BOUNDARY_8000_3: PASS
+UTF8_BOUNDARY_8000_4: PASS
+UTF8_BOUNDARY_8000_5: PASS
+UTF8_BOUNDARY_16000_0: PASS
+UTF8_BOUNDARY_16000_1: PASS
+UTF8_BOUNDARY_16000_2: PASS
+UTF8_BOUNDARY_16000_3: PASS
+UTF8_BOUNDARY_16000_4: PASS
+UTF8_BOUNDARY_16000_5: PASS
+MALFORMED_TEXT_TYPED_FIELD: PASS
+LLM_ENCODING_FAILS_BEFORE_NETWORK: PASS
+MALFORMED_TEXT_TYPED_FIELD: PASS
+LLM_ENCODING_FAILS_BEFORE_NETWORK: PASS
+MALFORMED_TEXT_TYPED_FIELD: PASS
+LLM_ENCODING_FAILS_BEFORE_NETWORK: PASS
+MALFORMED_TEXT_TYPED_FIELD: PASS
+LLM_ENCODING_FAILS_BEFORE_NETWORK: PASS
+NORMALIZATION_PRESERVES_LITERAL_PAYLOAD: PASS
+BLANK_REQUEST_NEEDS_INPUT: PASS
+FAILURE_HISTORY_NOT_VERIFICATION_EVIDENCE: PASS
+UNRELATED_INSPECTION_CANNOT_RESET_FAILED_MUTATION: PASS
+MATCHING_SUCCESS_RESOLVES_RETRY_HISTORY: PASS
+DECOMPOSER_TIMEOUT_RETAINED: PASS
+DECOMPOSER_RATE_LIMIT_RETAINED: PASS
+DECOMPOSER_CONNECTION_CAUSE_RETAINED: PASS
+DECOMPOSER_CONFIGURATION_CAUSE_RETAINED: PASS
+RECOVERED_TYPE_DOES_NOT_STICK: PASS
+PENDING_SUBMISSION_PREVENTS_DONE: PASS
+ANSWER_DELIVERED: PASS
+RESUME_DIAGNOSTICS_PRESERVED: PASS
+UNICODE_SAME_FOLDER_COPY_VERIFIED: PASS
+COPY_COLLISION_PRESERVED: PASS
+RELATIVE_TRAVERSAL_REJECTED: PASS
+MISSING_PATH_IS_OBSERVABLE_FACT: PASS
+COPY_ESTABLISHES_ARTIFACT_POSTCONDITION: PASS
+EVENT_SINK_RETAINS_DIAGNOSTIC_LOG: PASS
+RENAME_ESTABLISHES_ARTIFACT_POSTCONDITION: PASS
+UNICODE_FILENAME_REPORTED_WITH_VALID_UTF8: PASS
+STRUCTURED_EXECUTION_PROOF_ACCEPTS_REAL_PATH: PASS
+OTHER_STEP_EXECUTION_CANNOT_PROVE_COMPLETION: PASS
+TRANSITIVE_VERIFIED_DEPENDENCY_PROOF_ACCEPTED: PASS
+FALSE_BRANCH_CANNOT_BE_EXECUTED: PASS
+MISSING_BRANCH_HAS_NOT_APPLICABLE_EVIDENCE: PASS
+TRUE_BRANCH_RUNS_FALSE_BRANCH_SKIPPED: PASS
+EXISTING_BRANCH_HAS_NOT_APPLICABLE_EVIDENCE: PASS
+DEPENDENT_VERIFICATION_EXPLAINS_UNMET_PREREQUISITE: PASS
+OUT_OF_ORDER_PROOF_RECOVERS_WITHOUT_REEXECUTION: PASS
+EDITABLE_DRAFT_IS_NOT_SUBMISSION_EVIDENCE: PASS
+OPTIONAL_NULL_FIELDS_ARE_ABSENT: PASS
+CANDIDATE_SCHEMA_REPAIR_IS_BOUNDED_AND_STRUCTURAL: PASS
+EXECUTOR_EXCEPTION_CAN_BE_REPAIRED_WITHOUT_RUNNING_STATE_LEAK: PASS
+DOWNLOAD_DISPATCH_WITHOUT_COMPLETION_EVIDENCE_REJECTED: PASS
+BROWSER_SEMANTIC_LINK_CROSSES_RUNTIME_BOUNDARY: PASS
+BROWSER_PLANNER_CONTEXT_AVOIDS_DUPLICATE_DOM: PASS
+APPLICATION_DISPATCH_REJECTED_THEN_OBSERVED_PROOF_ACCEPTED: PASS
+UNOBSERVABLE_DOCUMENT_ASSOCIATION_REMAINS_EXPLICITLY_UNSUPPORTED: PASS
+Checks: 83 Failures: 0
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"ReliabilityRegression" end time: Oct 29 22:34 India Standard Time
+"ReliabilityRegression" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/17 Testing: WorkflowKernel
+4/17 Test: WorkflowKernel
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/WorkflowKernelTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"WorkflowKernel" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+Generated DAG cases: 250; Checks: 29439; Failures: 0
+<end of output>
+Test time =   0.28 sec
+----------------------------------------------------------
+Test Passed.
+"WorkflowKernel" end time: Oct 29 22:34 India Standard Time
+"WorkflowKernel" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/17 Testing: SemanticEvidence
+5/17 Test: SemanticEvidence
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/SemanticEvidenceTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"SemanticEvidence" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+url_equals: PASS
+url_contains: PASS
+title_equals: PASS
+title_contains: PASS
+text_contains: PASS
+input_equals: PASS
+LINK_TEXT_AND_HREF_CROSS_BOUNDARY: PASS
+FLAT_ELEMENT_SCHEMA: PASS
+ELEMENT_EXISTS: PASS
+LINK_EXISTS: PASS
+DOTTED_GENERIC_KIND: PASS
+WRONG_HREF_REJECTED: PASS
+CROSS_ELEMENT_CONSTRAINTS_REJECTED: PASS
+WRONG_BOOLEAN_REJECTED: PASS
+DRAFT_NOT_SUBMISSION: PASS
+OBSERVATION_IDS_REMOVED_FROM_DURABLE_FACTS: PASS
+IDS_NOT_ALLOWED_AS_PROOF: PASS
+UNTYPED_BOOLEAN_NOT_ACCEPTED: PASS
+UNKNOWN_PREDICATE_EXPLICIT: PASS
+APPLICATION_process_exists: PASS
+APPLICATION_window_exists: PASS
+APPLICATION_window_visible: PASS
+APPLICATION_foreground: PASS
+APPLICATION_TITLE_CONTAINS: PASS
+EXACT_OBSERVED_TARGET_ASSOCIATION: PASS
+STRONG_CORRELATION_ACCEPTS_GENERIC_TARGET_PROOF: PASS
+CORRELATION_DIAGNOSTIC_AND_DISPATCH_PROVENANCE: PASS
+DERIVATION_DOES_NOT_MUTATE_SOURCE_FACTS: PASS
+MISSING_PROCESS_EPOCH_REJECTED: PASS
+REUSED_PROCESS_REJECTED: PASS
+PREEXISTING_PROCESS_REJECTED: PASS
+FAILED_DISPATCH_REJECTED: PASS
+SAME_BASENAME_DIFFERENT_CANONICAL_TARGET_REJECTED: PASS
+OTHER_LAUNCH_SESSION_REJECTED: PASS
+PRE_DISPATCH_OBSERVATION_REJECTED: PASS
+PID_REUSE_REJECTED: PASS
+OTHER_PID_REJECTED_FOR_CORRELATION: PASS
+DIFFERENT_EXECUTABLE_PATH_REJECTED: PASS
+INVISIBLE_WINDOW_REJECTED_FOR_CORRELATION: PASS
+TITLE_SUBSTRING_IS_NOT_DOCUMENT_IDENTITY: PASS
+CONTRADICTING_FULL_PATH_TITLE_REJECTED: PASS
+DUPLICATE_DOCUMENT_WINDOWS_ARE_AMBIGUOUS: PASS
+UIA_LABEL_CORROBORATES_TRUSTED_DISPATCH: PASS
+DUPLICATE_UIA_DOCUMENT_LABELS_REJECTED: PASS
+CORRELATION_DIAGNOSTICS_ARE_STRUCTURED_AND_BOUNDED: PASS
+CONFLICTING_DISPATCH_TO_SAME_INSTANCE_REJECTED: PASS
+BASENAME_AND_PID_WITHOUT_DISPATCH_CONTEXT_REJECTED: PASS
+DIRECT_EXACT_REMAINS_STRONGEST: PASS
+DISPATCH_NOT_DOCUMENT_OBSERVATION: PASS
+OTHER_PROCESS_REJECTED: PASS
+OTHER_DOCUMENT_REJECTED: PASS
+CLAIM_WITHOUT_OBSERVED_ASSOCIATION_REJECTED: PASS
+OBSERVED_PATH_MUST_MATCH_REQUESTED_PATH: PASS
+BASENAME_TITLE_CANNOT_PROVE_TARGET: PASS
+BOUNDED_UNSUPPORTED_TARGET_DIAGNOSTIC: PASS
+SUPERSEDED_BROWSER_OBSERVATION_REJECTED: PASS
+CURRENT_SEMANTIC_FACT_VERIFIES: PASS
+APPLICATION_DISPATCH_INVALIDATES_PREVIOUS_OBSERVATION: PASS
+CURRENT_APPLICATION_PROOF_VERIFIES: PASS
+FACTSTORE_RETAINS_ELEMENTS_OUTSIDE_PRESENTATION_LIMIT: PASS
+PLANNER_PRESENTATION_BOUNDED: PASS
+PLANNER_INTERACTION_IDS_REMAIN: PASS
+TAIL_ELEMENT_CAN_BE_VERIFIED: PASS
+Semantic evidence checks: 63 Failures: 0
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"SemanticEvidence" end time: Oct 29 22:34 India Standard Time
+"SemanticEvidence" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/17 Testing: WorkflowAcceptance
+6/17 Test: WorkflowAcceptance
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/WorkflowAcceptanceTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"WorkflowAcceptance" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+01_create_populated_file: PASS
+02_create_directory_and_file: PASS
+03_inspect_existing_file: PASS
+04_missing_file_conditional: PASS
+05_create_copy_rename_verify: PASS
+06_multiple_dependencies: PASS
+07_failed_primitive_repaired: PASS
+08_planner_timeout_recovery: PASS
+09_browser_navigation_and_answer: PASS
+10_browser_input_and_submission: PASS
+11_browser_download_completion: PASS
+12_application_launch_evidence: PASS
+13_ambiguous_request: PASS
+14_false_branch_skipped: PASS
+15_exact_literal_payload: PASS
+Fixed acceptance scenarios: 15; Failures: 0. Browser/application adapters simulated; filesystem effects real. No network or LLM.
+<end of output>
+Test time =   0.31 sec
+----------------------------------------------------------
+Test Passed.
+"WorkflowAcceptance" end time: Oct 29 22:34 India Standard Time
+"WorkflowAcceptance" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/17 Testing: DiscoveryDecision
+7/17 Test: DiscoveryDecision
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/DiscoveryDecisionTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"DiscoveryDecision" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+token_order_independent: PASS
+joined_tokens_are_discoverable: PASS
+punctuation_normalized: PASS
+close_scores_are_ambiguous: PASS
+consequential_inferred_target_pauses: PASS
+continue_cannot_answer_question: PASS
+stale_question_rejected: PASS
+invented_candidate_rejected: PASS
+show_matches_retains_workflow: PASS
+terminal_answer_maps_active_question: PASS
+selection_resumes_without_routing_search_or_decomposition: PASS
+selected_identity_is_structured_evidence: PASS
+ambiguous_search_pauses: PASS
+ambiguous_yes_cannot_pick_candidate: PASS
+continue_cannot_answer_question: PASS
+stale_question_rejected: PASS
+invented_candidate_rejected: PASS
+show_matches_retains_workflow: PASS
+terminal_answer_maps_active_question: PASS
+selection_resumes_without_routing_search_or_decomposition: PASS
+selected_identity_is_structured_evidence: PASS
+explicit_canonical_target_needs_no_extra_confirmation: PASS
+clear_read_only_discovery_has_no_confirmation: PASS
+explicit_search_again_resumes_same_step: PASS
+refined_choice_finishes_original_search_step: PASS
+missing_information_has_retained_question: PASS
+information_answer_resumes_same_workflow: PASS
+successful_empty_search_does_not_prove_result: PASS
+search_predicate_matches_same_row: PASS
+canonical_search_predicate: PASS
+refinement_supersedes_old_search_and_selection_currency: PASS
+unknown_search_constraint_rejected: PASS
+path_missing_is_explicit_observation: PASS
+backend_ranked_search_metadata: PASS
+actual_backend_evidence_verifies_undotted_extension_and_root_separator: PASS
+generic_type_and_recency_search: PASS
+Failures: 0
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"DiscoveryDecision" end time: Oct 29 22:34 India Standard Time
+"DiscoveryDecision" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/17 Testing: PostconditionContract
+8/17 Test: PostconditionContract
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/PostconditionContractTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"PostconditionContract" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+decomposition_receives_canonical_schema: PASS
+declared_search_needs_no_planner_satisfaction: PASS
+search_verified_before_execution_confirmation: PASS
+natural_answer_resumes_retained_canonical_target: PASS
+proof_origin_is_diagnostic: PASS
+failed_declared_inspect_pauses_without_satisfaction_calls: PASS
+declared_inspect_verifies_after_operation: PASS
+declared_browser_contract_uses_fresh_host_observation_before_planner: PASS
+invalid_declared_predicate_fails_before_any_operation_execution.filesystem.search: PASS
+invalid_declared_predicate_fails_before_any_operation_execution.application.launch: PASS
+invalid_declared_predicate_fails_before_any_operation_execution.browser.navigate: PASS
+invalid_declared_predicate_fails_before_any_operation_execution.filesystem.delete: PASS
+invalid_declared_predicate_fails_before_any_operation_filesystem.invented: PASS
+one_bounded_decomposition_repair_precedes_execution: PASS
+legacy_planner_contract_repairs_from_existing_evidence: PASS
+complete_search_constraints_match_one_result: PASS
+canonical_path_search_constraint: PASS
+extension_contract_follows_case_insensitive_search: PASS
+query_contract_respects_token_order_independence: PASS
+wrong_search_constraint_rejected_entry_type: PASS
+wrong_search_constraint_rejected_extension: PASS
+wrong_search_constraint_rejected_search_root: PASS
+wrong_search_constraint_rejected_query: PASS
+wrong_search_constraint_rejected_modified_within_days: PASS
+wrong_search_constraint_rejected_path: PASS
+recency_requires_backend_metadata: PASS
+successful_empty_search_cannot_prove_discovery: PASS
+extension_and_canonical_windows_path_spellings: PASS
+semantic_normalization_preserves_original_evidence: PASS
+name_constraint_is_not_arbitrarily_case_folded: PASS
+arbitrary_extension_punctuation_is_not_weakened: PASS
+candidate_constraints_cannot_use_flat_search_metadata: PASS
+root_membership_uses_path_components: PASS
+root_relationship_accepts_recursive_descendants: PASS
+unc_root_case_and_separator_normalization: PASS
+unicode_windows_path_comparison_is_case_insensitive: PASS
+explicit_completeness_requires_search_metadata: PASS
+completeness_is_read_from_enclosing_observation: PASS
+incomplete_search_cannot_prove_declared_completeness: PASS
+candidate_constraints_must_hold_on_one_record: PASS
+a_later_candidate_can_satisfy_entire_contract: PASS
+graph_admission_rejects_unsupported_semantic_contract: PASS
+graph_admission_accepts_registered_semantic_contract: PASS
+declared_contract_never_weakens_to_search_success_0: PASS
+declared_contract_never_weakens_to_search_success_1: PASS
+declared_contract_never_weakens_to_search_success_2: PASS
+declared_contract_never_weakens_to_search_success_3: PASS
+declared_contract_never_weakens_to_search_success_4: PASS
+Failures: 0
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"PostconditionContract" end time: Oct 29 22:34 India Standard Time
+"PostconditionContract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/17 Testing: GoalDecomposerContract
+9/17 Test: GoalDecomposerContract
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/GoalDecomposerContractTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"GoalDecomposerContract" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+[PROMPT_ONLY_LOGICAL_DECOMPOSITION] PASS
+[ORIGINAL_GOAL_PASSED_TO_LLM] PASS
+[LLM_CALLED] PASS
+[VALID_PLAN_ACCEPTED] PASS
+[THREE_STEPS_RETURNED] PASS
+[DEPENDENCIES_PARSED] PASS
+[NO_PRIMITIVES_SELECTED] PASS
+[MALFORMED_JSON_REJECTED] PASS
+[MALFORMED_PLAN_HAS_NO_STEPS] PASS
+[UNKNOWN_DEPENDENCY_REJECTED] PASS
+[PRIMITIVE_FIELD_REJECTED] PASS
+[EMPTY_STEPS_REJECTED] PASS
+[LLM_FAILURE_REJECTED] PASS
+[LLM_FAILURE_HAS_NO_STEPS] PASS
+[LLM_FAILURE_MESSAGE] PASS
+
+GOAL DECOMPOSER CONTRACT TEST
+Passed: 15
+Failed: 0
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"GoalDecomposerContract" end time: Oct 29 22:34 India Standard Time
+"GoalDecomposerContract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/17 Testing: RecoveryGuidance
+10/17 Test: RecoveryGuidance
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/RecoveryGuidanceTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"RecoveryGuidance" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+autonomous_alternatives_precede_guidance: PASS
+question_uses_structured_attempts_and_blocker: PASS
+free_form_terminal_answer_is_not_a_new_request: PASS
+guidance_interpreter_receives_full_active_context: PASS
+same_workflow_preserves_verified_prerequisite: PASS
+registered_user_strategy_is_applied: PASS
+candidate_confirmation_remains_separate: PASS
+recovery_is_recorded_only_after_verification: PASS
+candidate_choice_resumes_canonical_target_without_rediscovery: PASS
+episode_tracks_goal_completion: PASS
+unregistered_user_capability_is_rejected_without_execution: PASS
+unsupported_suggestion_is_failed_not_learned_success: PASS
+cannot_clarify_retains_question_without_new_planning: PASS
+search_hint_enriches_strategy_context: PASS
+durable_records_exclude_raw_guidance_paths_and_hint_values: PASS
+location_hint_is_accepted_as_guidance: PASS
+failed_guidance_has_no_verified_success_record: PASS
+strategy_budget_persists_across_answers: PASS
+foreground_recovery_requires_explicit_permission: PASS
+permission_question_is_not_recovery_success: PASS
+stale_answer_cannot_grant_input_control: PASS
+interpreter_cannot_invent_explicit_foreground_consent: PASS
+permission_resumes_held_strategy_in_same_workflow: PASS
+declined_foreground_control_runs_no_global_input: PASS
+missing_information_is_first_class: PASS
+information_answer_enriches_same_step_without_redecomposition: PASS
+raw_missing_information_is_not_durable_learning_data: PASS
+guidance_cannot_authorize_input_or_smuggle_an_operation: PASS
+lifetime_attempt_and_question_budgets_cannot_be_reset: PASS
+answer_interpreter_preserves_typed_provider_failure_and_question: PASS
+dependency_retry_reinterprets_cached_answer_without_workflow_restart: PASS
+evidence_pause_can_request_guidance_separately_from_continue: PASS
+candidate_discovery_alone_does_not_create_verified_recovery: PASS
+guidance_can_unlock_retained_evidence_without_replaying_observation: PASS
+learning_log_failure_does_not_change_verifier_or_workflow: PASS
+local_recovery_log_rotates_at_bounded_size: PASS
+Failures: 0
+<end of output>
+Test time =   0.61 sec
+----------------------------------------------------------
+Test Passed.
+"RecoveryGuidance" end time: Oct 29 22:34 India Standard Time
+"RecoveryGuidance" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/17 Testing: ArtifactDependency
+11/17 Test: ArtifactDependency
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/ArtifactDependencyTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"ArtifactDependency" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+bare_new_directory_reference_is_not_an_environment_lookup: PASS
+consumer_has_typed_producer_reference_and_dependency: PASS
+parent_is_bound_from_verified_backend_output: PASS
+folder_and_populated_file_created_once: PASS
+normal_artifact_chain_has_no_recovery_question: PASS
+completed_workflow_has_only_new_request_or_quit: PASS
+recursive_producer_to_consumer_chaining: PASS
+several_files_share_one_verified_directory_output: PASS
+invalid_ref_rejected_before_execution_step_2: PASS
+invalid_plan_does_not_advertise_guidance_or_continue_step_2: PASS
+invalid_menu_actions_cannot_construct_fake_recovery_step_2: PASS
+invalid_ref_rejected_before_execution_step_9: PASS
+invalid_plan_does_not_advertise_guidance_or_continue_step_9: PASS
+invalid_menu_actions_cannot_construct_fake_recovery_step_9: PASS
+invalid_ref_rejected_before_execution_step_1: PASS
+invalid_plan_does_not_advertise_guidance_or_continue_step_1: PASS
+invalid_menu_actions_cannot_construct_fake_recovery_step_1: PASS
+invalid_graph_with_allocated_kernel_has_no_recovery_actions: PASS
+invalid_graph_cannot_restart_through_continue_or_guidance: PASS
+dispatch_without_artifact_proof_cannot_bind_a_parent: PASS
+planning_dependency_retry_is_distinct_from_runtime_recovery: PASS
+real_strategy_guidance_still_advertises_answer: PASS
+valid_guidance_accepts_free_form_answer_on_retained_graph: PASS
+Failures: 0
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"ArtifactDependency" end time: Oct 29 22:34 India Standard Time
+"ArtifactDependency" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/17 Testing: PrimitiveMapperContract
+12/17 Test: PrimitiveMapperContract
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/PrimitiveMapperContractTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"PrimitiveMapperContract" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+[LLM_CALLED_EXACTLY_ONCE] PASS
+[WHOLE_PLAN_INCLUDED] PASS
+[LIVE_CATALOG_INCLUDED] PASS
+[PROMPT_FORBIDS_INVENTED_PRIMITIVES] PASS
+[VALID_MAPPING_ACCEPTED] PASS
+[OPERATIONS_RESOLVED] PASS
+[DEPENDENCIES_PRESERVED] PASS
+[STEP_IDS_PRESERVED] PASS
+[INVENTED_PRIMITIVE_REJECTED] PASS
+[UNKNOWN_PARAMETER_REJECTED] PASS
+[STEP_REORDERING_REJECTED] PASS
+[MALFORMED_JSON_REJECTED] PASS
+[LLM_FAILURE_REJECTED] PASS
+[LLM_FAILURE_MESSAGE_PRESERVED] PASS
+[INVALID_PLAN_REJECTED_BEFORE_LLM] PASS
+
+PRIMITIVE MAPPER CONTRACT TEST
+Passed: 15
+Failed: 0
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"PrimitiveMapperContract" end time: Oct 29 22:34 India Standard Time
+"PrimitiveMapperContract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/17 Testing: FilesystemPathPolicy
+13/17 Test: FilesystemPathPolicy
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemPathPolicyTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"FilesystemPathPolicy" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+[KNOWN_DESKTOP_RESOLVES] PASS
+[KNOWN_DOCUMENTS_RESOLVES] PASS
+[ABSOLUTE_PATH_RESOLVES] PASS
+[KNOWN_FOLDER_TRAVERSAL_REJECTED] PASS
+[WINDOWS_WRITE_REJECTED] PASS
+Passed: 5 Failed: 0
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"FilesystemPathPolicy" end time: Oct 29 22:34 India Standard Time
+"FilesystemPathPolicy" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/17 Testing: FilesystemLocationResolver
+14/17 Test: FilesystemLocationResolver
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemLocationResolverTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"FilesystemLocationResolver" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+[KEYWORDS_RESOLVE_CONTEXTUAL_FOLDER] PASS
+[DESKTOP_ALIAS_IS_A_SEARCH_HINT_NOT_A_REQUIRED_PATH_SEGMENT] PASS
+[AMBIGUOUS_KEYWORDS_ARE_NOT_GUESSED] PASS
+[MISSING_KEYWORDS_ARE_REPORTED] PASS
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"FilesystemLocationResolver" end time: Oct 29 22:34 India Standard Time
+"FilesystemLocationResolver" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/17 Testing: FilesystemDiscovery
+15/17 Test: FilesystemDiscovery
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemDiscoveryGroupTest.exe"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"FilesystemDiscovery" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+RESULT: PASS
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"FilesystemDiscovery" end time: Oct 29 22:34 India Standard Time
+"FilesystemDiscovery" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/17 Testing: FilesystemCreationOffline
+16/17 Test: FilesystemCreationOffline
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemCreationGroupTest.exe" "--offline"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"FilesystemCreationOffline" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+=== GROUP 1: FILESYSTEM CREATION TEST ===
+Offline tests use a unique temporary directory.
+[CREATE_FOLDER_SUCCESS] PASS
+[CREATE_FOLDER_EXISTS_ON_DISK] PASS
+[EXISTING_FOLDER_REJECTED] PASS
+[EXISTING_FOLDER_PRESERVED] PASS
+[CREATE_FILE_SUCCESS] PASS
+[FILE_EXISTS_ON_DISK] PASS
+[FILE_CONTENT_EXACT] PASS
+[EXISTING_FILE_REJECTED] PASS
+[EXISTING_FILE_CONTENT_PRESERVED] PASS
+[MISSING_OR_INVALID_PARENT_REJECTED] PASS
+[MISSING_PARENT_NOT_CREATED] PASS
+[FOLDER_PATH_TRAVERSAL_REJECTED] PASS
+[FILE_PATH_TRAVERSAL_REJECTED] PASS
+[NO_ESCAPE_FILE_CREATED] PASS
+[LOCATION_PATH_TRAVERSAL_REJECTED] PASS
+[NO_ESCAPE_DIRECTORY_CREATED] PASS
+[UNRESOLVED_OPERATION_REJECTED] PASS
+[UNRESOLVED_FOLDER_NOT_CREATED] PASS
+[TEST_DIRECTORY_CLEANED] PASS
+
+GROUP 1 FILESYSTEM CREATION TEST
+Passed: 19
+Failed: 0
+RESULT: PASS
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"FilesystemCreationOffline" end time: Oct 29 22:34 India Standard Time
+"FilesystemCreationOffline" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/17 Testing: FilesystemManipulationOffline
+17/17 Test: FilesystemManipulationOffline
+Command: "C:/Users/shour/Desktop/Nova/build-runtime-supervisor/FilesystemManipulationGroupTest.exe" "--offline"
+Directory: C:/Users/shour/Desktop/Nova/build-runtime-supervisor
+"FilesystemManipulationOffline" start time: Oct 29 22:34 India Standard Time
+Output:
+----------------------------------------------------------
+=== GROUP 2: CHAINED FILESYSTEM INTEGRATION TEST ===
+[01_CREATE_WORKSPACE] PASS
+[02_WORKSPACE_EXISTS] PASS
+[03_CREATE_MAIN_JAVA] PASS
+[04_MAIN_JAVA_CONTENT_EXACT] PASS
+[05_COPY_MAIN_JAVA] PASS
+[06_COPY_BYTES_MATCH] PASS
+[07_DUPLICATE_COPY_REJECTED] PASS
+[08_DUPLICATE_COPY_PRESERVED] PASS
+[09_MISSING_COPY_SOURCE_REJECTED] PASS
+[10_MISSING_COPY_DESTINATION_ABSENT] PASS
+[11_RENAME_COPY] PASS
+[12_RENAMED_FILE_CONTENT] PASS
+[13_ORIGINAL_REMAINS] PASS
+[14_RENAME_TO_EXISTING_REJECTED] PASS
+[15_CREATE_STAGING_FOLDER] PASS
+[16_STAGING_EXISTS] PASS
+[17_MOVE_STAGING_INTO_WORKSPACE] PASS
+[18_ARCHIVE_EXISTS] PASS
+[19_MOVE_RENAMED_FILE_TO_ARCHIVE] PASS
+[20_MOVED_FILE_CONTENT] PASS
+[21_OLD_PATH_ABSENT] PASS
+[22_MOVE_MISSING_SOURCE_REJECTED] PASS
+[23_MOVE_EXISTING_DESTINATION_REJECTED] PASS
+[24_DELETE_MOVED_FILE] PASS
+[25_DELETED_FILE_ABSENT] PASS
+[26_NONEMPTY_DIRECTORY_DELETE_REJECTED] PASS
+[27_MAIN_FILE_PRESERVED] PASS
+[28_DELETE_EMPTY_ARCHIVE] PASS
+[29_ARCHIVE_REMOVED] PASS
+[30_DELETE_TRAVERSAL_REJECTED] PASS
+[31_COPY_TRAVERSAL_REJECTED] PASS
+[32_MOVE_TRAVERSAL_REJECTED] PASS
+[33_NO_ESCAPE_FILE_CREATED] PASS
+[34_TEST_RESOURCES_CLEANED] PASS
+
+GROUP 2 FILESYSTEM MANIPULATION TEST
+Passed: 34
+Failed: 0
+RESULT: PASS
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"FilesystemManipulationOffline" end time: Oct 29 22:34 India Standard Time
+"FilesystemManipulationOffline" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 29 22:34 India Standard Time

@@ -1,4 +1,5 @@
 #include "filesystem_path_policy.hpp"
+#include "utf8_text.hpp"
 
 #include <windows.h>
 #include <shlobj.h>
@@ -81,14 +82,14 @@ FilesystemPathResult FilesystemPathPolicy::resolve(const std::string& value,
 
     if (!base.empty()) {
         const std::string suffix = slash == std::string::npos ? "" : normalized.substr(slash + 1);
-        const fs::path relative(suffix);
+        const fs::path relative = Utf8::toPath(suffix);
         if (containsTraversal(relative)) {
             return {false, {}, FilesystemPathError::MALFORMED_PATH,
                 "Known-folder paths must not contain '..'."};
         }
         candidate = base / relative;
     } else {
-        const fs::path supplied(normalized);
+        const fs::path supplied = Utf8::toPath(normalized);
         if (supplied.is_absolute()) {
             candidate = supplied;
         } else if (!parent.empty()) {
@@ -127,11 +128,11 @@ FilesystemPathResult FilesystemPathPolicy::authorize(const fs::path& path,
     if (access != FilesystemAccess::DISCOVER &&
         physical == physical.root_path()) {
         return {false, physical, FilesystemPathError::PROTECTED_LOCATION,
-            "Mutating a filesystem volume root is not permitted: " + physical.string()};
+            "Mutating a filesystem volume root is not permitted: " + Utf8::path(physical)};
     }
     if (isProtected(physical) && access != FilesystemAccess::DISCOVER) {
         return {false, physical, FilesystemPathError::PROTECTED_LOCATION,
-            "This operation is blocked for a protected Windows or application location: " + physical.string()};
+            "This operation is blocked for a protected Windows or application location: " + Utf8::path(physical)};
     }
     return {true, physical, FilesystemPathError::NONE, {}};
 }
@@ -164,7 +165,9 @@ fs::path FilesystemPathPolicy::canonicalForPolicy(const fs::path& path,
     fs::path suffix;
     while (!existing.empty() && !fs::exists(existing, error)) {
         if (error) return {};
-        suffix = existing.filename() / suffix;
+        // Appending an empty path adds a trailing separator. For a missing
+        // destination file that made parent_path() equal the file itself.
+        suffix = suffix.empty() ? existing.filename() : existing.filename() / suffix;
         existing = existing.parent_path();
     }
     if (existing.empty()) {
@@ -173,7 +176,7 @@ fs::path FilesystemPathPolicy::canonicalForPolicy(const fs::path& path,
     }
     const fs::path physicalBase = fs::weakly_canonical(existing, error);
     if (error) return {};
-    return (physicalBase / suffix).lexically_normal();
+    return (suffix.empty() ? physicalBase : physicalBase / suffix).lexically_normal();
 }
 
 bool FilesystemPathPolicy::isProtected(const fs::path& path) const {

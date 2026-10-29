@@ -1,0 +1,206 @@
+{
+  "phrase": "hey nova",
+  "pronunciation": "hey-No-Va",
+  "seed": 20261028,
+  "training_positives": 20000,
+  "training_hard_negatives": 10000,
+  "training_background_examples": 98304,
+  "calibration": {
+    "step": 6000,
+    "loss": 0.00012526877981144935,
+    "recall": 0.9741666666666666,
+    "threshold": 0.95,
+    "false_events_per_hour": 0.3739529317909852,
+    "hard_negative_rate": 0.025
+  },
+  "threshold": 0.95,
+  "test": {
+    "positive_recall": 0.975,
+    "positive_examples": 1200,
+    "hard_negative_false_rate": 0.015,
+    "negative_hours": 5.347955555555555,
+    "negative_false_events": 5,
+    "negative_false_events_per_hour": 0.9349367151725686
+  },
+  "limitations": [
+    "Synthetic held-out speakers; personal microphone recall has not been measured.",
+    "Augmented examples share source utterances within each speaker split. Speaker splits are disjoint.",
+    "False activation counts on published embeddings; live environment performance may differ."
+  ],
+  "sources": [
+    "https://github.com/dscripka/openWakeWord",
+    "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/libritts_r/medium",
+    "https://huggingface.co/datasets/davidscripka/openwakeword_features"
+  ],
+  "model_sha256": "2286d91c039c739b88ad59229958c532b185b322d16b9ad1d6325804c0e4271f",
+  "history": [
+    {
+      "step": 0,
+      "loss": 0.7207096815109253,
+      "recall": 0.0,
+      "threshold": 0.27999999999999997,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.0
+    },
+    {
+      "step": 400,
+      "loss": 0.005067303776741028,
+      "recall": 0.9275,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.7479058635819704,
+      "hard_negative_rate": 0.029166666666666667
+    },
+    {
+      "step": 800,
+      "loss": 0.006689671892672777,
+      "recall": 0.9525,
+      "threshold": 0.6499999999999999,
+      "false_events_per_hour": 0.1869764658954926,
+      "hard_negative_rate": 0.029166666666666667
+    },
+    {
+      "step": 1200,
+      "loss": 0.004822904244065285,
+      "recall": 0.9433333333333334,
+      "threshold": 0.83,
+      "false_events_per_hour": 0.0,
+      "hard_negative_rate": 0.02
+    },
+    {
+      "step": 1600,
+      "loss": 0.004336226731538773,
+      "recall": 0.9466666666666667,
+      "threshold": 0.83,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.019166666666666665
+    },
+    {
+      "step": 2000,
+      "loss": 0.002062626415863633,
+      "recall": 0.9558333333333333,
+      "threshold": 0.8799999999999999,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.0275
+    },
+    {
+      "step": 2400,
+      "loss": 0.006720212288200855,
+      "recall": 0.9316666666666666,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.015
+    },
+    {
+      "step": 2800,
+      "loss": 0.003220469458028674,
+      "recall": 0.9491666666666667,
+      "threshold": 0.9099999999999999,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.02
+    },
+    {
+      "step": 3200,
+      "loss": 0.0043784985318779945,
+      "recall": 0.9541666666666667,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.1869764658954926,
+      "hard_negative_rate": 0.023333333333333334
+    },
+    {
+      "step": 3600,
+      "loss": 0.003380298148840666,
+      "recall": 0.955,
+      "threshold": 0.8699999999999999,
+      "false_events_per_hour": 0.1869764658954926,
+      "hard_negative_rate": 0.020833333333333332
+    },
+    {
+      "step": 4000,
+      "loss": 0.004199173767119646,
+      "recall": 0.9458333333333333,
+      "threshold": 0.8999999999999999,
+      "false_events_per_hour": 0.1869764658954926,
+      "hard_negative_rate": 0.015
+    },
+    {
+      "step": 4400,
+      "loss": 0.002715814160183072,
+      "recall": 0.945,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.0,
+      "hard_negative_rate": 0.013333333333333334
+    },
+    {
+      "step": 4800,
+      "loss": 0.00035195343662053347,
+      "recall": 0.9708333333333333,
+      "threshold": 0.6799999999999999,
+      "false_events_per_hour": 0.1869764658954926,
+      "hard_negative_rate": 0.02666666666666667
+    },
+    {
+      "step": 5200,
+      "loss": 0.006921365391463041,
+      "recall": 0.9725,
+      "threshold": 0.41999999999999993,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.0275
+    },
+    {
+      "step": 5600,
+      "loss": 0.00023494636116083711,
+      "recall": 0.9683333333333334,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.7479058635819704,
+      "hard_negative_rate": 0.028333333333333332
+    },
+    {
+      "step": 6000,
+      "loss": 0.00012526877981144935,
+      "recall": 0.9741666666666666,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.3739529317909852,
+      "hard_negative_rate": 0.025
+    },
+    {
+      "step": 6400,
+      "loss": 0.0001694302773103118,
+      "recall": 0.9675,
+      "threshold": 0.94,
+      "false_events_per_hour": 1.869764658954926,
+      "hard_negative_rate": 0.02666666666666667
+    },
+    {
+      "step": 6800,
+      "loss": 0.0002536121755838394,
+      "recall": 0.9633333333333334,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.7479058635819704,
+      "hard_negative_rate": 0.0225
+    },
+    {
+      "step": 7200,
+      "loss": 0.0033066526520997286,
+      "recall": 0.9666666666666667,
+      "threshold": 0.8799999999999999,
+      "false_events_per_hour": 0.5609293976864778,
+      "hard_negative_rate": 0.024166666666666666
+    },
+    {
+      "step": 7600,
+      "loss": 7.356754213105887e-05,
+      "recall": 0.9675,
+      "threshold": 0.94,
+      "false_events_per_hour": 0.5609293976864778,
+      "hard_negative_rate": 0.0225
+    },
+    {
+      "step": 8000,
+      "loss": 2.7935213438468054e-05,
+      "recall": 0.965,
+      "threshold": 0.95,
+      "false_events_per_hour": 0.5609293976864778,
+      "hard_negative_rate": 0.025
+    }
+  ]
+}

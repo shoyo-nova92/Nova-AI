@@ -1,0 +1,6 @@
+{
+  "model": "hey_nova.onnx",
+  "key": "hey_nova",
+  "phrase": "Hey Nova",
+  "threshold": 0.95
+}

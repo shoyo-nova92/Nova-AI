@@ -1,6 +1,8 @@
 #include <windows.h>
 #include <shlobj.h>
 #include "primitive_execution_engine.hpp"
+#include "filesystem_path_policy.hpp"
+#include "utf8_text.hpp"
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -13,23 +15,21 @@ using namespace std;
 namespace fs = std::filesystem;
 
 namespace {
+fs::path offlineParent;
 int passed = 0, failed = 0;
 void check(const string& name, bool ok) {
     cout << "[" << name << "] " << (ok ? "PASS" : "FAIL") << '\n';
     (ok ? passed : failed)++;
 }
 fs::path desktop() {
-    PWSTR raw = nullptr;
-    HRESULT hr = SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &raw);
-    if (FAILED(hr) || !raw) return {};
-    fs::path p(raw); CoTaskMemFree(raw); return p;
+    return offlineParent.empty()?FilesystemPathPolicy{}.resolve("desktop").path:offlineParent;
 }
 PrimitiveOperation base(PrimitiveOperationType type, const string& name) {
     PrimitiveOperation p{}; p.type = type; p.name = name; p.resolved = true; return p;
 }
 PrimitiveOperation folder(const string& name) {
     auto p = base(PrimitiveOperationType::FILESYSTEM_CREATE, "filesystem.create");
-    p.parameters.name = name; p.parameters.location = "desktop"; return p;
+    p.parameters.name = name; p.parameters.location = offlineParent.empty()?"desktop":Utf8::path(offlineParent); return p;
 }
 PrimitiveOperation file(const string& name, const string& location, const string& content) {
     auto p = base(PrimitiveOperationType::FILESYSTEM_CREATE_FILE, "filesystem.create_file");
@@ -57,7 +57,9 @@ string contents(const fs::path& p) {
 }
 }
 
-int main() {
+int main(int argc,char** argv) {
+    if(argc==2 && string(argv[1])=="--offline")offlineParent=fs::temp_directory_path();
+    else if(argc!=1)return 2;
     cout << "=== GROUP 2: CHAINED FILESYSTEM INTEGRATION TEST ===\n";
     const fs::path desk = desktop();
     if (desk.empty() || !fs::is_directory(desk)) { cerr << "Desktop unavailable.\n"; return 2; }
@@ -66,7 +68,7 @@ int main() {
         to_string(chrono::steady_clock::now().time_since_epoch().count());
     const string stagingName = unique + "_staging";
     const fs::path root = desk / unique, staging = desk / stagingName;
-    const string rootRel = "desktop/" + unique, stagingRel = "desktop/" + stagingName;
+    const string rootRel = offlineParent.empty()?"desktop/"+unique:Utf8::path(root), stagingRel = offlineParent.empty()?"desktop/"+stagingName:Utf8::path(staging);
     if (fs::exists(root) || fs::exists(staging)) { cerr << "Unique test path collision; abort.\n"; return 2; }
 
     PrimitiveExecutionEngine engine;

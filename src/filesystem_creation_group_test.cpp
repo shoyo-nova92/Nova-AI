@@ -3,6 +3,7 @@
 #include <shlobj.h>
 
 #include "primitive_execution_engine.hpp"
+#include "utf8_text.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -15,6 +16,7 @@ using namespace std;
 namespace fs = std::filesystem;
 
 namespace {
+fs::path offlineParent;
 int passed = 0;
 int failed = 0;
 
@@ -25,6 +27,7 @@ void check(const string& name, bool condition) {
 }
 
 fs::path desktopPath() {
+    if(!offlineParent.empty())return offlineParent;
     PWSTR rawPath = nullptr;
     HRESULT hr = SHGetKnownFolderPath(FOLDERID_Desktop, 0, nullptr, &rawPath);
     if (FAILED(hr) || rawPath == nullptr) return {};
@@ -38,7 +41,7 @@ PrimitiveOperation createFolder(const string& name) {
     op.type = PrimitiveOperationType::FILESYSTEM_CREATE;
     op.name = "filesystem.create";
     op.parameters.name = name;
-    op.parameters.location = "desktop";
+    op.parameters.location = offlineParent.empty()?"desktop":Utf8::path(offlineParent);
     op.resolved = true;
     return op;
 }
@@ -61,9 +64,11 @@ string readAll(const fs::path& path) {
 }
 }
 
-int main() {
+int main(int argc,char** argv) {
+    if(argc==2 && string(argv[1])=="--offline")offlineParent=fs::temp_directory_path();
+    else if(argc!=1)return 2;
     cout << "=== GROUP 1: FILESYSTEM CREATION TEST ===\n";
-    cout << "Tests use one uniquely named directory on the current Windows Desktop.\n";
+    cout << (offlineParent.empty()?"Tests use a unique directory on Desktop.\n":"Offline tests use a unique temporary directory.\n");
 
     const fs::path desktop = desktopPath();
     if (desktop.empty() || !fs::exists(desktop)) {
@@ -74,7 +79,7 @@ int main() {
     const auto stamp = chrono::steady_clock::now().time_since_epoch().count();
     const string rootName = "NovaGroup1Test_" + to_string(stamp);
     const fs::path rootPath = desktop / rootName;
-    const string rootLocation = "desktop/" + rootName;
+    const string rootLocation = offlineParent.empty()?"desktop/"+rootName:Utf8::path(rootPath);
     PrimitiveExecutionEngine engine;
 
     // Safety guard: never clean a path unless it is the unique test directory we selected.
@@ -111,10 +116,12 @@ int main() {
         check("EXISTING_FILE_CONTENT_PRESERVED",
               fs::is_regular_file(filePath) && readAll(filePath) == fileContent);
 
-        // 5. Missing parent must fail without creating directories implicitly.
-        auto missingParent = engine.execute(
-            createFile("Missing.java", rootLocation + "/does-not-exist", "class Missing {}"));
-        check("MISSING_PARENT_REJECTED", missingParent.status == ExecutionStatus::FAILED);
+        // The manual alias test exercises missing-location discovery. Offline
+        // coverage uses an invalid file-as-parent, avoiding discovery outside
+        // the test fixture while checking rejection and no implicit creation.
+        const string invalidParent = rootLocation + (offlineParent.empty()?"/does-not-exist":"/Main.java");
+        auto missingParent = engine.execute(createFile("Missing.java", invalidParent, "class Missing {}"));
+        check("MISSING_OR_INVALID_PARENT_REJECTED", missingParent.status == ExecutionStatus::FAILED || missingParent.status == ExecutionStatus::NOT_EXECUTED);
         check("MISSING_PARENT_NOT_CREATED", !fs::exists(rootPath / "does-not-exist"));
 
         // 6. Unsafe leaf names must be rejected.

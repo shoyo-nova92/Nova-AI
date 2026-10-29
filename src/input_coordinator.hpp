@@ -5,5 +5,5 @@
 class InputCoordinator
 {
 public:
-    InputEvent waitForInput();
+    InputEvent waitForInput(bool keyboardOnly = false);
 };

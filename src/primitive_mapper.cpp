@@ -1,4 +1,5 @@
 #include "primitive_mapper.hpp"
+#include "utf8_text.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -128,6 +129,8 @@ bool assignParameter(PrimitiveParameters& output, const string& name,
     else if (name == "query") output.query = value;
     else if (name == "max_results") output.maxResults = value;
     else if (name == "entry_type") output.entryType = value;
+    else if (name == "extension") output.extension = value;
+    else if (name == "modified_within_days") output.modifiedWithinDays = value;
     else if (name == "key") output.key = value;
     else if (name == "modifiers") output.modifiers = value;
     else if (name == "repeatCount") output.repeatCount = value;
@@ -143,6 +146,8 @@ bool assignParameter(PrimitiveParameters& output, const string& name,
     else if (name == "text") output.text = value;
     else if (name == "element_id") output.elementId = value;
     else if (name == "submit") output.submit = value;
+    else if (name == "process_id") output.processId = value;
+    else if (name == "window_handle") output.windowHandle = value;
     else {
         error = "Registry parameter '" + name + "' has no PrimitiveParameters storage field.";
         return false;
@@ -369,7 +374,21 @@ MultiStepPlan PrimitiveMapper::mapStep(const MultiStepAction& sourceStep, const 
     result.steps.front().operations.clear();
     result.steps.front().resolved = false;
     try {
-        const json operation = json::parse(operationJson);
+        json operation = json::parse(operationJson);
+        if (operation.value("name", string{}) == "filesystem.create_file") {
+            auto& parameters = operation.at("parameters");
+            const bool blank = !parameters.contains("content") ||
+                (parameters["content"].is_string() && trim(parameters["content"].get<string>()).empty());
+            // An explicitly empty file may use either omission or an empty string.
+            if (sourceStep.contentRequirement == "empty_allowed" && parameters.contains("content") &&
+                parameters["content"].is_string() && parameters["content"].get<string>().empty())
+                parameters.erase("content");
+            if (sourceStep.contentRequirement == "required" && blank) {
+                result.message = "Requested artifact requires populated content. Generate the complete requested content and supply parameters.content in filesystem.create_file; do not create an empty placeholder.";
+                result.steps.clear();
+                return result;
+            }
+        }
         json wrapped = {{"id", sourceStep.id}, {"operations", json::array({operation})}};
         unordered_map<string, PrimitiveDefinition> definitions;
         for (const auto& entry : PrimitiveRegistry::getCatalog()) definitions.emplace(entry.first, entry.second);
@@ -418,9 +437,9 @@ Rules:
 )PROMPT";
 
     const string userPrompt =
-        "LIVE_PRIMITIVE_REGISTRY:\n" + catalogToJson().dump(2) +
+        "LIVE_PRIMITIVE_REGISTRY:\n" + Utf8::dump(catalogToJson(),"registry",2) +
         "\n\nDECOMPOSED_PLAN (source of truth for step IDs/order/dependencies):\n" +
-        sourcePlanToJson(decomposedPlan).dump(2) +
+        Utf8::dump(sourcePlanToJson(decomposedPlan),"source_plan",2) +
         "\n\nReturn the mapped plan as strict JSON only.";
 
     LLMResponse response;

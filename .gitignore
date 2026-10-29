@@ -16,3 +16,10 @@ build/
 # Runtime/generated files
 logs/
 audio_output/
+
+# Reproducible wakeword training caches (keep scripts and the exported model)
+/tools/wakeword-training/venv/
+/tools/wakeword-training/data/
+/tools/wakeword-training/openWakeWord/
+/tools/wakeword-training/*.log
+/tools/wakeword-training/*.whl

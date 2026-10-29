@@ -1,0 +1,7630 @@
+{
+  "threshold": 0.95,
+  "calibration": {
+    "positive_examples": 360,
+    "positive_recall": 0.9833333333333333,
+    "clean_recall": 0.9722222222222222,
+    "augmented_recall": 0.9944444444444445,
+    "hard_negative_examples": 270,
+    "hard_negative_false_activations": 11,
+    "hard_negative_false_rate": 0.040740740740740744
+  },
+  "test": {
+    "positive_examples": 364,
+    "positive_recall": 0.9862637362637363,
+    "clean_recall": 0.9725274725274725,
+    "augmented_recall": 1.0,
+    "hard_negative_examples": 273,
+    "hard_negative_false_activations": 8,
+    "hard_negative_false_rate": 0.029304029304029304
+  },
+  "model_key": "hey_nova",
+  "chunk_samples": 1280,
+  "sample_rate": 16000,
+  "calibration_records": [
+    {
+      "file": "negative_105_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.5854835510253906e-05
+    },
+    {
+      "file": "negative_105_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.9604644775390625e-06
+    },
+    {
+      "file": "negative_105_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.245208740234375e-06
+    },
+    {
+      "file": "negative_106_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.838010787963867e-06
+    },
+    {
+      "file": "negative_106_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.424022674560547e-06
+    },
+    {
+      "file": "negative_106_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001780688762664795
+    },
+    {
+      "file": "negative_111_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.006306260824203491
+    },
+    {
+      "file": "negative_111_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0004433095455169678
+    },
+    {
+      "file": "negative_111_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005576014518737793
+    },
+    {
+      "file": "negative_114_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.513429641723633e-06
+    },
+    {
+      "file": "negative_114_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0024930238723754883
+    },
+    {
+      "file": "negative_114_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0019746720790863037
+    },
+    {
+      "file": "negative_122_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.4373016357421875e-06
+    },
+    {
+      "file": "negative_122_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.0961971282958984e-06
+    },
+    {
+      "file": "negative_122_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.986559271812439
+    },
+    {
+      "file": "negative_123_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.033348083496094e-06
+    },
+    {
+      "file": "negative_123_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.328126907348633e-05
+    },
+    {
+      "file": "negative_123_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9914209246635437
+    },
+    {
+      "file": "negative_170_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00013175606727600098
+    },
+    {
+      "file": "negative_170_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3619661331176758e-05
+    },
+    {
+      "file": "negative_170_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0006653964519500732
+    },
+    {
+      "file": "negative_187_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00018531084060668945
+    },
+    {
+      "file": "negative_187_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.016392171382904053
+    },
+    {
+      "file": "negative_187_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.856684684753418e-05
+    },
+    {
+      "file": "negative_188_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.361701965332031e-05
+    },
+    {
+      "file": "negative_188_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.257129669189453e-05
+    },
+    {
+      "file": "negative_188_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.806020736694336e-05
+    },
+    {
+      "file": "negative_189_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.645917892456055e-06
+    },
+    {
+      "file": "negative_189_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.841255187988281e-06
+    },
+    {
+      "file": "negative_189_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.475214958190918e-05
+    },
+    {
+      "file": "negative_190_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3709068298339844e-05
+    },
+    {
+      "file": "negative_190_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.539987564086914e-06
+    },
+    {
+      "file": "negative_190_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.543231964111328e-06
+    },
+    {
+      "file": "negative_221_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.970499038696289e-05
+    },
+    {
+      "file": "negative_221_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005339086055755615
+    },
+    {
+      "file": "negative_221_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.902482032775879e-05
+    },
+    {
+      "file": "negative_227_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.4836273193359375e-05
+    },
+    {
+      "file": "negative_227_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0039997100830078125
+    },
+    {
+      "file": "negative_227_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.161498069763184e-05
+    },
+    {
+      "file": "negative_266_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.025727659463882446
+    },
+    {
+      "file": "negative_266_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.851289749145508e-06
+    },
+    {
+      "file": "negative_266_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0015270411968231201
+    },
+    {
+      "file": "negative_267_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3381242752075195e-05
+    },
+    {
+      "file": "negative_267_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0006844997406005859
+    },
+    {
+      "file": "negative_267_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.07341575622558594
+    },
+    {
+      "file": "negative_277_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.481175422668457e-05
+    },
+    {
+      "file": "negative_277_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1831521987915039e-05
+    },
+    {
+      "file": "negative_277_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.258487701416016e-06
+    },
+    {
+      "file": "negative_279_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.808208465576172e-06
+    },
+    {
+      "file": "negative_279_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.947185516357422e-06
+    },
+    {
+      "file": "negative_279_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.304813385009766e-06
+    },
+    {
+      "file": "negative_301_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.783008575439453e-05
+    },
+    {
+      "file": "negative_301_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.707408905029297e-05
+    },
+    {
+      "file": "negative_301_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00014728307723999023
+    },
+    {
+      "file": "negative_311_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00015088915824890137
+    },
+    {
+      "file": "negative_311_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.377696990966797e-06
+    },
+    {
+      "file": "negative_311_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002637505531311035
+    },
+    {
+      "file": "negative_329_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.765127182006836e-06
+    },
+    {
+      "file": "negative_329_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.910894393920898e-06
+    },
+    {
+      "file": "negative_329_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4126300811767578e-05
+    },
+    {
+      "file": "negative_32_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.6570091247558594e-05
+    },
+    {
+      "file": "negative_32_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.854534149169922e-06
+    },
+    {
+      "file": "negative_32_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.4836273193359375e-06
+    },
+    {
+      "file": "negative_332_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.318092346191406e-06
+    },
+    {
+      "file": "negative_332_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.329183578491211e-05
+    },
+    {
+      "file": "negative_332_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.867813110351562e-06
+    },
+    {
+      "file": "negative_339_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.008621126413345337
+    },
+    {
+      "file": "negative_339_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.999232292175293
+    },
+    {
+      "file": "negative_339_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.11871153116226196
+    },
+    {
+      "file": "negative_342_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.755922317504883e-05
+    },
+    {
+      "file": "negative_342_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.319978713989258e-05
+    },
+    {
+      "file": "negative_342_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.513429641723633e-06
+    },
+    {
+      "file": "negative_347_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0040445029735565186
+    },
+    {
+      "file": "negative_347_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.8520822525024414e-05
+    },
+    {
+      "file": "negative_347_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.632638931274414e-06
+    },
+    {
+      "file": "negative_349_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.999552845954895
+    },
+    {
+      "file": "negative_349_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.051125168800354004
+    },
+    {
+      "file": "negative_349_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.5534747242927551
+    },
+    {
+      "file": "negative_359_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00042510032653808594
+    },
+    {
+      "file": "negative_359_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.065300941467285e-05
+    },
+    {
+      "file": "negative_359_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.138448715209961e-05
+    },
+    {
+      "file": "negative_364_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0009708702564239502
+    },
+    {
+      "file": "negative_364_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.940696716308594e-06
+    },
+    {
+      "file": "negative_364_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.155801773071289e-06
+    },
+    {
+      "file": "negative_369_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.5228986740112305e-05
+    },
+    {
+      "file": "negative_369_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.35660120844841003
+    },
+    {
+      "file": "negative_369_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.7195940017700195e-05
+    },
+    {
+      "file": "negative_370_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.06734263896942139
+    },
+    {
+      "file": "negative_370_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3321638107299805e-05
+    },
+    {
+      "file": "negative_370_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.665421485900879e-05
+    },
+    {
+      "file": "negative_375_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.646182060241699e-05
+    },
+    {
+      "file": "negative_375_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00013777613639831543
+    },
+    {
+      "file": "negative_375_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.9162893295288086e-05
+    },
+    {
+      "file": "negative_384_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3023614883422852e-05
+    },
+    {
+      "file": "negative_384_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.650784492492676e-05
+    },
+    {
+      "file": "negative_384_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0003012120723724365
+    },
+    {
+      "file": "negative_385_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002079308032989502
+    },
+    {
+      "file": "negative_385_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2069940567016602e-05
+    },
+    {
+      "file": "negative_385_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.212162017822266e-06
+    },
+    {
+      "file": "negative_386_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.1856040954589844e-05
+    },
+    {
+      "file": "negative_386_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.450580596923828e-06
+    },
+    {
+      "file": "negative_386_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0020164847373962402
+    },
+    {
+      "file": "negative_389_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.636313796043396
+    },
+    {
+      "file": "negative_389_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.250075340270996e-05
+    },
+    {
+      "file": "negative_389_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4930963516235352e-05
+    },
+    {
+      "file": "negative_396_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.7851591110229492e-05
+    },
+    {
+      "file": "negative_396_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002994239330291748
+    },
+    {
+      "file": "negative_396_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0013641119003295898
+    },
+    {
+      "file": "negative_397_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.456805229187012e-05
+    },
+    {
+      "file": "negative_397_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.832578659057617e-05
+    },
+    {
+      "file": "negative_397_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9404501914978027
+    },
+    {
+      "file": "negative_39_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.314018249511719e-05
+    },
+    {
+      "file": "negative_39_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.537271499633789e-05
+    },
+    {
+      "file": "negative_39_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.318092346191406e-06
+    },
+    {
+      "file": "negative_403_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.683831214904785e-05
+    },
+    {
+      "file": "negative_403_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005303025245666504
+    },
+    {
+      "file": "negative_403_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.472800254821777e-05
+    },
+    {
+      "file": "negative_416_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.556510925292969e-06
+    },
+    {
+      "file": "negative_416_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.16908073425293e-06
+    },
+    {
+      "file": "negative_416_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1771917343139648e-05
+    },
+    {
+      "file": "negative_440_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.900859832763672e-06
+    },
+    {
+      "file": "negative_440_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005483925342559814
+    },
+    {
+      "file": "negative_440_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.6494264602661133e-05
+    },
+    {
+      "file": "negative_442_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.5391578674316406e-05
+    },
+    {
+      "file": "negative_442_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0003814399242401123
+    },
+    {
+      "file": "negative_442_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2858381271362305e-05
+    },
+    {
+      "file": "negative_450_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.24021831154823303
+    },
+    {
+      "file": "negative_450_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00019037723541259766
+    },
+    {
+      "file": "negative_450_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.046891212463379e-05
+    },
+    {
+      "file": "negative_452_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4036893844604492e-05
+    },
+    {
+      "file": "negative_452_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.27324169874191284
+    },
+    {
+      "file": "negative_452_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.008452266454696655
+    },
+    {
+      "file": "negative_453_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.079673767089844e-06
+    },
+    {
+      "file": "negative_453_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.361173629760742e-06
+    },
+    {
+      "file": "negative_453_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.897615432739258e-06
+    },
+    {
+      "file": "negative_475_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.973743438720703e-06
+    },
+    {
+      "file": "negative_475_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.245208740234375e-06
+    },
+    {
+      "file": "negative_475_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.4199485778808594e-05
+    },
+    {
+      "file": "negative_483_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.16908073425293e-06
+    },
+    {
+      "file": "negative_483_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.8710575103759766e-06
+    },
+    {
+      "file": "negative_483_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.0498714447021484e-06
+    },
+    {
+      "file": "negative_484_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.496906280517578e-06
+    },
+    {
+      "file": "negative_484_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001259148120880127
+    },
+    {
+      "file": "negative_484_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0004938244819641113
+    },
+    {
+      "file": "negative_504_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.453824996948242e-06
+    },
+    {
+      "file": "negative_504_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.304813385009766e-06
+    },
+    {
+      "file": "negative_504_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2367963790893555e-05
+    },
+    {
+      "file": "negative_508_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.0067901611328125e-06
+    },
+    {
+      "file": "negative_508_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.012676805257797241
+    },
+    {
+      "file": "negative_508_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.47713851928711e-06
+    },
+    {
+      "file": "negative_525_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001874864101409912
+    },
+    {
+      "file": "negative_525_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00030153989791870117
+    },
+    {
+      "file": "negative_525_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.05269145965576172
+    },
+    {
+      "file": "negative_52_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0027479231357574463
+    },
+    {
+      "file": "negative_52_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0006641745567321777
+    },
+    {
+      "file": "negative_52_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1831521987915039e-05
+    },
+    {
+      "file": "negative_533_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.3156805634498596
+    },
+    {
+      "file": "negative_533_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.9742717742919922e-05
+    },
+    {
+      "file": "negative_533_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00020393729209899902
+    },
+    {
+      "file": "negative_540_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.616115570068359e-06
+    },
+    {
+      "file": "negative_540_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.765127182006836e-05
+    },
+    {
+      "file": "negative_540_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.910894393920898e-06
+    },
+    {
+      "file": "negative_564_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00019690394401550293
+    },
+    {
+      "file": "negative_564_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00018030405044555664
+    },
+    {
+      "file": "negative_564_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.583333015441895e-05
+    },
+    {
+      "file": "negative_590_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.3909759521484375e-06
+    },
+    {
+      "file": "negative_590_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1712312698364258e-05
+    },
+    {
+      "file": "negative_590_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.13603401184082e-06
+    },
+    {
+      "file": "negative_597_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.011483490467071533
+    },
+    {
+      "file": "negative_597_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2874603271484375e-05
+    },
+    {
+      "file": "negative_597_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0025049448013305664
+    },
+    {
+      "file": "negative_599_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00011119246482849121
+    },
+    {
+      "file": "negative_599_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0004978477954864502
+    },
+    {
+      "file": "negative_599_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.2006101906299591
+    },
+    {
+      "file": "negative_5_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0004995763301849365
+    },
+    {
+      "file": "negative_5_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.987550735473633e-05
+    },
+    {
+      "file": "negative_5_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.5730342864990234e-06
+    },
+    {
+      "file": "negative_602_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.0368566513061523e-05
+    },
+    {
+      "file": "negative_602_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1324882507324219e-05
+    },
+    {
+      "file": "negative_602_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.20023420453071594
+    },
+    {
+      "file": "negative_611_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.04711836576461792
+    },
+    {
+      "file": "negative_611_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3500452041625977e-05
+    },
+    {
+      "file": "negative_611_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.900859832763672e-06
+    },
+    {
+      "file": "negative_615_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.1249055862426758e-05
+    },
+    {
+      "file": "negative_615_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.22868537902832e-06
+    },
+    {
+      "file": "negative_615_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.4836273193359375e-06
+    },
+    {
+      "file": "negative_633_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00010022521018981934
+    },
+    {
+      "file": "negative_633_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9960027933120728
+    },
+    {
+      "file": "negative_633_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9996073246002197
+    },
+    {
+      "file": "negative_640_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0009680092334747314
+    },
+    {
+      "file": "negative_640_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2023916244506836e-05
+    },
+    {
+      "file": "negative_640_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.781650543212891e-06
+    },
+    {
+      "file": "negative_642_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00040850043296813965
+    },
+    {
+      "file": "negative_642_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00018736720085144043
+    },
+    {
+      "file": "negative_642_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2858381271362305e-05
+    },
+    {
+      "file": "negative_654_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.620453834533691e-05
+    },
+    {
+      "file": "negative_654_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9875022172927856
+    },
+    {
+      "file": "negative_654_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2129545211791992e-05
+    },
+    {
+      "file": "negative_65_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00018221139907836914
+    },
+    {
+      "file": "negative_65_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.22868537902832e-05
+    },
+    {
+      "file": "negative_65_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.0669231414794922e-05
+    },
+    {
+      "file": "negative_667_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.5730342864990234e-06
+    },
+    {
+      "file": "negative_667_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.705522537231445e-06
+    },
+    {
+      "file": "negative_667_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.4373016357421875e-06
+    },
+    {
+      "file": "negative_699_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.013979703187942505
+    },
+    {
+      "file": "negative_699_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.8710575103759766e-06
+    },
+    {
+      "file": "negative_699_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00014975666999816895
+    },
+    {
+      "file": "negative_711_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.035899072885513306
+    },
+    {
+      "file": "negative_711_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.900859832763672e-06
+    },
+    {
+      "file": "negative_711_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.539987564086914e-06
+    },
+    {
+      "file": "negative_718_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0017857253551483154
+    },
+    {
+      "file": "negative_718_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.489851951599121e-05
+    },
+    {
+      "file": "negative_718_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.066394805908203e-06
+    },
+    {
+      "file": "negative_721_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.407499313354492e-06
+    },
+    {
+      "file": "negative_721_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.241964340209961e-06
+    },
+    {
+      "file": "negative_721_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.732080459594727e-06
+    },
+    {
+      "file": "negative_730_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.079673767089844e-06
+    },
+    {
+      "file": "negative_730_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.612871170043945e-06
+    },
+    {
+      "file": "negative_730_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005069971084594727
+    },
+    {
+      "file": "negative_732_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.124113082885742e-05
+    },
+    {
+      "file": "negative_732_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.943941116333008e-06
+    },
+    {
+      "file": "negative_732_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1056661605834961e-05
+    },
+    {
+      "file": "negative_742_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.407499313354492e-06
+    },
+    {
+      "file": "negative_742_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.602836608886719e-06
+    },
+    {
+      "file": "negative_742_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.3942203521728516e-06
+    },
+    {
+      "file": "negative_765_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.407499313354492e-06
+    },
+    {
+      "file": "negative_765_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.03492468595504761
+    },
+    {
+      "file": "negative_765_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.6421079635620117e-05
+    },
+    {
+      "file": "negative_766_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.5730342864990234e-06
+    },
+    {
+      "file": "negative_766_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005682706832885742
+    },
+    {
+      "file": "negative_766_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.8893458843231201
+    },
+    {
+      "file": "negative_777_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.7835369110107422e-05
+    },
+    {
+      "file": "negative_777_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.165836334228516e-06
+    },
+    {
+      "file": "negative_777_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.632638931274414e-06
+    },
+    {
+      "file": "negative_778_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.0579824447631836e-05
+    },
+    {
+      "file": "negative_778_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.079409599304199e-05
+    },
+    {
+      "file": "negative_778_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.616115570068359e-06
+    },
+    {
+      "file": "negative_786_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.185604095458984e-06
+    },
+    {
+      "file": "negative_786_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.685754776000977e-06
+    },
+    {
+      "file": "negative_786_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.692243576049805e-06
+    },
+    {
+      "file": "negative_804_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.022706210613250732
+    },
+    {
+      "file": "negative_804_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0027927160263061523
+    },
+    {
+      "file": "negative_804_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.274746894836426e-05
+    },
+    {
+      "file": "negative_81_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.951523780822754e-05
+    },
+    {
+      "file": "negative_81_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.155801773071289e-06
+    },
+    {
+      "file": "negative_81_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.58846378326416e-05
+    },
+    {
+      "file": "negative_823_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9821370840072632
+    },
+    {
+      "file": "negative_823_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1235475540161133e-05
+    },
+    {
+      "file": "negative_823_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.530782699584961e-05
+    },
+    {
+      "file": "negative_829_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.510185241699219e-06
+    },
+    {
+      "file": "negative_829_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.653500556945801e-05
+    },
+    {
+      "file": "negative_829_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.7637691497802734e-05
+    },
+    {
+      "file": "negative_862_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9987382888793945
+    },
+    {
+      "file": "negative_862_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9998629093170166
+    },
+    {
+      "file": "negative_862_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.230571746826172e-05
+    },
+    {
+      "file": "negative_865_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.8060301542282104
+    },
+    {
+      "file": "negative_865_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.781650543212891e-06
+    },
+    {
+      "file": "negative_865_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00020489096641540527
+    },
+    {
+      "file": "negative_871_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.212162017822266e-06
+    },
+    {
+      "file": "negative_871_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.4836273193359375e-06
+    },
+    {
+      "file": "negative_871_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0012424588203430176
+    },
+    {
+      "file": "negative_87_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.8864870071411133e-05
+    },
+    {
+      "file": "negative_87_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0006116330623626709
+    },
+    {
+      "file": "negative_87_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.212162017822266e-05
+    },
+    {
+      "file": "negative_881_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002751648426055908
+    },
+    {
+      "file": "negative_881_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4275312423706055e-05
+    },
+    {
+      "file": "negative_881_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.733702659606934e-05
+    },
+    {
+      "file": "negative_898_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.672475814819336e-06
+    },
+    {
+      "file": "negative_898_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001309216022491455
+    },
+    {
+      "file": "negative_898_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9846468567848206
+    },
+    {
+      "file": "positive_105_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999363422393799
+    },
+    {
+      "file": "positive_105_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998296499252319
+    },
+    {
+      "file": "positive_105_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999305009841919
+    },
+    {
+      "file": "positive_105_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999431371688843
+    },
+    {
+      "file": "positive_106_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998948574066162
+    },
+    {
+      "file": "positive_106_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999268054962158
+    },
+    {
+      "file": "positive_106_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999014139175415
+    },
+    {
+      "file": "positive_106_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999518394470215
+    },
+    {
+      "file": "positive_111_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999517202377319
+    },
+    {
+      "file": "positive_111_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999039173126221
+    },
+    {
+      "file": "positive_111_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999402761459351
+    },
+    {
+      "file": "positive_111_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999414682388306
+    },
+    {
+      "file": "positive_114_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999944269657135
+    },
+    {
+      "file": "positive_114_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999382495880127
+    },
+    {
+      "file": "positive_114_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999229907989502
+    },
+    {
+      "file": "positive_114_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999345541000366
+    },
+    {
+      "file": "positive_122_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999513030052185
+    },
+    {
+      "file": "positive_122_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999950647354126
+    },
+    {
+      "file": "positive_122_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999516010284424
+    },
+    {
+      "file": "positive_122_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999263286590576
+    },
+    {
+      "file": "positive_123_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999486207962036
+    },
+    {
+      "file": "positive_123_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999487996101379
+    },
+    {
+      "file": "positive_123_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999308586120605
+    },
+    {
+      "file": "positive_123_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999253749847412
+    },
+    {
+      "file": "positive_170_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9837132692337036
+    },
+    {
+      "file": "positive_170_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999169111251831
+    },
+    {
+      "file": "positive_170_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999936044216156
+    },
+    {
+      "file": "positive_170_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999552965164185
+    },
+    {
+      "file": "positive_187_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998613595962524
+    },
+    {
+      "file": "positive_187_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999911904335022
+    },
+    {
+      "file": "positive_187_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999316930770874
+    },
+    {
+      "file": "positive_187_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999334216117859
+    },
+    {
+      "file": "positive_188_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999496936798096
+    },
+    {
+      "file": "positive_188_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999535083770752
+    },
+    {
+      "file": "positive_188_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998507499694824
+    },
+    {
+      "file": "positive_188_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999234676361084
+    },
+    {
+      "file": "positive_189_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998767375946045
+    },
+    {
+      "file": "positive_189_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999436140060425
+    },
+    {
+      "file": "positive_189_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999497532844543
+    },
+    {
+      "file": "positive_189_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999364614486694
+    },
+    {
+      "file": "positive_190_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999430775642395
+    },
+    {
+      "file": "positive_190_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999477863311768
+    },
+    {
+      "file": "positive_190_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999435544013977
+    },
+    {
+      "file": "positive_190_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999511241912842
+    },
+    {
+      "file": "positive_221_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999321103096008
+    },
+    {
+      "file": "positive_221_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998725056648254
+    },
+    {
+      "file": "positive_221_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.99992835521698
+    },
+    {
+      "file": "positive_221_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999518394470215
+    },
+    {
+      "file": "positive_227_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9948254823684692
+    },
+    {
+      "file": "positive_227_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999894917011261
+    },
+    {
+      "file": "positive_227_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.0001538693904876709
+    },
+    {
+      "file": "positive_227_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9892276525497437
+    },
+    {
+      "file": "positive_266_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999233484268188
+    },
+    {
+      "file": "positive_266_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998096227645874
+    },
+    {
+      "file": "positive_266_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999297857284546
+    },
+    {
+      "file": "positive_266_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999532699584961
+    },
+    {
+      "file": "positive_267_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999282956123352
+    },
+    {
+      "file": "positive_267_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999494552612305
+    },
+    {
+      "file": "positive_267_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999496936798096
+    },
+    {
+      "file": "positive_267_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999500513076782
+    },
+    {
+      "file": "positive_277_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9969471096992493
+    },
+    {
+      "file": "positive_277_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999380111694336
+    },
+    {
+      "file": "positive_277_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999513030052185
+    },
+    {
+      "file": "positive_277_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999558925628662
+    },
+    {
+      "file": "positive_279_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.003099799156188965
+    },
+    {
+      "file": "positive_279_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9993698596954346
+    },
+    {
+      "file": "positive_279_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999516010284424
+    },
+    {
+      "file": "positive_279_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999548196792603
+    },
+    {
+      "file": "positive_301_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998796582221985
+    },
+    {
+      "file": "positive_301_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999385476112366
+    },
+    {
+      "file": "positive_301_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997545480728149
+    },
+    {
+      "file": "positive_301_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999531507492065
+    },
+    {
+      "file": "positive_311_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999943733215332
+    },
+    {
+      "file": "positive_311_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999300241470337
+    },
+    {
+      "file": "positive_311_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999491572380066
+    },
+    {
+      "file": "positive_311_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999514818191528
+    },
+    {
+      "file": "positive_329_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998533129692078
+    },
+    {
+      "file": "positive_329_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999247789382935
+    },
+    {
+      "file": "positive_329_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9995034337043762
+    },
+    {
+      "file": "positive_329_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998185634613037
+    },
+    {
+      "file": "positive_32_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998354911804199
+    },
+    {
+      "file": "positive_32_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999932050704956
+    },
+    {
+      "file": "positive_32_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999264478683472
+    },
+    {
+      "file": "positive_32_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999399185180664
+    },
+    {
+      "file": "positive_332_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998549818992615
+    },
+    {
+      "file": "positive_332_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999383687973022
+    },
+    {
+      "file": "positive_332_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999377727508545
+    },
+    {
+      "file": "positive_332_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999513030052185
+    },
+    {
+      "file": "positive_339_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999121427536011
+    },
+    {
+      "file": "positive_339_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999176263809204
+    },
+    {
+      "file": "positive_339_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999259114265442
+    },
+    {
+      "file": "positive_339_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999496936798096
+    },
+    {
+      "file": "positive_342_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998770952224731
+    },
+    {
+      "file": "positive_342_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999480247497559
+    },
+    {
+      "file": "positive_342_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999524354934692
+    },
+    {
+      "file": "positive_342_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999549388885498
+    },
+    {
+      "file": "positive_347_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999276995658875
+    },
+    {
+      "file": "positive_347_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999581575393677
+    },
+    {
+      "file": "positive_347_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999417066574097
+    },
+    {
+      "file": "positive_347_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999579191207886
+    },
+    {
+      "file": "positive_349_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.7567589282989502
+    },
+    {
+      "file": "positive_349_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998985528945923
+    },
+    {
+      "file": "positive_349_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999354481697083
+    },
+    {
+      "file": "positive_349_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999245405197144
+    },
+    {
+      "file": "positive_359_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.0477864146232605
+    },
+    {
+      "file": "positive_359_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.31175801157951355
+    },
+    {
+      "file": "positive_359_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.980938196182251
+    },
+    {
+      "file": "positive_359_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9995899796485901
+    },
+    {
+      "file": "positive_364_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999927282333374
+    },
+    {
+      "file": "positive_364_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999353885650635
+    },
+    {
+      "file": "positive_364_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998142123222351
+    },
+    {
+      "file": "positive_364_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999955415725708
+    },
+    {
+      "file": "positive_369_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999238848686218
+    },
+    {
+      "file": "positive_369_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999539852142334
+    },
+    {
+      "file": "positive_369_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999383091926575
+    },
+    {
+      "file": "positive_369_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999526143074036
+    },
+    {
+      "file": "positive_370_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999403953552246
+    },
+    {
+      "file": "positive_370_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999515414237976
+    },
+    {
+      "file": "positive_370_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999166131019592
+    },
+    {
+      "file": "positive_370_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998941421508789
+    },
+    {
+      "file": "positive_375_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999252557754517
+    },
+    {
+      "file": "positive_375_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999927282333374
+    },
+    {
+      "file": "positive_375_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999433755874634
+    },
+    {
+      "file": "positive_375_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999344944953918
+    },
+    {
+      "file": "positive_384_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999421834945679
+    },
+    {
+      "file": "positive_384_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999549388885498
+    },
+    {
+      "file": "positive_384_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999937117099762
+    },
+    {
+      "file": "positive_384_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999560117721558
+    },
+    {
+      "file": "positive_385_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999394416809082
+    },
+    {
+      "file": "positive_385_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999147653579712
+    },
+    {
+      "file": "positive_385_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998941421508789
+    },
+    {
+      "file": "positive_385_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999370574951172
+    },
+    {
+      "file": "positive_386_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999327659606934
+    },
+    {
+      "file": "positive_386_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999312162399292
+    },
+    {
+      "file": "positive_386_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999464750289917
+    },
+    {
+      "file": "positive_386_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999403953552246
+    },
+    {
+      "file": "positive_389_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998229742050171
+    },
+    {
+      "file": "positive_389_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999956488609314
+    },
+    {
+      "file": "positive_389_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999414086341858
+    },
+    {
+      "file": "positive_389_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999476075172424
+    },
+    {
+      "file": "positive_396_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999482035636902
+    },
+    {
+      "file": "positive_396_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999566078186035
+    },
+    {
+      "file": "positive_396_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999527931213379
+    },
+    {
+      "file": "positive_396_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999359250068665
+    },
+    {
+      "file": "positive_397_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999312162399292
+    },
+    {
+      "file": "positive_397_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999094009399414
+    },
+    {
+      "file": "positive_397_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999493956565857
+    },
+    {
+      "file": "positive_397_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999575614929199
+    },
+    {
+      "file": "positive_39_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9983186721801758
+    },
+    {
+      "file": "positive_39_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998502731323242
+    },
+    {
+      "file": "positive_39_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999516010284424
+    },
+    {
+      "file": "positive_39_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999460577964783
+    },
+    {
+      "file": "positive_403_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999161958694458
+    },
+    {
+      "file": "positive_403_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999381899833679
+    },
+    {
+      "file": "positive_403_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999417066574097
+    },
+    {
+      "file": "positive_403_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999545812606812
+    },
+    {
+      "file": "positive_416_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.99992835521698
+    },
+    {
+      "file": "positive_416_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999526739120483
+    },
+    {
+      "file": "positive_416_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9853750467300415
+    },
+    {
+      "file": "positive_416_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999923586845398
+    },
+    {
+      "file": "positive_440_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999354481697083
+    },
+    {
+      "file": "positive_440_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998890161514282
+    },
+    {
+      "file": "positive_440_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999951183795929
+    },
+    {
+      "file": "positive_440_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999499320983887
+    },
+    {
+      "file": "positive_442_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999540448188782
+    },
+    {
+      "file": "positive_442_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999424815177917
+    },
+    {
+      "file": "positive_442_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999421834945679
+    },
+    {
+      "file": "positive_442_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999353885650635
+    },
+    {
+      "file": "positive_450_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999449253082275
+    },
+    {
+      "file": "positive_450_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999414086341858
+    },
+    {
+      "file": "positive_450_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999929666519165
+    },
+    {
+      "file": "positive_450_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999934196472168
+    },
+    {
+      "file": "positive_452_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9754679203033447
+    },
+    {
+      "file": "positive_452_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998883008956909
+    },
+    {
+      "file": "positive_452_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998657703399658
+    },
+    {
+      "file": "positive_452_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999947726726532
+    },
+    {
+      "file": "positive_453_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999206066131592
+    },
+    {
+      "file": "positive_453_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999380707740784
+    },
+    {
+      "file": "positive_453_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999955415725708
+    },
+    {
+      "file": "positive_453_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999572038650513
+    },
+    {
+      "file": "positive_475_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999455213546753
+    },
+    {
+      "file": "positive_475_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999943733215332
+    },
+    {
+      "file": "positive_475_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999358654022217
+    },
+    {
+      "file": "positive_475_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999247789382935
+    },
+    {
+      "file": "positive_483_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999409317970276
+    },
+    {
+      "file": "positive_483_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999217391014099
+    },
+    {
+      "file": "positive_483_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999501705169678
+    },
+    {
+      "file": "positive_483_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999363422393799
+    },
+    {
+      "file": "positive_484_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998881220817566
+    },
+    {
+      "file": "positive_484_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999392628669739
+    },
+    {
+      "file": "positive_484_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999372959136963
+    },
+    {
+      "file": "positive_484_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999531507492065
+    },
+    {
+      "file": "positive_504_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999285936355591
+    },
+    {
+      "file": "positive_504_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999468326568604
+    },
+    {
+      "file": "positive_504_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999548196792603
+    },
+    {
+      "file": "positive_504_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999954104423523
+    },
+    {
+      "file": "positive_508_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999271631240845
+    },
+    {
+      "file": "positive_508_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9960790872573853
+    },
+    {
+      "file": "positive_508_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999223947525024
+    },
+    {
+      "file": "positive_508_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999493360519409
+    },
+    {
+      "file": "positive_525_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999266862869263
+    },
+    {
+      "file": "positive_525_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999380707740784
+    },
+    {
+      "file": "positive_525_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999410510063171
+    },
+    {
+      "file": "positive_525_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999923050403595
+    },
+    {
+      "file": "positive_52_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999923586845398
+    },
+    {
+      "file": "positive_52_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999387264251709
+    },
+    {
+      "file": "positive_52_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999411106109619
+    },
+    {
+      "file": "positive_52_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999329447746277
+    },
+    {
+      "file": "positive_533_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999216198921204
+    },
+    {
+      "file": "positive_533_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999529123306274
+    },
+    {
+      "file": "positive_533_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999446272850037
+    },
+    {
+      "file": "positive_533_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999479651451111
+    },
+    {
+      "file": "positive_540_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999436140060425
+    },
+    {
+      "file": "positive_540_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999505877494812
+    },
+    {
+      "file": "positive_540_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999960720539093
+    },
+    {
+      "file": "positive_540_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999594688415527
+    },
+    {
+      "file": "positive_564_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999526858329773
+    },
+    {
+      "file": "positive_564_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999930739402771
+    },
+    {
+      "file": "positive_564_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999498724937439
+    },
+    {
+      "file": "positive_564_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999305009841919
+    },
+    {
+      "file": "positive_590_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999532699584961
+    },
+    {
+      "file": "positive_590_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999375343322754
+    },
+    {
+      "file": "positive_590_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999047517776489
+    },
+    {
+      "file": "positive_590_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999419450759888
+    },
+    {
+      "file": "positive_597_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999428987503052
+    },
+    {
+      "file": "positive_597_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999544620513916
+    },
+    {
+      "file": "positive_597_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999401569366455
+    },
+    {
+      "file": "positive_597_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999387264251709
+    },
+    {
+      "file": "positive_599_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999372959136963
+    },
+    {
+      "file": "positive_599_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999392032623291
+    },
+    {
+      "file": "positive_599_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999396800994873
+    },
+    {
+      "file": "positive_599_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999486207962036
+    },
+    {
+      "file": "positive_5_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9995876550674438
+    },
+    {
+      "file": "positive_5_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999464750289917
+    },
+    {
+      "file": "positive_5_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999091029167175
+    },
+    {
+      "file": "positive_5_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999207258224487
+    },
+    {
+      "file": "positive_602_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999944269657135
+    },
+    {
+      "file": "positive_602_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999301433563232
+    },
+    {
+      "file": "positive_602_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9994200468063354
+    },
+    {
+      "file": "positive_602_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997545480728149
+    },
+    {
+      "file": "positive_611_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999925434589386
+    },
+    {
+      "file": "positive_611_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998884201049805
+    },
+    {
+      "file": "positive_611_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9988735914230347
+    },
+    {
+      "file": "positive_611_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999514818191528
+    },
+    {
+      "file": "positive_615_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998644590377808
+    },
+    {
+      "file": "positive_615_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999913215637207
+    },
+    {
+      "file": "positive_615_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999345541000366
+    },
+    {
+      "file": "positive_615_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999485015869141
+    },
+    {
+      "file": "positive_633_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999321699142456
+    },
+    {
+      "file": "positive_633_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998765587806702
+    },
+    {
+      "file": "positive_633_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999868631362915
+    },
+    {
+      "file": "positive_633_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999539256095886
+    },
+    {
+      "file": "positive_640_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999090433120728
+    },
+    {
+      "file": "positive_640_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998918771743774
+    },
+    {
+      "file": "positive_640_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999233484268188
+    },
+    {
+      "file": "positive_640_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999496936798096
+    },
+    {
+      "file": "positive_642_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999164342880249
+    },
+    {
+      "file": "positive_642_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998435974121094
+    },
+    {
+      "file": "positive_642_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999921441078186
+    },
+    {
+      "file": "positive_642_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999942421913147
+    },
+    {
+      "file": "positive_654_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999383687973022
+    },
+    {
+      "file": "positive_654_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998242855072021
+    },
+    {
+      "file": "positive_654_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999064207077026
+    },
+    {
+      "file": "positive_654_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999301433563232
+    },
+    {
+      "file": "positive_65_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.24390524625778198
+    },
+    {
+      "file": "positive_65_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.997774600982666
+    },
+    {
+      "file": "positive_65_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999430775642395
+    },
+    {
+      "file": "positive_65_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999479055404663
+    },
+    {
+      "file": "positive_667_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9991921186447144
+    },
+    {
+      "file": "positive_667_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999285936355591
+    },
+    {
+      "file": "positive_667_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999943196773529
+    },
+    {
+      "file": "positive_667_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999945878982544
+    },
+    {
+      "file": "positive_699_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999545812606812
+    },
+    {
+      "file": "positive_699_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999545812606812
+    },
+    {
+      "file": "positive_699_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998888969421387
+    },
+    {
+      "file": "positive_699_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999322891235352
+    },
+    {
+      "file": "positive_711_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999452233314514
+    },
+    {
+      "file": "positive_711_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.99991774559021
+    },
+    {
+      "file": "positive_711_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999424815177917
+    },
+    {
+      "file": "positive_711_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999457001686096
+    },
+    {
+      "file": "positive_718_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998573064804077
+    },
+    {
+      "file": "positive_718_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999392628669739
+    },
+    {
+      "file": "positive_718_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999936044216156
+    },
+    {
+      "file": "positive_718_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9996883869171143
+    },
+    {
+      "file": "positive_721_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999232292175293
+    },
+    {
+      "file": "positive_721_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998970031738281
+    },
+    {
+      "file": "positive_721_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999459981918335
+    },
+    {
+      "file": "positive_721_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999415874481201
+    },
+    {
+      "file": "positive_730_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999406337738037
+    },
+    {
+      "file": "positive_730_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999472498893738
+    },
+    {
+      "file": "positive_730_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999771237373352
+    },
+    {
+      "file": "positive_730_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999903678894043
+    },
+    {
+      "file": "positive_732_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998910427093506
+    },
+    {
+      "file": "positive_732_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999322295188904
+    },
+    {
+      "file": "positive_732_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999419450759888
+    },
+    {
+      "file": "positive_732_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999231100082397
+    },
+    {
+      "file": "positive_742_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999346733093262
+    },
+    {
+      "file": "positive_742_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998937845230103
+    },
+    {
+      "file": "positive_742_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999353885650635
+    },
+    {
+      "file": "positive_742_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.99994295835495
+    },
+    {
+      "file": "positive_765_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999449849128723
+    },
+    {
+      "file": "positive_765_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999516606330872
+    },
+    {
+      "file": "positive_765_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999371767044067
+    },
+    {
+      "file": "positive_765_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999607801437378
+    },
+    {
+      "file": "positive_766_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999521374702454
+    },
+    {
+      "file": "positive_766_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999509453773499
+    },
+    {
+      "file": "positive_766_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999452829360962
+    },
+    {
+      "file": "positive_766_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999539852142334
+    },
+    {
+      "file": "positive_777_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999451637268066
+    },
+    {
+      "file": "positive_777_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999504685401917
+    },
+    {
+      "file": "positive_777_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999340772628784
+    },
+    {
+      "file": "positive_777_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999465346336365
+    },
+    {
+      "file": "positive_778_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998461008071899
+    },
+    {
+      "file": "positive_778_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998568296432495
+    },
+    {
+      "file": "positive_778_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999024868011475
+    },
+    {
+      "file": "positive_778_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999170303344727
+    },
+    {
+      "file": "positive_786_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999940812587738
+    },
+    {
+      "file": "positive_786_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999364018440247
+    },
+    {
+      "file": "positive_786_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999950647354126
+    },
+    {
+      "file": "positive_786_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999518394470215
+    },
+    {
+      "file": "positive_804_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999083876609802
+    },
+    {
+      "file": "positive_804_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9996592998504639
+    },
+    {
+      "file": "positive_804_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999313354492188
+    },
+    {
+      "file": "positive_804_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999390840530396
+    },
+    {
+      "file": "positive_81_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999420642852783
+    },
+    {
+      "file": "positive_81_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998561143875122
+    },
+    {
+      "file": "positive_81_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.99992835521698
+    },
+    {
+      "file": "positive_81_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999829888343811
+    },
+    {
+      "file": "positive_823_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9996681213378906
+    },
+    {
+      "file": "positive_823_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9996627569198608
+    },
+    {
+      "file": "positive_823_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999434947967529
+    },
+    {
+      "file": "positive_823_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999582171440125
+    },
+    {
+      "file": "positive_829_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999268054962158
+    },
+    {
+      "file": "positive_829_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999315142631531
+    },
+    {
+      "file": "positive_829_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999209642410278
+    },
+    {
+      "file": "positive_829_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999489188194275
+    },
+    {
+      "file": "positive_862_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999504685401917
+    },
+    {
+      "file": "positive_862_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999953031539917
+    },
+    {
+      "file": "positive_862_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999497532844543
+    },
+    {
+      "file": "positive_862_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999439716339111
+    },
+    {
+      "file": "positive_865_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999456405639648
+    },
+    {
+      "file": "positive_865_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999445676803589
+    },
+    {
+      "file": "positive_865_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999919056892395
+    },
+    {
+      "file": "positive_865_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999927818775177
+    },
+    {
+      "file": "positive_871_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9995701313018799
+    },
+    {
+      "file": "positive_871_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998812675476074
+    },
+    {
+      "file": "positive_871_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999209642410278
+    },
+    {
+      "file": "positive_871_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999487996101379
+    },
+    {
+      "file": "positive_87_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999322891235352
+    },
+    {
+      "file": "positive_87_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999521970748901
+    },
+    {
+      "file": "positive_87_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998451471328735
+    },
+    {
+      "file": "positive_87_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999514818191528
+    },
+    {
+      "file": "positive_881_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997805953025818
+    },
+    {
+      "file": "positive_881_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999334216117859
+    },
+    {
+      "file": "positive_881_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999498128890991
+    },
+    {
+      "file": "positive_881_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999444484710693
+    },
+    {
+      "file": "positive_898_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999176859855652
+    },
+    {
+      "file": "positive_898_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999349117279053
+    },
+    {
+      "file": "positive_898_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999402761459351
+    },
+    {
+      "file": "positive_898_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999433755874634
+    }
+  ],
+  "test_records": [
+    {
+      "file": "negative_102_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.000361025333404541
+    },
+    {
+      "file": "negative_102_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.5212764739990234e-05
+    },
+    {
+      "file": "negative_102_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.212162017822266e-06
+    },
+    {
+      "file": "negative_10_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.424551010131836e-05
+    },
+    {
+      "file": "negative_10_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.739663124084473e-05
+    },
+    {
+      "file": "negative_10_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.851289749145508e-06
+    },
+    {
+      "file": "negative_113_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.735324859619141e-06
+    },
+    {
+      "file": "negative_113_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.751848220825195e-06
+    },
+    {
+      "file": "negative_113_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.97536563873291e-05
+    },
+    {
+      "file": "negative_117_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.884336471557617e-06
+    },
+    {
+      "file": "negative_117_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.3102288842201233
+    },
+    {
+      "file": "negative_117_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.387731552124023e-06
+    },
+    {
+      "file": "negative_137_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1920928955078125e-05
+    },
+    {
+      "file": "negative_137_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.155801773071289e-06
+    },
+    {
+      "file": "negative_137_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.604194641113281e-05
+    },
+    {
+      "file": "negative_141_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0010588467121124268
+    },
+    {
+      "file": "negative_141_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0007732212543487549
+    },
+    {
+      "file": "negative_141_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.576542854309082e-05
+    },
+    {
+      "file": "negative_15_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1146068572998047e-05
+    },
+    {
+      "file": "negative_15_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00138777494430542
+    },
+    {
+      "file": "negative_15_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.017753571271896362
+    },
+    {
+      "file": "negative_167_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0003807544708251953
+    },
+    {
+      "file": "negative_167_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.940131187438965e-05
+    },
+    {
+      "file": "negative_167_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.864568710327148e-06
+    },
+    {
+      "file": "negative_177_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002372264862060547
+    },
+    {
+      "file": "negative_177_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.238719940185547e-06
+    },
+    {
+      "file": "negative_177_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.22868537902832e-06
+    },
+    {
+      "file": "negative_182_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.12275505065918e-06
+    },
+    {
+      "file": "negative_182_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.30805778503418e-05
+    },
+    {
+      "file": "negative_182_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00015491247177124023
+    },
+    {
+      "file": "negative_195_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.811452865600586e-06
+    },
+    {
+      "file": "negative_195_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.586313247680664e-06
+    },
+    {
+      "file": "negative_195_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.3663043975830078e-05
+    },
+    {
+      "file": "negative_1_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.344650268554688e-06
+    },
+    {
+      "file": "negative_1_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.318092346191406e-06
+    },
+    {
+      "file": "negative_1_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.811452865600586e-06
+    },
+    {
+      "file": "negative_212_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0003644227981567383
+    },
+    {
+      "file": "negative_212_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.794929504394531e-06
+    },
+    {
+      "file": "negative_212_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.314847946166992e-06
+    },
+    {
+      "file": "negative_272_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.331371307373047e-06
+    },
+    {
+      "file": "negative_272_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.705522537231445e-06
+    },
+    {
+      "file": "negative_272_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.608268737792969e-05
+    },
+    {
+      "file": "negative_275_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.119510650634766e-06
+    },
+    {
+      "file": "negative_275_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.01684969663619995
+    },
+    {
+      "file": "negative_275_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.672475814819336e-06
+    },
+    {
+      "file": "negative_286_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00017178058624267578
+    },
+    {
+      "file": "negative_286_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00020551681518554688
+    },
+    {
+      "file": "negative_286_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.012019813060760498
+    },
+    {
+      "file": "negative_287_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0028569698333740234
+    },
+    {
+      "file": "negative_287_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.0788440704345703e-05
+    },
+    {
+      "file": "negative_287_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4901161193847656e-05
+    },
+    {
+      "file": "negative_290_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.609325408935547e-05
+    },
+    {
+      "file": "negative_290_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.285045623779297e-06
+    },
+    {
+      "file": "negative_290_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.62939453125e-05
+    },
+    {
+      "file": "negative_296_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.990266799926758e-06
+    },
+    {
+      "file": "negative_296_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.553266525268555e-06
+    },
+    {
+      "file": "negative_296_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4841556549072266e-05
+    },
+    {
+      "file": "negative_300_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.884336471557617e-06
+    },
+    {
+      "file": "negative_300_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00018769502639770508
+    },
+    {
+      "file": "negative_300_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.553266525268555e-06
+    },
+    {
+      "file": "negative_303_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.208917617797852e-06
+    },
+    {
+      "file": "negative_303_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.19806906580924988
+    },
+    {
+      "file": "negative_303_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3500452041625977e-05
+    },
+    {
+      "file": "negative_313_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.007484406232833862
+    },
+    {
+      "file": "negative_313_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.8401613235473633e-05
+    },
+    {
+      "file": "negative_313_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.318092346191406e-06
+    },
+    {
+      "file": "negative_314_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.0035457611083984e-06
+    },
+    {
+      "file": "negative_314_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0007950961589813232
+    },
+    {
+      "file": "negative_314_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9353777170181274
+    },
+    {
+      "file": "negative_317_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001321732997894287
+    },
+    {
+      "file": "negative_317_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.004916876554489136
+    },
+    {
+      "file": "negative_317_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0147513747215271
+    },
+    {
+      "file": "negative_333_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.002685368061065674
+    },
+    {
+      "file": "negative_333_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.856684684753418e-05
+    },
+    {
+      "file": "negative_333_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9783493876457214
+    },
+    {
+      "file": "negative_34_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.735324859619141e-06
+    },
+    {
+      "file": "negative_34_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.751848220825195e-06
+    },
+    {
+      "file": "negative_34_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.19268375635147095
+    },
+    {
+      "file": "negative_366_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.709860801696777e-05
+    },
+    {
+      "file": "negative_366_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.006263941526412964
+    },
+    {
+      "file": "negative_366_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.8328217267990112
+    },
+    {
+      "file": "negative_372_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.1021575927734375e-05
+    },
+    {
+      "file": "negative_372_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.24493268132209778
+    },
+    {
+      "file": "negative_372_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.41052454710006714
+    },
+    {
+      "file": "negative_410_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3887882232666016e-05
+    },
+    {
+      "file": "negative_410_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.423758506774902e-05
+    },
+    {
+      "file": "negative_410_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.6450881958007812e-05
+    },
+    {
+      "file": "negative_41_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.364418029785156e-06
+    },
+    {
+      "file": "negative_41_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.2796710729598999
+    },
+    {
+      "file": "negative_41_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.059906005859375e-06
+    },
+    {
+      "file": "negative_42_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9654357433319092
+    },
+    {
+      "file": "negative_42_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.940131187438965e-05
+    },
+    {
+      "file": "negative_42_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002180039882659912
+    },
+    {
+      "file": "negative_432_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.692243576049805e-06
+    },
+    {
+      "file": "negative_432_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.318092346191406e-06
+    },
+    {
+      "file": "negative_432_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.4733285903930664e-05
+    },
+    {
+      "file": "negative_437_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.997849464416504e-05
+    },
+    {
+      "file": "negative_437_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.434057235717773e-06
+    },
+    {
+      "file": "negative_437_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.9604644775390625e-06
+    },
+    {
+      "file": "negative_451_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.028589725494384766
+    },
+    {
+      "file": "negative_451_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.148747444152832e-05
+    },
+    {
+      "file": "negative_451_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00011295080184936523
+    },
+    {
+      "file": "negative_490_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2159347534179688e-05
+    },
+    {
+      "file": "negative_490_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.3942203521728516e-06
+    },
+    {
+      "file": "negative_490_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.06765162944793701
+    },
+    {
+      "file": "negative_491_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0006506443023681641
+    },
+    {
+      "file": "negative_491_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.042552947998047e-05
+    },
+    {
+      "file": "negative_491_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.3126602172851562e-05
+    },
+    {
+      "file": "negative_49_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.0517578125e-05
+    },
+    {
+      "file": "negative_49_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.496906280517578e-06
+    },
+    {
+      "file": "negative_49_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.119510650634766e-06
+    },
+    {
+      "file": "negative_500_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.808208465576172e-06
+    },
+    {
+      "file": "negative_500_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.304813385009766e-06
+    },
+    {
+      "file": "negative_500_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.22868537902832e-06
+    },
+    {
+      "file": "negative_502_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.9604644775390625e-06
+    },
+    {
+      "file": "negative_502_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.288290023803711e-06
+    },
+    {
+      "file": "negative_502_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.331899642944336e-05
+    },
+    {
+      "file": "negative_503_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.212162017822266e-06
+    },
+    {
+      "file": "negative_503_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.794929504394531e-06
+    },
+    {
+      "file": "negative_503_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.361173629760742e-06
+    },
+    {
+      "file": "negative_518_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1771917343139648e-05
+    },
+    {
+      "file": "negative_518_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.659196853637695e-06
+    },
+    {
+      "file": "negative_518_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0010485947132110596
+    },
+    {
+      "file": "negative_526_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.769993782043457e-05
+    },
+    {
+      "file": "negative_526_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.453824996948242e-06
+    },
+    {
+      "file": "negative_526_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00024259090423583984
+    },
+    {
+      "file": "negative_528_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.3004751205444336e-05
+    },
+    {
+      "file": "negative_528_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.9729137420654297e-05
+    },
+    {
+      "file": "negative_528_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.285045623779297e-06
+    },
+    {
+      "file": "negative_529_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002911090850830078
+    },
+    {
+      "file": "negative_529_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.5284712314605713
+    },
+    {
+      "file": "negative_529_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.74913215637207e-05
+    },
+    {
+      "file": "negative_534_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.0341405868530273e-05
+    },
+    {
+      "file": "negative_534_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.5180320739746094e-05
+    },
+    {
+      "file": "negative_534_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00021517276763916016
+    },
+    {
+      "file": "negative_535_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.044888317584991455
+    },
+    {
+      "file": "negative_535_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0014287829399108887
+    },
+    {
+      "file": "negative_535_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00012281537055969238
+    },
+    {
+      "file": "negative_543_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00012215971946716309
+    },
+    {
+      "file": "negative_543_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.3527612686157227e-05
+    },
+    {
+      "file": "negative_543_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.9265880584716797e-05
+    },
+    {
+      "file": "negative_547_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.002572476863861084
+    },
+    {
+      "file": "negative_547_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.5272369384765625e-05
+    },
+    {
+      "file": "negative_547_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.863739013671875e-05
+    },
+    {
+      "file": "negative_548_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.948807716369629e-05
+    },
+    {
+      "file": "negative_548_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.447336196899414e-06
+    },
+    {
+      "file": "negative_548_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0009891390800476074
+    },
+    {
+      "file": "negative_553_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.14624229073524475
+    },
+    {
+      "file": "negative_553_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001443028450012207
+    },
+    {
+      "file": "negative_553_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.68899917602539e-06
+    },
+    {
+      "file": "negative_555_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.036592483520508e-06
+    },
+    {
+      "file": "negative_555_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.2928924560546875e-05
+    },
+    {
+      "file": "negative_555_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.943941116333008e-06
+    },
+    {
+      "file": "negative_57_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.5497207641601562e-05
+    },
+    {
+      "file": "negative_57_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.890561103820801e-05
+    },
+    {
+      "file": "negative_57_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.841255187988281e-06
+    },
+    {
+      "file": "negative_583_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.245208740234375e-06
+    },
+    {
+      "file": "negative_583_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00013238191604614258
+    },
+    {
+      "file": "negative_583_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9807083010673523
+    },
+    {
+      "file": "negative_586_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.176663398742676e-05
+    },
+    {
+      "file": "negative_586_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.619624137878418e-05
+    },
+    {
+      "file": "negative_586_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.900859832763672e-06
+    },
+    {
+      "file": "negative_609_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.45491886138916e-05
+    },
+    {
+      "file": "negative_609_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2917985916137695e-05
+    },
+    {
+      "file": "negative_609_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.930662155151367e-06
+    },
+    {
+      "file": "negative_617_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4573335647583008e-05
+    },
+    {
+      "file": "negative_617_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.16908073425293e-06
+    },
+    {
+      "file": "negative_617_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.377696990966797e-06
+    },
+    {
+      "file": "negative_621_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9560899138450623
+    },
+    {
+      "file": "negative_621_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.6673078536987305e-05
+    },
+    {
+      "file": "negative_621_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.004338264465332e-05
+    },
+    {
+      "file": "negative_622_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.930662155151367e-06
+    },
+    {
+      "file": "negative_622_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.1755695343017578e-05
+    },
+    {
+      "file": "negative_622_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.655952453613281e-06
+    },
+    {
+      "file": "negative_628_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.22868537902832e-06
+    },
+    {
+      "file": "negative_628_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.004726111888885498
+    },
+    {
+      "file": "negative_628_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.248453140258789e-05
+    },
+    {
+      "file": "negative_634_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9720025062561035
+    },
+    {
+      "file": "negative_634_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.543231964111328e-06
+    },
+    {
+      "file": "negative_634_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00022414326667785645
+    },
+    {
+      "file": "negative_637_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.761317253112793e-05
+    },
+    {
+      "file": "negative_637_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.645917892456055e-06
+    },
+    {
+      "file": "negative_637_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4096498489379883e-05
+    },
+    {
+      "file": "negative_63_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.493661880493164e-06
+    },
+    {
+      "file": "negative_63_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005467236042022705
+    },
+    {
+      "file": "negative_63_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.857250213623047e-05
+    },
+    {
+      "file": "negative_641_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1473894119262695e-05
+    },
+    {
+      "file": "negative_641_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.671910285949707e-05
+    },
+    {
+      "file": "negative_641_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0026601552963256836
+    },
+    {
+      "file": "negative_648_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.930662155151367e-06
+    },
+    {
+      "file": "negative_648_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.85264778137207e-05
+    },
+    {
+      "file": "negative_648_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2934207916259766e-05
+    },
+    {
+      "file": "negative_651_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.334615707397461e-06
+    },
+    {
+      "file": "negative_651_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1235475540161133e-05
+    },
+    {
+      "file": "negative_651_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.7911195755004883e-05
+    },
+    {
+      "file": "negative_669_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.4373016357421875e-06
+    },
+    {
+      "file": "negative_669_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 4.887580871582031e-06
+    },
+    {
+      "file": "negative_669_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.176399230957031e-05
+    },
+    {
+      "file": "negative_672_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.002006053924560547
+    },
+    {
+      "file": "negative_672_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00022932887077331543
+    },
+    {
+      "file": "negative_672_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.841255187988281e-06
+    },
+    {
+      "file": "negative_675_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.883242607116699e-05
+    },
+    {
+      "file": "negative_675_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00012856721878051758
+    },
+    {
+      "file": "negative_675_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0005044639110565186
+    },
+    {
+      "file": "negative_687_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.867813110351562e-06
+    },
+    {
+      "file": "negative_687_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4662742614746094e-05
+    },
+    {
+      "file": "negative_687_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.513429641723633e-06
+    },
+    {
+      "file": "negative_689_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.8358230590820312e-05
+    },
+    {
+      "file": "negative_689_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.3478946685791016e-06
+    },
+    {
+      "file": "negative_689_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.7220458984375e-06
+    },
+    {
+      "file": "negative_69_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.9130449295043945e-05
+    },
+    {
+      "file": "negative_69_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.2636184692382812e-05
+    },
+    {
+      "file": "negative_69_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.05783325433731079
+    },
+    {
+      "file": "negative_702_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.2915343940258026
+    },
+    {
+      "file": "negative_702_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.11755150556564331
+    },
+    {
+      "file": "negative_702_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.3202428817749023e-05
+    },
+    {
+      "file": "negative_706_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0356978178024292
+    },
+    {
+      "file": "negative_706_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.318092346191406e-06
+    },
+    {
+      "file": "negative_706_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.602836608886719e-06
+    },
+    {
+      "file": "negative_720_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.221631050109863e-05
+    },
+    {
+      "file": "negative_720_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00016570091247558594
+    },
+    {
+      "file": "negative_720_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0010564923286437988
+    },
+    {
+      "file": "negative_735_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.407499313354492e-06
+    },
+    {
+      "file": "negative_735_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.407499313354492e-06
+    },
+    {
+      "file": "negative_735_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0001442432403564453
+    },
+    {
+      "file": "negative_736_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.0669231414794922e-05
+    },
+    {
+      "file": "negative_736_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.973743438720703e-06
+    },
+    {
+      "file": "negative_736_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.543231964111328e-06
+    },
+    {
+      "file": "negative_749_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.8710575103759766e-06
+    },
+    {
+      "file": "negative_749_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.616115570068359e-06
+    },
+    {
+      "file": "negative_749_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 7.361173629760742e-06
+    },
+    {
+      "file": "negative_752_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.013334810733795166
+    },
+    {
+      "file": "negative_752_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.04365885257720947
+    },
+    {
+      "file": "negative_752_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.245208740234375e-06
+    },
+    {
+      "file": "negative_76_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.556510925292969e-06
+    },
+    {
+      "file": "negative_76_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.11964112520217896
+    },
+    {
+      "file": "negative_76_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.626150131225586e-06
+    },
+    {
+      "file": "negative_779_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.09168380498886108
+    },
+    {
+      "file": "negative_779_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.208917617797852e-06
+    },
+    {
+      "file": "negative_779_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.4836273193359375e-06
+    },
+    {
+      "file": "negative_791_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.1593103408813477e-05
+    },
+    {
+      "file": "negative_791_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.6183977127075195
+    },
+    {
+      "file": "negative_791_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.867548942565918e-05
+    },
+    {
+      "file": "negative_809_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9991933107376099
+    },
+    {
+      "file": "negative_809_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2679567337036133e-05
+    },
+    {
+      "file": "negative_809_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00038635730743408203
+    },
+    {
+      "file": "negative_821_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0002410411834716797
+    },
+    {
+      "file": "negative_821_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.4066696166992188e-05
+    },
+    {
+      "file": "negative_821_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.973743438720703e-06
+    },
+    {
+      "file": "negative_828_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.65402889251709e-05
+    },
+    {
+      "file": "negative_828_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.225440979003906e-06
+    },
+    {
+      "file": "negative_828_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.602836608886719e-06
+    },
+    {
+      "file": "negative_832_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.811452865600586e-06
+    },
+    {
+      "file": "negative_832_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.8710575103759766e-06
+    },
+    {
+      "file": "negative_832_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2023916244506836e-05
+    },
+    {
+      "file": "negative_837_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.304813385009766e-06
+    },
+    {
+      "file": "negative_837_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.00013637542724609375
+    },
+    {
+      "file": "negative_837_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9939581751823425
+    },
+    {
+      "file": "negative_838_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.173154830932617e-05
+    },
+    {
+      "file": "negative_838_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.720423698425293e-05
+    },
+    {
+      "file": "negative_838_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 9.775161743164062e-06
+    },
+    {
+      "file": "negative_850_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.2023916244506836e-05
+    },
+    {
+      "file": "negative_850_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 3.972649574279785e-05
+    },
+    {
+      "file": "negative_850_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 1.811981201171875e-05
+    },
+    {
+      "file": "negative_858_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.9978413581848145
+    },
+    {
+      "file": "negative_858_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.59687614440918e-05
+    },
+    {
+      "file": "negative_858_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.51750373840332e-05
+    },
+    {
+      "file": "negative_875_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 6.16908073425293e-06
+    },
+    {
+      "file": "negative_875_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.12956178188323975
+    },
+    {
+      "file": "negative_875_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 0.0004628300666809082
+    },
+    {
+      "file": "negative_889_0.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 5.602836608886719e-06
+    },
+    {
+      "file": "negative_889_1.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 2.0444393157958984e-05
+    },
+    {
+      "file": "negative_889_2.wav",
+      "variant": "clean",
+      "positive": false,
+      "max_score": 8.225440979003906e-06
+    },
+    {
+      "file": "positive_102_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999384880065918
+    },
+    {
+      "file": "positive_102_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999368190765381
+    },
+    {
+      "file": "positive_102_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999409914016724
+    },
+    {
+      "file": "positive_102_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999546408653259
+    },
+    {
+      "file": "positive_10_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9977644681930542
+    },
+    {
+      "file": "positive_10_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999324083328247
+    },
+    {
+      "file": "positive_10_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998867511749268
+    },
+    {
+      "file": "positive_10_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999370574951172
+    },
+    {
+      "file": "positive_113_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999433755874634
+    },
+    {
+      "file": "positive_113_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999286532402039
+    },
+    {
+      "file": "positive_113_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999357461929321
+    },
+    {
+      "file": "positive_113_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999263286590576
+    },
+    {
+      "file": "positive_117_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999246597290039
+    },
+    {
+      "file": "positive_117_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999469518661499
+    },
+    {
+      "file": "positive_117_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998701810836792
+    },
+    {
+      "file": "positive_117_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9996826648712158
+    },
+    {
+      "file": "positive_137_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998572468757629
+    },
+    {
+      "file": "positive_137_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999215602874756
+    },
+    {
+      "file": "positive_137_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998852014541626
+    },
+    {
+      "file": "positive_137_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999476671218872
+    },
+    {
+      "file": "positive_141_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999225735664368
+    },
+    {
+      "file": "positive_141_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999464154243469
+    },
+    {
+      "file": "positive_141_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999409914016724
+    },
+    {
+      "file": "positive_141_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999393224716187
+    },
+    {
+      "file": "positive_15_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999291896820068
+    },
+    {
+      "file": "positive_15_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999305009841919
+    },
+    {
+      "file": "positive_15_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998941421508789
+    },
+    {
+      "file": "positive_15_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999442100524902
+    },
+    {
+      "file": "positive_167_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999168515205383
+    },
+    {
+      "file": "positive_167_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999448657035828
+    },
+    {
+      "file": "positive_167_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999492764472961
+    },
+    {
+      "file": "positive_167_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999542236328125
+    },
+    {
+      "file": "positive_177_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999098777770996
+    },
+    {
+      "file": "positive_177_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999417066574097
+    },
+    {
+      "file": "positive_177_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999490976333618
+    },
+    {
+      "file": "positive_177_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999533891677856
+    },
+    {
+      "file": "positive_182_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.998776912689209
+    },
+    {
+      "file": "positive_182_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9993610978126526
+    },
+    {
+      "file": "positive_182_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999936580657959
+    },
+    {
+      "file": "positive_182_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999944806098938
+    },
+    {
+      "file": "positive_195_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999129176139832
+    },
+    {
+      "file": "positive_195_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999490976333618
+    },
+    {
+      "file": "positive_195_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999495148658752
+    },
+    {
+      "file": "positive_195_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999567270278931
+    },
+    {
+      "file": "positive_1_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998387098312378
+    },
+    {
+      "file": "positive_1_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998977184295654
+    },
+    {
+      "file": "positive_1_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.16840973496437073
+    },
+    {
+      "file": "positive_1_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997267723083496
+    },
+    {
+      "file": "positive_212_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999319314956665
+    },
+    {
+      "file": "positive_212_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999204277992249
+    },
+    {
+      "file": "positive_212_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999455213546753
+    },
+    {
+      "file": "positive_212_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999350309371948
+    },
+    {
+      "file": "positive_272_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999462366104126
+    },
+    {
+      "file": "positive_272_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999934196472168
+    },
+    {
+      "file": "positive_272_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999535083770752
+    },
+    {
+      "file": "positive_272_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999532103538513
+    },
+    {
+      "file": "positive_275_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998575448989868
+    },
+    {
+      "file": "positive_275_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999931812286377
+    },
+    {
+      "file": "positive_275_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999941349029541
+    },
+    {
+      "file": "positive_275_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999521970748901
+    },
+    {
+      "file": "positive_286_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9977370500564575
+    },
+    {
+      "file": "positive_286_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998855590820312
+    },
+    {
+      "file": "positive_286_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998648166656494
+    },
+    {
+      "file": "positive_286_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999486804008484
+    },
+    {
+      "file": "positive_287_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999443292617798
+    },
+    {
+      "file": "positive_287_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999562501907349
+    },
+    {
+      "file": "positive_287_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998791217803955
+    },
+    {
+      "file": "positive_287_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999216794967651
+    },
+    {
+      "file": "positive_290_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999450445175171
+    },
+    {
+      "file": "positive_290_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999394416809082
+    },
+    {
+      "file": "positive_290_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999325275421143
+    },
+    {
+      "file": "positive_290_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999931812286377
+    },
+    {
+      "file": "positive_296_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998557567596436
+    },
+    {
+      "file": "positive_296_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.99985271692276
+    },
+    {
+      "file": "positive_296_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999325275421143
+    },
+    {
+      "file": "positive_296_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999364614486694
+    },
+    {
+      "file": "positive_300_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999475479125977
+    },
+    {
+      "file": "positive_300_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999423027038574
+    },
+    {
+      "file": "positive_300_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999486804008484
+    },
+    {
+      "file": "positive_300_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999399185180664
+    },
+    {
+      "file": "positive_303_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999209642410278
+    },
+    {
+      "file": "positive_303_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998596906661987
+    },
+    {
+      "file": "positive_303_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999493360519409
+    },
+    {
+      "file": "positive_303_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999423027038574
+    },
+    {
+      "file": "positive_313_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9143350720405579
+    },
+    {
+      "file": "positive_313_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997680187225342
+    },
+    {
+      "file": "positive_313_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999412298202515
+    },
+    {
+      "file": "positive_313_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999521374702454
+    },
+    {
+      "file": "positive_314_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997050166130066
+    },
+    {
+      "file": "positive_314_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999923586845398
+    },
+    {
+      "file": "positive_314_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998621344566345
+    },
+    {
+      "file": "positive_314_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999900758266449
+    },
+    {
+      "file": "positive_317_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997377991676331
+    },
+    {
+      "file": "positive_317_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999454021453857
+    },
+    {
+      "file": "positive_317_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999496340751648
+    },
+    {
+      "file": "positive_317_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999579191207886
+    },
+    {
+      "file": "positive_333_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999291300773621
+    },
+    {
+      "file": "positive_333_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999456405639648
+    },
+    {
+      "file": "positive_333_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999532699584961
+    },
+    {
+      "file": "positive_333_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999464750289917
+    },
+    {
+      "file": "positive_34_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999462366104126
+    },
+    {
+      "file": "positive_34_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998306035995483
+    },
+    {
+      "file": "positive_34_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9996730089187622
+    },
+    {
+      "file": "positive_34_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999885618686676
+    },
+    {
+      "file": "positive_366_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999188184738159
+    },
+    {
+      "file": "positive_366_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999148845672607
+    },
+    {
+      "file": "positive_366_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999536275863647
+    },
+    {
+      "file": "positive_366_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999582767486572
+    },
+    {
+      "file": "positive_372_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999403953552246
+    },
+    {
+      "file": "positive_372_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999411106109619
+    },
+    {
+      "file": "positive_372_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999468326568604
+    },
+    {
+      "file": "positive_372_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999537467956543
+    },
+    {
+      "file": "positive_410_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999269843101501
+    },
+    {
+      "file": "positive_410_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9995264410972595
+    },
+    {
+      "file": "positive_410_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9434305429458618
+    },
+    {
+      "file": "positive_410_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999147653579712
+    },
+    {
+      "file": "positive_41_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999377727508545
+    },
+    {
+      "file": "positive_41_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999342560768127
+    },
+    {
+      "file": "positive_41_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999192953109741
+    },
+    {
+      "file": "positive_41_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999101161956787
+    },
+    {
+      "file": "positive_42_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999343156814575
+    },
+    {
+      "file": "positive_42_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999234676361084
+    },
+    {
+      "file": "positive_42_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999417662620544
+    },
+    {
+      "file": "positive_42_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999279379844666
+    },
+    {
+      "file": "positive_432_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999921441078186
+    },
+    {
+      "file": "positive_432_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999327659606934
+    },
+    {
+      "file": "positive_432_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999907374382019
+    },
+    {
+      "file": "positive_432_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998006820678711
+    },
+    {
+      "file": "positive_437_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997848868370056
+    },
+    {
+      "file": "positive_437_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999371767044067
+    },
+    {
+      "file": "positive_437_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.99992835521698
+    },
+    {
+      "file": "positive_437_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999579191207886
+    },
+    {
+      "file": "positive_451_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999489784240723
+    },
+    {
+      "file": "positive_451_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999527931213379
+    },
+    {
+      "file": "positive_451_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999946653842926
+    },
+    {
+      "file": "positive_451_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999536275863647
+    },
+    {
+      "file": "positive_490_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9993722438812256
+    },
+    {
+      "file": "positive_490_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999171495437622
+    },
+    {
+      "file": "positive_490_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999388456344604
+    },
+    {
+      "file": "positive_490_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999344348907471
+    },
+    {
+      "file": "positive_491_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999117255210876
+    },
+    {
+      "file": "positive_491_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998948574066162
+    },
+    {
+      "file": "positive_491_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999528169631958
+    },
+    {
+      "file": "positive_491_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997047185897827
+    },
+    {
+      "file": "positive_49_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999422430992126
+    },
+    {
+      "file": "positive_49_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999066591262817
+    },
+    {
+      "file": "positive_49_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999931275844574
+    },
+    {
+      "file": "positive_49_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9992296695709229
+    },
+    {
+      "file": "positive_500_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999943733215332
+    },
+    {
+      "file": "positive_500_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999182224273682
+    },
+    {
+      "file": "positive_500_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999483823776245
+    },
+    {
+      "file": "positive_500_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999945878982544
+    },
+    {
+      "file": "positive_502_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998999834060669
+    },
+    {
+      "file": "positive_502_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998607635498047
+    },
+    {
+      "file": "positive_502_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999037981033325
+    },
+    {
+      "file": "positive_502_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999483823776245
+    },
+    {
+      "file": "positive_503_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999336004257202
+    },
+    {
+      "file": "positive_503_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999514818191528
+    },
+    {
+      "file": "positive_503_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999546408653259
+    },
+    {
+      "file": "positive_503_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999596476554871
+    },
+    {
+      "file": "positive_518_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999377131462097
+    },
+    {
+      "file": "positive_518_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9982140064239502
+    },
+    {
+      "file": "positive_518_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999131560325623
+    },
+    {
+      "file": "positive_518_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999474287033081
+    },
+    {
+      "file": "positive_526_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999926745891571
+    },
+    {
+      "file": "positive_526_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999310374259949
+    },
+    {
+      "file": "positive_526_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998050928115845
+    },
+    {
+      "file": "positive_526_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999407529830933
+    },
+    {
+      "file": "positive_528_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999487400054932
+    },
+    {
+      "file": "positive_528_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999404549598694
+    },
+    {
+      "file": "positive_528_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999488592147827
+    },
+    {
+      "file": "positive_528_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999547600746155
+    },
+    {
+      "file": "positive_529_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999032616615295
+    },
+    {
+      "file": "positive_529_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999387264251709
+    },
+    {
+      "file": "positive_529_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999518990516663
+    },
+    {
+      "file": "positive_529_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999525547027588
+    },
+    {
+      "file": "positive_534_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998893737792969
+    },
+    {
+      "file": "positive_534_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997749328613281
+    },
+    {
+      "file": "positive_534_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999299049377441
+    },
+    {
+      "file": "positive_534_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999399185180664
+    },
+    {
+      "file": "positive_535_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999216198921204
+    },
+    {
+      "file": "positive_535_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999513626098633
+    },
+    {
+      "file": "positive_535_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999457597732544
+    },
+    {
+      "file": "positive_535_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999475479125977
+    },
+    {
+      "file": "positive_543_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999520778656006
+    },
+    {
+      "file": "positive_543_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999566674232483
+    },
+    {
+      "file": "positive_543_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999272227287292
+    },
+    {
+      "file": "positive_543_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999057054519653
+    },
+    {
+      "file": "positive_547_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999452829360962
+    },
+    {
+      "file": "positive_547_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999290108680725
+    },
+    {
+      "file": "positive_547_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999336004257202
+    },
+    {
+      "file": "positive_547_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999151229858398
+    },
+    {
+      "file": "positive_548_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999383687973022
+    },
+    {
+      "file": "positive_548_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999454021453857
+    },
+    {
+      "file": "positive_548_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999495148658752
+    },
+    {
+      "file": "positive_548_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999382495880127
+    },
+    {
+      "file": "positive_553_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999284148216248
+    },
+    {
+      "file": "positive_553_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999262094497681
+    },
+    {
+      "file": "positive_553_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999356865882874
+    },
+    {
+      "file": "positive_553_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999933123588562
+    },
+    {
+      "file": "positive_555_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999462366104126
+    },
+    {
+      "file": "positive_555_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999475479125977
+    },
+    {
+      "file": "positive_555_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999586343765259
+    },
+    {
+      "file": "positive_555_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999521374702454
+    },
+    {
+      "file": "positive_57_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999241828918457
+    },
+    {
+      "file": "positive_57_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999293088912964
+    },
+    {
+      "file": "positive_57_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999589920043945
+    },
+    {
+      "file": "positive_57_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998806118965149
+    },
+    {
+      "file": "positive_583_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999223947525024
+    },
+    {
+      "file": "positive_583_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997913837432861
+    },
+    {
+      "file": "positive_583_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999282956123352
+    },
+    {
+      "file": "positive_583_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999526739120483
+    },
+    {
+      "file": "positive_586_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998452663421631
+    },
+    {
+      "file": "positive_586_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999879777431488
+    },
+    {
+      "file": "positive_586_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999403953552246
+    },
+    {
+      "file": "positive_586_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.99994957447052
+    },
+    {
+      "file": "positive_609_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9994456768035889
+    },
+    {
+      "file": "positive_609_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997105598449707
+    },
+    {
+      "file": "positive_609_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999396800994873
+    },
+    {
+      "file": "positive_609_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999597072601318
+    },
+    {
+      "file": "positive_617_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998311996459961
+    },
+    {
+      "file": "positive_617_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999070167541504
+    },
+    {
+      "file": "positive_617_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999467134475708
+    },
+    {
+      "file": "positive_617_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999450445175171
+    },
+    {
+      "file": "positive_621_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997348785400391
+    },
+    {
+      "file": "positive_621_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999240040779114
+    },
+    {
+      "file": "positive_621_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999361038208008
+    },
+    {
+      "file": "positive_621_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999372959136963
+    },
+    {
+      "file": "positive_622_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998761415481567
+    },
+    {
+      "file": "positive_622_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9994032382965088
+    },
+    {
+      "file": "positive_622_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999204277992249
+    },
+    {
+      "file": "positive_622_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999580383300781
+    },
+    {
+      "file": "positive_628_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.13564971089363098
+    },
+    {
+      "file": "positive_628_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.99986332654953
+    },
+    {
+      "file": "positive_628_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999286532402039
+    },
+    {
+      "file": "positive_628_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999166131019592
+    },
+    {
+      "file": "positive_634_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998685121536255
+    },
+    {
+      "file": "positive_634_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998571872711182
+    },
+    {
+      "file": "positive_634_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999324083328247
+    },
+    {
+      "file": "positive_634_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998894929885864
+    },
+    {
+      "file": "positive_637_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9998458623886108
+    },
+    {
+      "file": "positive_637_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997677206993103
+    },
+    {
+      "file": "positive_637_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999174475669861
+    },
+    {
+      "file": "positive_637_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999322891235352
+    },
+    {
+      "file": "positive_63_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999944269657135
+    },
+    {
+      "file": "positive_63_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999419450759888
+    },
+    {
+      "file": "positive_63_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999359846115112
+    },
+    {
+      "file": "positive_63_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999452829360962
+    },
+    {
+      "file": "positive_641_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999198317527771
+    },
+    {
+      "file": "positive_641_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999362826347351
+    },
+    {
+      "file": "positive_641_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999927818775177
+    },
+    {
+      "file": "positive_641_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999435544013977
+    },
+    {
+      "file": "positive_648_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999921441078186
+    },
+    {
+      "file": "positive_648_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999271035194397
+    },
+    {
+      "file": "positive_648_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999260902404785
+    },
+    {
+      "file": "positive_648_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9997620582580566
+    },
+    {
+      "file": "positive_651_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999350905418396
+    },
+    {
+      "file": "positive_651_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999356269836426
+    },
+    {
+      "file": "positive_651_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999463558197021
+    },
+    {
+      "file": "positive_651_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999485015869141
+    },
+    {
+      "file": "positive_669_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9991354942321777
+    },
+    {
+      "file": "positive_669_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999276399612427
+    },
+    {
+      "file": "positive_669_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999944269657135
+    },
+    {
+      "file": "positive_669_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998964071273804
+    },
+    {
+      "file": "positive_672_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999923586845398
+    },
+    {
+      "file": "positive_672_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999322295188904
+    },
+    {
+      "file": "positive_672_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999557733535767
+    },
+    {
+      "file": "positive_672_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999420642852783
+    },
+    {
+      "file": "positive_675_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999961793422699
+    },
+    {
+      "file": "positive_675_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999456405639648
+    },
+    {
+      "file": "positive_675_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999504089355469
+    },
+    {
+      "file": "positive_675_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999518990516663
+    },
+    {
+      "file": "positive_687_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999181032180786
+    },
+    {
+      "file": "positive_687_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999336004257202
+    },
+    {
+      "file": "positive_687_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999455213546753
+    },
+    {
+      "file": "positive_687_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999502897262573
+    },
+    {
+      "file": "positive_689_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999411106109619
+    },
+    {
+      "file": "positive_689_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999505281448364
+    },
+    {
+      "file": "positive_689_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999148845672607
+    },
+    {
+      "file": "positive_689_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9983514547348022
+    },
+    {
+      "file": "positive_69_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999926745891571
+    },
+    {
+      "file": "positive_69_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999438524246216
+    },
+    {
+      "file": "positive_69_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999468326568604
+    },
+    {
+      "file": "positive_69_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999555349349976
+    },
+    {
+      "file": "positive_702_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999751091003418
+    },
+    {
+      "file": "positive_702_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999924898147583
+    },
+    {
+      "file": "positive_702_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999207258224487
+    },
+    {
+      "file": "positive_702_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999586343765259
+    },
+    {
+      "file": "positive_706_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999229907989502
+    },
+    {
+      "file": "positive_706_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999006986618042
+    },
+    {
+      "file": "positive_706_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999695897102356
+    },
+    {
+      "file": "positive_706_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998756647109985
+    },
+    {
+      "file": "positive_720_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999334812164307
+    },
+    {
+      "file": "positive_720_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999047517776489
+    },
+    {
+      "file": "positive_720_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999265670776367
+    },
+    {
+      "file": "positive_720_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9996756315231323
+    },
+    {
+      "file": "positive_735_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9426873326301575
+    },
+    {
+      "file": "positive_735_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9635330438613892
+    },
+    {
+      "file": "positive_735_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999232888221741
+    },
+    {
+      "file": "positive_735_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998653531074524
+    },
+    {
+      "file": "positive_736_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999226331710815
+    },
+    {
+      "file": "positive_736_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9970954656600952
+    },
+    {
+      "file": "positive_736_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999954104423523
+    },
+    {
+      "file": "positive_736_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999353885650635
+    },
+    {
+      "file": "positive_749_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999319911003113
+    },
+    {
+      "file": "positive_749_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999054670333862
+    },
+    {
+      "file": "positive_749_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999408721923828
+    },
+    {
+      "file": "positive_749_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999314546585083
+    },
+    {
+      "file": "positive_752_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999191761016846
+    },
+    {
+      "file": "positive_752_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9984603524208069
+    },
+    {
+      "file": "positive_752_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999399185180664
+    },
+    {
+      "file": "positive_752_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999449849128723
+    },
+    {
+      "file": "positive_76_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999271631240845
+    },
+    {
+      "file": "positive_76_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999431371688843
+    },
+    {
+      "file": "positive_76_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999310970306396
+    },
+    {
+      "file": "positive_76_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999538064002991
+    },
+    {
+      "file": "positive_779_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999175071716309
+    },
+    {
+      "file": "positive_779_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9996675252914429
+    },
+    {
+      "file": "positive_779_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999473094940186
+    },
+    {
+      "file": "positive_779_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999954104423523
+    },
+    {
+      "file": "positive_791_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999907374382019
+    },
+    {
+      "file": "positive_791_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999099969863892
+    },
+    {
+      "file": "positive_791_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999315738677979
+    },
+    {
+      "file": "positive_791_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999472498893738
+    },
+    {
+      "file": "positive_809_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999160766601562
+    },
+    {
+      "file": "positive_809_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999278783798218
+    },
+    {
+      "file": "positive_809_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999022483825684
+    },
+    {
+      "file": "positive_809_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999262094497681
+    },
+    {
+      "file": "positive_821_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999018311500549
+    },
+    {
+      "file": "positive_821_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999216794967651
+    },
+    {
+      "file": "positive_821_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999266266822815
+    },
+    {
+      "file": "positive_821_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999423623085022
+    },
+    {
+      "file": "positive_828_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999477863311768
+    },
+    {
+      "file": "positive_828_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999380707740784
+    },
+    {
+      "file": "positive_828_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999937891960144
+    },
+    {
+      "file": "positive_828_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999178051948547
+    },
+    {
+      "file": "positive_832_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9997600317001343
+    },
+    {
+      "file": "positive_832_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998120665550232
+    },
+    {
+      "file": "positive_832_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9948533773422241
+    },
+    {
+      "file": "positive_832_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9986988306045532
+    },
+    {
+      "file": "positive_837_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999192953109741
+    },
+    {
+      "file": "positive_837_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9998440742492676
+    },
+    {
+      "file": "positive_837_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999412298202515
+    },
+    {
+      "file": "positive_837_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999338984489441
+    },
+    {
+      "file": "positive_838_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999260902404785
+    },
+    {
+      "file": "positive_838_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999139308929443
+    },
+    {
+      "file": "positive_838_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999557137489319
+    },
+    {
+      "file": "positive_838_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999568462371826
+    },
+    {
+      "file": "positive_850_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999546408653259
+    },
+    {
+      "file": "positive_850_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999562501907349
+    },
+    {
+      "file": "positive_850_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999161958694458
+    },
+    {
+      "file": "positive_850_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999169111251831
+    },
+    {
+      "file": "positive_858_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999234676361084
+    },
+    {
+      "file": "positive_858_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999380707740784
+    },
+    {
+      "file": "positive_858_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9995764493942261
+    },
+    {
+      "file": "positive_858_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999258518218994
+    },
+    {
+      "file": "positive_875_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9856768846511841
+    },
+    {
+      "file": "positive_875_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.999271035194397
+    },
+    {
+      "file": "positive_875_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999469518661499
+    },
+    {
+      "file": "positive_875_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999446272850037
+    },
+    {
+      "file": "positive_889_0.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.999947190284729
+    },
+    {
+      "file": "positive_889_0.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999364018440247
+    },
+    {
+      "file": "positive_889_1.wav",
+      "variant": "clean",
+      "positive": true,
+      "max_score": 0.9999318718910217
+    },
+    {
+      "file": "positive_889_1.wav",
+      "variant": "augmented",
+      "positive": true,
+      "max_score": 0.9999285936355591
+    }
+  ]
+}
