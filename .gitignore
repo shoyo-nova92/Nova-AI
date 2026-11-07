@@ -1,0 +1,52 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+/config/personal_sources.json
+/config/*.local.json
+
+# Python environments and caches
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Editors and local agent state
+.vscode/
+.idea/
+.cursor/
+.codex/
+.brud/
+AGENTS.md
+/Personal-docs/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Builds and runtime data
+/build/
+/build-*/
+/dist/
+/logs/
+/audio_output/
+*.log
+*.exe
+*.dll
+*.obj
+*.o
+*.a
+
+# Local development and model-training artifacts
+/postman/
+/tools/wakeword-training/
+/src/*_test.cpp
+/src/branch2_benchmark.cpp
+/python/*_test.py
+/models/wakeword/training_report.json
+/models/wakeword/streaming_validation.json

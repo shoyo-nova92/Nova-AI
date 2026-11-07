@@ -1,0 +1,3 @@
+# Core helpers for browser automation and timezone-aware date/time.
+playwright==1.64.0
+tzdata==2026.6
